@@ -1,0 +1,21 @@
+.wrapper {
+    height: 100%;
+    width: 100%;
+}
+
+.title {
+    height: 40px;
+    border-bottom: 1px dashed var(--main-border-color);
+    margin-bottom: 14px;
+    padding: 10px;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.contents {
+    height: calc(100% - 75px);
+    width: 100%;
+}

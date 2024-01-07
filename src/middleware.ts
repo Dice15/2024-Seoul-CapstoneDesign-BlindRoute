@@ -120,6 +120,6 @@ function getHostUrl(request: NextRequest): string {
  * @returns {Promise<boolean>} 사용자가 인증되었는지 여부를 나타내는 Promise 객체입니다.
  */
 async function isUserAuthenticated(request: NextRequest): Promise<boolean> {
-    const session = await getToken({ req: request, secret: process.env.ALZARTAK_NEXTAUTH_SECRET });
+    const session = await getToken({ req: request, secret: process.env.BLINDROUTE_NEXTAUTH_SECRET });
     return session !== null;
 }
