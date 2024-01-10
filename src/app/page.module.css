@@ -12,7 +12,7 @@
     width: calc(70vw - 4px);
     border: 2px solid var(--main-border-color);
     margin-bottom: calc(70vw * 0.125 * 0.5);
-    font-size: 25px;
+    font-size: 3.5vw;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
