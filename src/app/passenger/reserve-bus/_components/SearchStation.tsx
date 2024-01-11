@@ -10,6 +10,8 @@ import styled from "styled-components";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { getStations } from "@/core/api/blindrouteApi";
 import { Station } from "@/core/type/Station";
+import { useSwipeable } from "react-swipeable";
+import { useRouter } from "next/navigation";
 
 
 
@@ -23,6 +25,10 @@ export interface SearchStationProps {
 
 /** SearchStation 컴포넌트 */
 export default function SearchStation({ setCurrStep, setStations }: SearchStationProps) {
+    // Const
+    const router = useRouter();
+
+
     // Refs
     const audioContainer = useRef<HTMLAudioElement>(null);
     const audioSource = useRef<HTMLSourceElement>(null);
@@ -77,6 +83,13 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
     };
 
 
+    /** 이전 단계로 이동 */
+    const handleBackToPrev = () => {
+        setIsLoading(false);
+        router.replace("./");
+    }
+
+
     /** 버스 데이터 가져오기 */
     const handleGetStations = () => {
         if (stationName === "") {
@@ -116,6 +129,20 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
     });
 
 
+    /** horizontal 스와이프 이벤트 */
+    const handleHorizontalSwiper = useSwipeable({
+        onSwipedLeft: () => {
+            setIsLoading(true);
+            setTimeout(() => { handleGetStations(); }, 1000);
+        },
+        onSwipedRight: () => {
+            setIsLoading(true);
+            handleBackToPrev();
+        },
+        trackMouse: true
+    });
+
+
     /** 터치 이벤트 */
     const handleSearchStation = useTouchEvents({
         onSingleTouch: () => {
@@ -138,7 +165,7 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
 
     // Render
     return (
-        <Wrapper>
+        <Wrapper {...handleHorizontalSwiper}>
             <LoadingAnimation active={isLoading} />
             <audio ref={audioContainer}>
                 <source ref={audioSource} />
@@ -167,7 +194,7 @@ const Wrapper = styled.div`
 
 const StationNameContainer = styled.div`
     height: 90%;
-    width: 90%;
+    width: 85%;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);

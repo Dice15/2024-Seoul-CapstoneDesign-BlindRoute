@@ -7,13 +7,13 @@ import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import styled from "styled-components";
-import useElementDimensions from "@/core/hooks/useElementDimensions";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { Bus } from "@/core/type/Bus";
 import { Station } from "@/core/type/Station";
 import { reserveBus } from "@/core/api/blindrouteApi";
+import { useSwipeable } from "react-swipeable";
 
 
 
@@ -37,10 +37,6 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
     const [isLoading, setIsLoading] = useState(false);
 
 
-    /* Custom Hook */
-    const busInfoContainerHeight = useElementDimensions<HTMLDivElement>(busInfoContainer, "Pure").height;
-
-
     // Handler
     /** 안내 음성 */
     const handleAnnouncement = (type: "guide" | "currBus" | "failedReservation") => {
@@ -61,6 +57,13 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
                 break;
             }
         }
+    }
+
+
+    /** 이전 단계로 이동 */
+    const handleBackToPrev = () => {
+        setIsLoading(false);
+        setCurrStep("selectStation");
     }
 
 
@@ -89,7 +92,21 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
     };
 
 
-    /** 스와이프 아이템 터치 이벤트 */
+    /** horizontal 스와이프 이벤트 */
+    const handleHorizontalSwiper = useSwipeable({
+        onSwipedLeft: () => {
+            setIsLoading(true);
+            setTimeout(() => { handleReserveBus(); }, 500);
+        },
+        onSwipedRight: () => {
+            setIsLoading(true);
+            handleBackToPrev();
+        },
+        trackMouse: true
+    });
+
+
+    /** vertical 스와이프 아이템 터치 이벤트 */
     const handleBusInfoClick = useTouchEvents({
         onSingleTouch: () => {
             VibrationProvider.vibrate(1000);
@@ -112,7 +129,7 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
 
     // Render
     return (
-        <Wrapper>
+        <Wrapper {...handleHorizontalSwiper}>
             <LoadingAnimation active={isLoading} />
             <BusInfoContainer ref={busInfoContainer}>
                 <Swiper
@@ -121,13 +138,12 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
                     onSlideChange={handleSlideChange}
                     speed={300}
                     loop={true}
+                    direction="vertical"
+                    style={{ height: "100%", width: "100%" }}
                 >
                     {buses.map((bus, index) => (
-                        <SwiperSlide key={index}>
-                            <BusInfo
-                                style={{ height: `${busInfoContainerHeight}px` }}
-                                onClick={handleBusInfoClick}
-                            >
+                        <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
+                            <BusInfo onClick={handleBusInfoClick}>
                                 <BusInfoName>{bus.busRouteAbrv || bus.busRouteNm}</BusInfoName>
                             </BusInfo>
                         </SwiperSlide>
@@ -150,7 +166,7 @@ const Wrapper = styled.div`
 
 const BusInfoContainer = styled.div`
     height: 90%;
-    width: 90%;
+    width: 85%;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);
@@ -159,13 +175,18 @@ const BusInfoContainer = styled.div`
 
 
 const BusInfo = styled.div`
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 `;
 
+
 const BusInfoName = styled.h1` 
+    width: 95%;
+    text-align: center;
     font-size: 7vw;
     font-weight: bold;
     cursor: pointer;

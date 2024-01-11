@@ -8,6 +8,7 @@ import { cancelReservation, getReservedBusArrInfo } from "@/core/api/blindrouteA
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
+import { useSwipeable } from "react-swipeable";
 
 
 export interface WaitingBusProps {
@@ -41,6 +42,13 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     }
 
 
+    /** 이전 단계로 이동 */
+    const handleBackToPrev = () => {
+        setIsLoading(false);
+        setCurrStep("selectStation");
+    }
+
+
     /** 버스 예약 취소 */
     const handleCancelReservation = () => {
         cancelReservation().then(({ msg, deletedCount }) => {
@@ -48,6 +56,16 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
             setCurrStep("selectBus");
         });
     }
+
+
+    /** horizontal 스와이프 이벤트 */
+    const handleHorizontalSwiper = useSwipeable({
+        onSwipedRight: () => {
+            setIsLoading(true);
+            handleCancelReservation();
+        },
+        trackMouse: true
+    });
 
 
     /** 화면 터치 이벤트 */
@@ -58,8 +76,8 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
         },
         onDoubleTouch: () => {
             VibrationProvider.repeatVibrate(500, 200, 2);
-            handleCancelReservation();
             setIsLoading(true);
+            handleCancelReservation();
         },
     });
 
@@ -117,7 +135,7 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
 
     // Render
     return (
-        <Wrapper>
+        <Wrapper {...handleHorizontalSwiper}>
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -141,7 +159,7 @@ const Wrapper = styled.div`
 
 const ReservationContainer = styled.div`
     height: 90%;
-    width: 90%;
+    width: 85%;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);

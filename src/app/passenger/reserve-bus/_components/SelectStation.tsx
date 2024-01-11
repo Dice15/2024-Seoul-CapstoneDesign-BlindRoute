@@ -7,12 +7,12 @@ import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import styled from "styled-components";
-import useElementDimensions from "@/core/hooks/useElementDimensions";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { getBuses } from "@/core/api/blindrouteApi";
 import { Bus } from "@/core/type/Bus";
+import { useSwipeable } from "react-swipeable";
 
 
 
@@ -34,10 +34,6 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
 
     /* State */
     const [isLoading, setIsLoading] = useState(false);
-
-
-    /* Custom Hook */
-    const stationInfoContainerHeight = useElementDimensions<HTMLDivElement>(stationInfoContainer, "Pure").height;
 
 
     // Handler
@@ -63,6 +59,14 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
     }
 
 
+    /** 이전 단계로 이동 */
+    const handleBackToPrev = () => {
+        setIsLoading(false);
+        setCurrStep("searchStation");
+    }
+
+
+    /** 선택한 정류장를 경유하는 버스노선을 가져옴 */
     const handleGetBuses = () => {
         getBuses(stations[stationListIndexRef.current].arsId).then(({ msg, itemList }) => {
             setIsLoading(false);
@@ -88,7 +92,22 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
     };
 
 
-    /** 스와이프 아이템 터치 이벤트 */
+    /** horizontal 스와이프 이벤트 */
+    const handleHorizontalSwiper = useSwipeable({
+        onSwipedLeft: () => {
+            setIsLoading(true);
+            setTimeout(() => { handleGetBuses(); }, 500);
+        },
+        onSwipedRight: () => {
+            setIsLoading(true);
+            handleBackToPrev();
+        },
+        trackMouse: true
+    });
+
+
+
+    /** vertical 스와이프 아이템 터치 이벤트 */
     const handleStationInfoClick = useTouchEvents({
         onSingleTouch: () => {
             VibrationProvider.vibrate(1000);
@@ -98,7 +117,6 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
             VibrationProvider.repeatVibrate(500, 200, 2);
             setIsLoading(true);
             setTimeout(() => { handleGetBuses(); }, 500);
-
         }
     });
 
@@ -111,7 +129,7 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
 
     // Render
     return (
-        <Wrapper>
+        <Wrapper {...handleHorizontalSwiper}>
             <LoadingAnimation active={isLoading} />
             <StationInfoContainer ref={stationInfoContainer}>
                 <Swiper
@@ -120,13 +138,12 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
                     onSlideChange={handleSlideChange}
                     speed={300}
                     loop={true}
+                    direction="vertical"
+                    style={{ height: "100%", width: "100%" }}
                 >
                     {stations.map((station, index) => (
-                        <SwiperSlide key={index}>
-                            <StationInfo
-                                style={{ height: `${stationInfoContainerHeight}px` }}
-                                onClick={handleStationInfoClick}
-                            >
+                        <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
+                            <StationInfo onClick={handleStationInfoClick}>
                                 <StationInfoName>{station.stNm}</StationInfoName>
                             </StationInfo>
                         </SwiperSlide>
@@ -149,7 +166,7 @@ const Wrapper = styled.div`
 
 const StationInfoContainer = styled.div`
     height: 90%;
-    width: 90%;
+    width: 85%;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);
@@ -158,13 +175,18 @@ const StationInfoContainer = styled.div`
 
 
 const StationInfo = styled.div`
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 `;
 
+
 const StationInfoName = styled.h1` 
+    width: 95%;
+    text-align: center;
     font-size: 7vw;
     font-weight: bold;
     cursor: pointer;
