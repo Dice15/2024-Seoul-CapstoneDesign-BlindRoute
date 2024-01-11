@@ -29,7 +29,7 @@ export default function ReserveBus() {
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedStation, setSelectedStation] = useState<Station | null>(null);
     const [buses, setBuses] = useState<Bus[]>([]);
-    const [reservedBus, setReservedBus] = useState<{ bus: Bus, reservationId: string } | null>(null);
+    const [reservedBus, setReservedBus] = useState<{ station: Station; bus: Bus, reservationId: string } | null>(null);
 
 
     /* Handler */

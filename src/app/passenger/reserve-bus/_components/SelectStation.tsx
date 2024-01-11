@@ -165,7 +165,7 @@ const StationInfo = styled.div`
 `;
 
 const StationInfoName = styled.h1` 
-    font-size: 5vw;
+    font-size: 7vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

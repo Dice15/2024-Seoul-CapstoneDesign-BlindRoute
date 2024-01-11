@@ -11,7 +11,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
     switch (request.method) {
         case "POST": {
             if (!session) {
-                response.status(401).json({ msg: "Unauthorized: 세션이 없습니다.", itemList: null });
+                response.status(401).json({ msg: "Unauthorized: 세션이 없습니다.", item: null });
                 break;
             }
 
@@ -24,18 +24,18 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 });
 
                 if (insertResult.acknowledged === undefined) {
-                    response.status(500).json({ msg: "DB 저장 중 오류가 발생했습니다.", itemList: null });
+                    response.status(500).json({ msg: "DB 저장 중 오류가 발생했습니다.", item: null });
                 } else {
-                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: insertResult.insertedId });
+                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: insertResult.insertedId });
                 }
             } catch (error) {
-                response.status(502).json({ msg: "DB 저장 중 오류가 발생했습니다.", itemList: null });
+                response.status(502).json({ msg: "DB 저장 중 오류가 발생했습니다.", item: null });
             }
             break;
         }
         case "DELETE": {
             if (!session) {
-                response.status(401).json({ msg: "Unauthorized: 세션이 없습니다.", itemList: null });
+                response.status(401).json({ msg: "Unauthorized: 세션이 없습니다.", item: null });
                 break;
             }
 
@@ -45,17 +45,17 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 });
 
                 if (deleteResult.acknowledged === undefined) {
-                    response.status(500).json({ msg: "DB 삭제 중 오류가 발생했습니다.", itemList: null });
+                    response.status(500).json({ msg: "DB 삭제 중 오류가 발생했습니다.", item: null });
                 } else {
-                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: deleteResult.deletedCount });
+                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: deleteResult.deletedCount });
                 }
             } catch (error) {
-                response.status(502).json({ msg: "DB 삭제 중 오류가 발생했습니다.", itemList: null });
+                response.status(502).json({ msg: "DB 삭제 중 오류가 발생했습니다.", item: null });
             }
             break;
         }
         default: {
-            response.status(405).json({ msg: "지원하지 않는 메서드입니다.", itemList: null });
+            response.status(405).json({ msg: "지원하지 않는 메서드입니다.", item: null });
             break;
         }
     }

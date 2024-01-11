@@ -172,7 +172,7 @@ const StationNameContainer = styled.div`
     border-radius: 8px;
     background-color: var(--main-color);
     color: var(--main-font-color);
-    font-size: 5vw;
+    font-size: 7vw;
     font-weight: 550;
     display: flex;
     justify-content: center;
@@ -186,7 +186,7 @@ const TextareaStationName = styled.textarea`
     border: 0;
     background-color: var(--button-color);
     color: var(--button-text-color);
-    font-size: 5vw;
+    font-size: 7vw;
     font-weight: bold;
     text-align: center;
     resize: none;

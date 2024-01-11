@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { cancelReservation } from "@/core/api/blindrouteApi";
+import { cancelReservation, getReservedBusArrInfo } from "@/core/api/blindrouteApi";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
+import { Station } from "@/core/type/Station";
 
 
 export interface WaitingBusProps {
     setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
     reservedBus: {
+        station: Station;
         bus: Bus;
         reservationId: string;
     };
@@ -22,6 +24,7 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     // States
     const [waitingMsg, setWaitingMsg] = useState("대기중");
     const [isLoading, setIsLoading] = useState(false);
+    const [busArrInfo, setBusArrInfo] = useState<{ stopFlag: string; stId: string; arrmsg: string; } | null>(null);
 
 
     // Handler
@@ -30,7 +33,8 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
         //return;
         switch (type) {
             case "guide": {
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. 화면을 두번 터치를 하면 예약을 취소합니다`);
+                const currInfo = busArrInfo ? `${busArrInfo.arrmsg.split("[")[0]}에 도착합니다.` : "";
+                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${currInfo}. 화면을 두번 터치를 하면 예약을 취소합니다`);
                 break;
             }
         }
@@ -85,7 +89,27 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
 
 
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
-    // TODO
+    useEffect(() => {
+        const intervalId = setInterval(async () => {
+            setBusArrInfo((await getReservedBusArrInfo(reservedBus.reservationId)).busArrInfo);
+        }, 2000);
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, [reservedBus]);
+
+
+    useEffect(() => {
+        if (busArrInfo) {
+            if (reservedBus.station.stId === busArrInfo.stId && busArrInfo.stopFlag === "1") {
+                console.log("버스가 도착하였습니다");
+                SpeechOutputProvider.speak("버스가 도착하였습니다");
+                setCurrStep("gettingOff");
+            }
+        }
+        console.log(reservedBus.station.stId === busArrInfo?.stId, busArrInfo?.stopFlag, busArrInfo?.arrmsg);
+    }, [busArrInfo])
 
 
     // Render
@@ -127,14 +151,14 @@ const ReservationContainer = styled.div`
 
 
 const ReservationBusName = styled.h1` 
-    font-size: 5vw;
+    font-size: 7vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
 `;
 
 const WiatingMessage = styled.h3` 
-    font-size: 3vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

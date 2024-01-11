@@ -21,7 +21,7 @@ export interface SelectBusProps {
     setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
     selectedStation: Station;
     buses: Bus[];
-    setReservedBus: React.Dispatch<React.SetStateAction<{ bus: Bus, reservationId: string } | null>>;
+    setReservedBus: React.Dispatch<React.SetStateAction<{ station: Station; bus: Bus, reservationId: string } | null>>;
 }
 
 
@@ -69,7 +69,7 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
         reserveBus(selectedStation.arsId, buses[busListIndexRef.current].busRouteId).then(({ msg, reservationId }) => {
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
-                setReservedBus({ bus: buses[busListIndexRef.current], reservationId });
+                setReservedBus({ station: selectedStation, bus: buses[busListIndexRef.current], reservationId });
                 setCurrStep("waiting");
             } else {
                 handleAnnouncement("failedReservation");
@@ -166,7 +166,7 @@ const BusInfo = styled.div`
 `;
 
 const BusInfoName = styled.h1` 
-    font-size: 5vw;
+    font-size: 7vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

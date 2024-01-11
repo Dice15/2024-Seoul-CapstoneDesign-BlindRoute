@@ -6,6 +6,7 @@ import axios from "axios";
 import IStation, { Station } from "../type/Station";
 import IBus, { Bus } from "../type/Bus";
 
+
 /**
  * getApiUrl 메서드는 기본 URL에 API 경로를 추가하여 완성된 API URL을 반환합니다.
  * @param path API 경로입니다.
@@ -145,7 +146,7 @@ export async function getBuses(arsId: string): Promise<{
 /** 버스 예약 응답 데이터 타입 */
 type ReserveBusResponse = {
     msg: string;
-    reservationId: string | null;
+    item: string | null;
 };
 
 /**
@@ -169,10 +170,10 @@ export async function reserveBus(arsId: string, busRouteId: string): Promise<{
             }
         );
 
-        const { msg, reservationId } = response.data;
+        const { msg, item } = response.data;
         return {
             msg: msg,
-            reservationId: reservationId
+            reservationId: item
         };
     } catch (error) {
         return {
@@ -193,7 +194,7 @@ export async function reserveBus(arsId: string, busRouteId: string): Promise<{
 /** 버스 예약 취소 응답 데이터 타입 */
 type CancelReservationResponse = {
     msg: string;
-    deletedCount: number | null;
+    item: number | null;
 };
 
 /**
@@ -212,10 +213,10 @@ export async function cancelReservation(): Promise<{
             getApiUrl(`/api/stationinfo/reserveBusAtStation`)
         );
 
-        const { msg, deletedCount } = response.data;
+        const { msg, item } = response.data;
         return {
             msg: msg,
-            deletedCount: deletedCount
+            deletedCount: item
         };
     } catch (error) {
         return {
@@ -228,6 +229,56 @@ export async function cancelReservation(): Promise<{
 
 
 
+
+/*****************************************************************
+ * 예약된 버스의 도착 정보를 가져오는 API 메서드입니다.
+ *****************************************************************/
+
+/** 예약된 버스 도착 정보 응답 데이터 타입 */
+type GetReservedBusArrInfoResponse = {
+    msg: string;
+    item: {
+        stopFlag: string;
+        stId: string;
+        arrmsg: string;
+    } | null;
+};
+
+/**
+ * 서버에서 예약된 버스의 도착 정보를 가져옵니다.
+ * @param reservationId 예약 ID
+ * @returns {Promise<GetReservedBusArrInfoResponse>}
+ * 버스 도착 정보와 처리 결과 메시지를 포함하는 객체를 반환합니다.
+ * 요청이 실패하면 null과 "FAIL" 메시지를 반환합니다.
+ */
+export async function getReservedBusArrInfo(reservationId: string): Promise<{
+    msg: string;
+    busArrInfo: {
+        stopFlag: string;
+        stId: string;
+        arrmsg: string;
+    } | null;
+}> {
+    try {
+        const response = await axios.get<GetReservedBusArrInfoResponse>(
+            getApiUrl(`/api/stationinfo/getReservedBusArrInfo`),
+            {
+                params: { reservationId }
+            }
+        );
+
+        const { msg, item } = response.data;
+        return {
+            msg: msg,
+            busArrInfo: item
+        };
+    } catch (error) {
+        return {
+            msg: "예약된 버스 도착 정보 요청 중 오류가 발생했습니다.",
+            busArrInfo: null
+        };
+    }
+}
 
 
 
