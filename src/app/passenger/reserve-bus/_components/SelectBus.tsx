@@ -18,7 +18,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 export interface SelectBusProps {
-    setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     selectedStation: Station;
     buses: Bus[];
     setReservedBus: React.Dispatch<React.SetStateAction<{ station: Station; bus: Bus, reservationId: string } | null>>;
@@ -26,7 +26,7 @@ export interface SelectBusProps {
 
 
 
-export default function SelectBus({ setCurrStep, selectedStation, buses, setReservedBus }: SelectBusProps) {
+export default function SelectBus({ setReserveStep, selectedStation, buses, setReservedBus }: SelectBusProps) {
     /* Ref */
     const busInfoContainer = useRef<HTMLDivElement>(null);
     const busListIndexRef = useRef<number>(0);
@@ -39,7 +39,7 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide" | "currBus" | "failedReservation") => {
+    const handleAnnouncement = (type: "guide" | "currBus" | "failedReservation" | "noVehicleFound") => {
         //return;
         switch (type) {
             case "guide": {
@@ -56,6 +56,10 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
                 SpeechOutputProvider.speak(`버스를 예약하는데 실패했습니다`);
                 break;
             }
+            case "noVehicleFound": {
+                SpeechOutputProvider.speak("지금은 운행하는 버스가 없습니다.")
+                break;
+            }
         }
     }
 
@@ -63,7 +67,10 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
     /** 이전 단계로 이동 */
     const handleBackToPrev = () => {
         setIsLoading(false);
-        setCurrStep("selectStation");
+        setReserveStep({
+            prev: "selectBus",
+            curr: "selectStation"
+        });
     }
 
 
@@ -73,7 +80,12 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
                 setReservedBus({ station: selectedStation, bus: buses[busListIndexRef.current], reservationId });
-                setCurrStep("waiting");
+                setReserveStep({
+                    prev: "selectBus",
+                    curr: "waiting"
+                });
+            } else if (msg === "운행 종료되었습니다.") {
+                handleAnnouncement("noVehicleFound");
             } else {
                 handleAnnouncement("failedReservation");
             }
@@ -124,7 +136,7 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
     // Effects
     useEffect(() => {
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [setCurrStep, selectedStation, buses, setReservedBus]);
+    }, [buses]);
 
 
     // Render

@@ -17,14 +17,14 @@ import { useRouter } from "next/navigation";
 
 /** SearchStation 컴포넌트 프로퍼티 */
 export interface SearchStationProps {
-    setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     setStations: React.Dispatch<React.SetStateAction<Station[]>>;
 }
 
 
 
 /** SearchStation 컴포넌트 */
-export default function SearchStation({ setCurrStep, setStations }: SearchStationProps) {
+export default function SearchStation({ setReserveStep, setStations }: SearchStationProps) {
     // Const
     const router = useRouter();
 
@@ -100,7 +100,10 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
                 setIsLoading(false);
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     setStations(itemList);
-                    setCurrStep("selectStation");
+                    setReserveStep({
+                        prev: "searchStation",
+                        curr: "selectStation"
+                    })
                 } else {
                     handleAnnouncement("noStationsFound");
                 }
@@ -160,7 +163,7 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
     // Effects
     useEffect(() => {
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [setCurrStep, setStations]);
+    }, [setStations]);
 
 
     // Render

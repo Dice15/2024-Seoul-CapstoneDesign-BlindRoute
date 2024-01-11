@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import SearchStation from "./SearchStation";
 import styled from "styled-components";
@@ -24,8 +24,7 @@ export default function ReserveBus() {
 
 
     /* State */
-    const [prevStep, setPrevStep] = useState<ReserveBusStep>("searchStation");
-    const [currStep, setCurrStep] = useState<ReserveBusStep>("searchStation");
+    const [reserveStep, setReserveStep] = useState<{ prev: ReserveBusStep, curr: ReserveBusStep }>({ prev: "searchStation", curr: "searchStation" });
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedStation, setSelectedStation] = useState<Station | null>(null);
     const [buses, setBuses] = useState<Bus[]>([]);
@@ -35,16 +34,16 @@ export default function ReserveBus() {
     /* Handler */
     /** 페이지 상태에 따른 알맞는 컨트롤러 반환 */
     const getControllerForm = () => {
-        switch (currStep) {
+        switch (reserveStep.curr) {
             case "searchStation": {
                 return <SearchStation
-                    setCurrStep={setCurrStep}
+                    setReserveStep={setReserveStep}
                     setStations={setStations}
                 />;
             }
             case "selectStation": {
                 return <SelectStation
-                    setCurrStep={setCurrStep}
+                    setReserveStep={setReserveStep}
                     stations={stations}
                     setSelectedStation={setSelectedStation}
                     setBuses={setBuses}
@@ -52,7 +51,7 @@ export default function ReserveBus() {
             }
             case "selectBus": {
                 return <SelectBus
-                    setCurrStep={setCurrStep}
+                    setReserveStep={setReserveStep}
                     selectedStation={selectedStation!}
                     buses={buses}
                     setReservedBus={setReservedBus}
@@ -60,7 +59,7 @@ export default function ReserveBus() {
             }
             case "waiting": {
                 return <WaitingBus
-                    setCurrStep={setCurrStep}
+                    setReserveStep={setReserveStep}
                     reservedBus={reservedBus!}
                 />
             }
@@ -74,8 +73,8 @@ export default function ReserveBus() {
     /** 페이지 이동 애니메이션 */
     const getAnimationDirection = (): "left" | "right" => {
         const stepIdx: ReserveBusStep[] = ["searchStation", "selectStation", "selectBus", "waiting", "arrival", "gettingOff"];
-        const currIdx = stepIdx.indexOf(currStep);
-        const prevIdx = stepIdx.indexOf(prevStep);
+        const prevIdx = stepIdx.indexOf(reserveStep.prev);
+        const currIdx = stepIdx.indexOf(reserveStep.curr);
         return currIdx >= prevIdx ? 'left' : 'right';
     };
 
@@ -89,21 +88,13 @@ export default function ReserveBus() {
     });
 
 
-    /* Effect */
-    /** 페이지 상태가 바뀌면 이전 페이지 저장 */
-    useEffect(() => {
-        setPrevStep(currStep);
-    }, [currStep]);
-
-
     // Render
     return (
         <TransitionGroupWrapper>
             <CSSTransition
                 nodeRef={reserveStepsRef}
-                key={currStep}
+                key={`${reserveStep.prev}${reserveStep.curr}`}
                 timeout={300}
-                classNames={getAnimationStyles(getAnimationDirection())}
             >
                 <ReserveSteps ref={reserveStepsRef}>
                     {getControllerForm()}
@@ -123,40 +114,4 @@ const TransitionGroupWrapper = styled(TransitionGroup)`
 const ReserveSteps = styled.div`
     height: 100%;
     width: 100%;
-
-    &.leftSlideEnter {
-        transform: translateX(100%);
-    }
-
-    &.leftSlideEnterActive {
-        transform: translateX(0);
-        transition: transform 300ms ease-in-out;
-    }
-
-    &.leftSlideExit {
-        transform: translateX(0);
-    }
-
-    &.leftSlideExitActive {
-        transform: translateX(-100%);
-        transition: transform 300ms ease-in-out;
-    }
-
-    &.rightSlideEnter {
-        transform: translateX(-100%);
-    }
-
-    &.rightSlideEnterActive {
-        transform: translateX(0);
-        transition: transform 300ms ease-in-out;
-    }
-
-    &.rightSlideExit {
-        transform: translateX(0);
-    }
-
-    &.rightSlideExitActive {
-        transform: translateX(100%);
-        transition: transform 300ms ease-in-out;
-    }
 `;

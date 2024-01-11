@@ -37,7 +37,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         }
                     ).then(async (stationInfo) => {
                         const busArrInfo = stationInfo.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === reservation.busRouteId);
-                        if (busArrInfo) {
+                        if (busArrInfo && busArrInfo.arrmsg1 !== "운행종료") {
                             return {
                                 arrmsg: busArrInfo.arrmsg1,
                                 vehId: busArrInfo.vehId1,
@@ -60,11 +60,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         return null;
                     })
 
-                    if (reservedBusArrInfo === null) {
-                        response.status(500).json({ msg: "시스템 오류가 발생하였습니다.", item: null });
-                    } else {
-                        response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: reservedBusArrInfo });
-                    }
+                    response.status(200).json({ msg: reservedBusArrInfo === null ? "운행 종료되었습니다." : "정상적으로 처리되었습니다.", item: reservedBusArrInfo });
                 }
             } catch (error) {
                 response.status(405).json({ msg: "지원하지 않는 메서드입니다.", item: null });

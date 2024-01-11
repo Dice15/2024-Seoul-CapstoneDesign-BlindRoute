@@ -12,7 +12,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 export interface WaitingBusProps {
-    setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     reservedBus: {
         station: Station;
         bus: Bus;
@@ -21,7 +21,7 @@ export interface WaitingBusProps {
 }
 
 
-export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps) {
+export default function WaitingBus({ setReserveStep, reservedBus }: WaitingBusProps) {
     // States
     const [waitingMsg, setWaitingMsg] = useState("대기중");
     const [isLoading, setIsLoading] = useState(false);
@@ -34,18 +34,11 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
         //return;
         switch (type) {
             case "guide": {
-                const currInfo = busArrInfo ? `${busArrInfo.arrmsg.split("[")[0]}에 도착합니다.` : "";
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${currInfo}. 화면을 두번 터치를 하면 예약을 취소합니다`);
+                const currInfo = busArrInfo ? busArrInfo.arrmsg.split("[")[0] : "";
+                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다. 화면을 두번 터치를 하면 예약을 취소합니다`);
                 break;
             }
         }
-    }
-
-
-    /** 이전 단계로 이동 */
-    const handleBackToPrev = () => {
-        setIsLoading(false);
-        setCurrStep("selectStation");
     }
 
 
@@ -53,7 +46,10 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     const handleCancelReservation = () => {
         cancelReservation().then(({ msg, deletedCount }) => {
             setIsLoading(false);
-            setCurrStep("selectBus");
+            setReserveStep({
+                prev: "waiting",
+                curr: "selectBus"
+            });
         });
     }
 
@@ -86,7 +82,7 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     /** 대기중 메시지 이벤트 */
     useEffect(() => {
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [setCurrStep, reservedBus]);
+    }, [reservedBus]);
 
 
     useEffect(() => {
@@ -113,9 +109,10 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
             if (newArrInfo !== null) {
                 if (busArrInfo !== null) {
                     if (newArrInfo.vehId !== busArrInfo.vehId) {
-                        console.log("버스가 도착하였습니다");
-                        SpeechOutputProvider.speak("버스가 도착하였습니다");
-                        setCurrStep("gettingOff");
+                        setReserveStep({
+                            prev: "waiting",
+                            curr: "gettingOff"
+                        });
                     }
                 }
                 setBusArrInfo(newArrInfo);
@@ -126,11 +123,6 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
             clearInterval(intervalId);
         }
     }, [reservedBus, busArrInfo, setBusArrInfo]);
-
-
-    useEffect(() => {
-        console.log(busArrInfo?.vehId, busArrInfo?.arrmsg);
-    }, [busArrInfo])
 
 
     // Render

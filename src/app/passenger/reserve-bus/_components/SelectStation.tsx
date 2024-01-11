@@ -17,7 +17,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 export interface SelectStationProps {
-    setCurrStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     stations: Station[];
     setSelectedStation: React.Dispatch<React.SetStateAction<Station | null>>
     setBuses: React.Dispatch<React.SetStateAction<Bus[]>>;
@@ -25,7 +25,7 @@ export interface SelectStationProps {
 
 
 
-export default function SelectStation({ setCurrStep, stations, setSelectedStation, setBuses }: SelectStationProps) {
+export default function SelectStation({ setReserveStep, stations, setSelectedStation, setBuses }: SelectStationProps) {
     /* Ref */
     const stationInfoContainer = useRef<HTMLDivElement>(null);
     const stationListIndexRef = useRef<number>(0);
@@ -62,7 +62,10 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
     /** 이전 단계로 이동 */
     const handleBackToPrev = () => {
         setIsLoading(false);
-        setCurrStep("searchStation");
+        setReserveStep({
+            prev: "selectStation",
+            curr: "searchStation"
+        });
     }
 
 
@@ -73,7 +76,10 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
             if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                 setSelectedStation(stations[stationListIndexRef.current])
                 setBuses(itemList);
-                setCurrStep("selectBus");
+                setReserveStep({
+                    prev: "selectStation",
+                    curr: "selectBus"
+                });
             } else {
                 handleAnnouncement("noBusesFound");
             }
@@ -124,7 +130,7 @@ export default function SelectStation({ setCurrStep, stations, setSelectedStatio
     // Effects
     useEffect(() => {
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [setCurrStep, stations, setSelectedStation, setBuses]);
+    }, [stations]);
 
 
     // Render
