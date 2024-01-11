@@ -40,6 +40,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         if (busArrInfo) {
                             return {
                                 arrmsg: busArrInfo.arrmsg1,
+                                vehId: busArrInfo.vehId1,
                                 ...(await axios.get<GetBusPosByVehIdApiResponse>(
                                     "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
                                     {
@@ -51,11 +52,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                     }
                                 ).then((busLocInfo) => {
                                     const temp = busLocInfo.data.msgBody.itemList[0];
-                                    console.log(temp.tmX, temp.tmY, temp.posX, temp.posY);
-                                    return {
-                                        stopFlag: busLocInfo.data.msgBody.itemList[0].stopFlag,
-                                        stId: busLocInfo.data.msgBody.itemList[0].stId
-                                    }
+                                    console.log(busArrInfo.isArrive1, busArrInfo.posX, busArrInfo.posY, "/", temp.posX, temp.posY);
+                                    return {}
                                 }))
                             }
                         }

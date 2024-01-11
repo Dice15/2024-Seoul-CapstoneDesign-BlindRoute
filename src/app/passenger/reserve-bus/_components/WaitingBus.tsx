@@ -24,7 +24,7 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     // States
     const [waitingMsg, setWaitingMsg] = useState("대기중");
     const [isLoading, setIsLoading] = useState(false);
-    const [busArrInfo, setBusArrInfo] = useState<{ stopFlag: string; stId: string; arrmsg: string; } | null>(null);
+    const [busArrInfo, setBusArrInfo] = useState<{ arrmsg: string; vehId: string; } | null>(null);
 
 
     // Handler
@@ -67,7 +67,7 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     // Effects
     /** 대기중 메시지 이벤트 */
     useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 500);
+        setTimeout(() => { handleAnnouncement("guide"); }, 400);
     }, [setCurrStep, reservedBus]);
 
 
@@ -91,24 +91,27 @@ export default function WaitingBus({ setCurrStep, reservedBus }: WaitingBusProps
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
         const intervalId = setInterval(async () => {
-            setBusArrInfo((await getReservedBusArrInfo(reservedBus.reservationId)).busArrInfo);
+            const newArrInfo = (await getReservedBusArrInfo(reservedBus.reservationId)).busArrInfo;
+            if (newArrInfo !== null) {
+                if (busArrInfo !== null) {
+                    if (newArrInfo.vehId !== busArrInfo.vehId) {
+                        console.log("버스가 도착하였습니다");
+                        SpeechOutputProvider.speak("버스가 도착하였습니다");
+                        setCurrStep("gettingOff");
+                    }
+                }
+                setBusArrInfo(newArrInfo);
+            }
         }, 2000);
 
         return () => {
             clearInterval(intervalId);
         }
-    }, [reservedBus]);
+    }, [reservedBus, busArrInfo, setBusArrInfo]);
 
 
     useEffect(() => {
-        if (busArrInfo) {
-            if (reservedBus.station.stId === busArrInfo.stId && busArrInfo.stopFlag === "1") {
-                console.log("버스가 도착하였습니다");
-                SpeechOutputProvider.speak("버스가 도착하였습니다");
-                setCurrStep("gettingOff");
-            }
-        }
-        console.log(reservedBus.station.stId === busArrInfo?.stId, busArrInfo?.stopFlag, busArrInfo?.arrmsg);
+        console.log(busArrInfo?.vehId, busArrInfo?.arrmsg);
     }, [busArrInfo])
 
 

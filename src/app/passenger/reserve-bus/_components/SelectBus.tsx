@@ -106,7 +106,7 @@ export default function SelectBus({ setCurrStep, selectedStation, buses, setRese
 
     // Effects
     useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 500);
+        setTimeout(() => { handleAnnouncement("guide"); }, 400);
     }, [setCurrStep, selectedStation, buses, setReservedBus]);
 
 

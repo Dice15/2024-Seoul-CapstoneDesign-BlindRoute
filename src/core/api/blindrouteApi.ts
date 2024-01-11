@@ -238,9 +238,8 @@ export async function cancelReservation(): Promise<{
 type GetReservedBusArrInfoResponse = {
     msg: string;
     item: {
-        stopFlag: string;
-        stId: string;
         arrmsg: string;
+        vehId: string;
     } | null;
 };
 
@@ -254,9 +253,8 @@ type GetReservedBusArrInfoResponse = {
 export async function getReservedBusArrInfo(reservationId: string): Promise<{
     msg: string;
     busArrInfo: {
-        stopFlag: string;
-        stId: string;
         arrmsg: string;
+        vehId: string;
     } | null;
 }> {
     try {

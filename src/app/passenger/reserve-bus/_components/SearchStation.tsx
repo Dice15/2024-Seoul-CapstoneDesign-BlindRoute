@@ -132,7 +132,7 @@ export default function SearchStation({ setCurrStep, setStations }: SearchStatio
 
     // Effects
     useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 500);
+        setTimeout(() => { handleAnnouncement("guide"); }, 400);
     }, [setCurrStep, setStations]);
 
 
