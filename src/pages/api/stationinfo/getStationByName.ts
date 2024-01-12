@@ -31,7 +31,13 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 if (comMsgHeader.errMsg) {
                     response.status(500).json({ msg: msgHeader.headerMsg, itemList: [] });
                 } else {
-                    response.status(200).json({ msg: msgHeader.headerMsg, itemList: msgBody.itemList });
+                    response.status(200).json({
+                        msg: msgHeader.headerMsg,
+                        itemList: msgBody.itemList.map((item) => ({
+                            seq: "",
+                            ...item
+                        }))
+                    });
                 }
             } catch (error) {
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", itemList: [] });

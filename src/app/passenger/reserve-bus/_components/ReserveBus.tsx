@@ -11,11 +11,13 @@ import SelectBus from "./SelectBus";
 import WaitingBus from "./WaitingBus";
 import ArrivalBus from "./ArrivalBus";
 import SelectDestination from "./SelectDestination";
+import WaitingDestination from "./WaitingDestination";
+import ArrivalDestination from "./ArrivalDestination";
 
 
 
 /** 예약 단계 */
-export type ReserveBusStep = "searchStation" | "selectStation" | "selectBus" | "waitingBus" | "arrival" | "selectDestination" | "waitingDestination";
+export type ReserveBusStep = "searchStation" | "selectStation" | "selectBus" | "waitingBus" | "arrival" | "selectDestination" | "waitingDestination" | "arrivalDestination";
 
 
 
@@ -81,8 +83,21 @@ export default function ReserveBus() {
                 return <SelectDestination
                     setReserveStep={setReserveStep}
                     reservedBus={reservedBus!}
-                    destinations={destinations}
+                    destinations={destinations.slice(1)}
                     setSelectedDestination={setSelectedDestination}
+                />
+            }
+            case "waitingDestination": {
+                return <WaitingDestination
+                    setReserveStep={setReserveStep}
+                    boardingVehId={boardingVehId!}
+                    destinations={destinations}
+                    selectedDestination={selectedDestination!}
+                />
+            }
+            case "arrivalDestination": {
+                return <ArrivalDestination
+                    selectedDestination={selectedDestination!}
                 />
             }
             default: {

@@ -13,7 +13,7 @@ import { Station } from "@/core/type/Station";
 import { useSwipeable } from "react-swipeable";
 
 
-export interface WaitingBusProps {
+interface WaitingBusProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     reservedBus: {
         station: Station;
@@ -38,7 +38,13 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
         //return;
         switch (type) {
             case "guide": {
-                const currInfo = busArrInfo ? busArrInfo.arrmsg.split("[")[0] : "";
+                const extractTimeInfo = (arrmsg: string) => {
+                    const timePattern = /\d+분\d+초후|곧 도착/; // '1분56초후' 또는 '곧 도착'을 찾는 정규 표현식
+                    const match = arrmsg.match(timePattern);
+                    return match ? match[0] : ""; // 일치하는 부분을 반환하거나, 일치하는 부분이 없으면 null을 반환
+                }
+
+                const currInfo = busArrInfo ? extractTimeInfo(busArrInfo.arrmsg) : "";
                 const arrMsg = currInfo === "" ? "" : `${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다.`;
                 SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${arrMsg}. 화면을 두번 터치를 하면 예약을 취소합니다`);
                 break;
@@ -66,7 +72,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                 setIsLoading(false);
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     const stIdx = itemList.findIndex((item) => item.stNm === reservedBus.station.stNm);
-                    setDestinations(itemList.slice(stIdx + 1));
+                    setDestinations(itemList.slice(stIdx));
                 }
                 setReserveStep({
                     prev: "waitingBus",
@@ -136,9 +142,15 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                         handleArrivedBus();
                     } else {
                         setBoardingVehId(newArrInfo.vehId);
+                        setBusArrInfo(newArrInfo);
                     }
                 } else {
                     setBusArrInfo(newArrInfo);
+                }
+            } else {
+                if (busArrInfo !== null) {
+                    setIsLoading(true);
+                    handleArrivedBus();
                 }
             }
         }, 2000);
@@ -146,7 +158,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
         return () => {
             clearInterval(intervalId);
         }
-    }, [reservedBus, busArrInfo, setBusArrInfo]);
+    }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
 
 
     // Render
@@ -188,6 +200,7 @@ const ReservationContainer = styled.div`
 
 
 const ReservationBusName = styled.h1` 
+    text-align: center;
     font-size: 7vw;
     font-weight: bold;
     cursor: pointer;

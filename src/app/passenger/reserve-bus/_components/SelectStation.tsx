@@ -16,7 +16,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 
-export interface SelectStationProps {
+interface SelectStationProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     stations: Station[];
     setSelectedStation: React.Dispatch<React.SetStateAction<Station | null>>
@@ -143,7 +143,6 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
                     spaceBetween={50}
                     onSlideChange={handleSlideChange}
                     speed={300}
-                    loop={true}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >

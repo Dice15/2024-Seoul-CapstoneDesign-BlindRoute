@@ -14,7 +14,7 @@ import { reserveBus } from "@/core/api/blindrouteApi";
 import { Bus } from "@/core/type/Bus";
 
 
-export interface SelectDestinationProps {
+interface SelectDestinationProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     reservedBus: {
         station: Station;
@@ -43,6 +43,7 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
         //return;
         switch (type) {
             case "guide": {
+                console.log(stationListIndexRef.current, destinations)
                 const station = destinations[stationListIndexRef.current];
                 SpeechOutputProvider.speak(`하차할 도착지를 선택하세요, "${station.stNm}", 화면을 두번 터치하면 하차 예약이 등록됩니다.`);
                 break;
@@ -75,6 +76,7 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
         reserveBus(station.stId, station.arsId, reservedBus.bus.busRouteId, "alighting").then(({ msg, reservationId }) => {
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
+                setSelectedDestination(station);
                 setReserveStep({
                     prev: "selectDestination",
                     curr: "waitingDestination"

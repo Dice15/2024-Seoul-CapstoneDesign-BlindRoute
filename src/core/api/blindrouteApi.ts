@@ -336,10 +336,7 @@ export async function getDestinationByRoute(busRouteId: string, vehId: string): 
 /** 버스 위치 정보 응답 데이터 타입 */
 type GetBusPosByVehIdResponse = {
     msg: string;
-    item: {
-        stId: string;
-        stopFlag: string;
-    } | null;
+    item: IStation | null;
 };
 
 /**
@@ -351,10 +348,7 @@ type GetBusPosByVehIdResponse = {
  */
 export async function getBusPosByVehId(vehId: string): Promise<{
     msg: string;
-    busPosInfo: {
-        stId: string;
-        stopFlag: string;
-    } | null;
+    currStation: Station | null;
 }> {
     try {
         const response = await axios.get<GetBusPosByVehIdResponse>(
@@ -367,12 +361,12 @@ export async function getBusPosByVehId(vehId: string): Promise<{
         const { msg, item } = response.data;
         return {
             msg: msg,
-            busPosInfo: item
+            currStation: item === null ? null : Station.fromObject(item)
         };
     } catch (error) {
         return {
             msg: "버스 위치 정보 요청 중 오류가 발생했습니다.",
-            busPosInfo: null
+            currStation: null
         };
     }
 }

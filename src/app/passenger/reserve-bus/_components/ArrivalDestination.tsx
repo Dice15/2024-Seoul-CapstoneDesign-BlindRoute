@@ -1,29 +1,22 @@
 "use client"
 
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
-import styled from "styled-components";
-import { ReserveBusStep } from "./ReserveBus";
-import { Station } from "@/core/type/Station";
-import { Bus } from "@/core/type/Bus";
-import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { useSwipeable } from "react-swipeable";
-import { useRouter } from "next/navigation";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
+import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
+import { Station } from "@/core/type/Station";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSwipeable } from "react-swipeable";
+import styled from "styled-components";
 
 
-interface ArrivalBusProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
-    reservedBus: {
-        station: Station;
-        bus: Bus;
-        reservationId: string;
-    };
+interface ArrivalDestinationProps {
+    selectedDestination: Station;
 }
 
 
-export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusProps) {
+export default function ArrivalDestination({ selectedDestination }: ArrivalDestinationProps) {
     // Const
     const router = useRouter();
 
@@ -38,7 +31,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
         //return;
         switch (type) {
             case "guide": {
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}" 버스가 도착했습니다! 화면을 두번 터치하면 승차 완료 처리가 됩니다.`);
+                SpeechOutputProvider.speak(`"${selectedDestination.stNm}"에 도착했습니다.`);
                 break;
             }
         }
@@ -52,21 +45,11 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     }
 
 
-    /** 하차 등록 단계로 이동 */
-    const handleGoNextStep = () => {
-        setIsLoading(false);
-        setReserveStep({
-            prev: "arrival",
-            curr: "selectDestination"
-        });
-    }
-
-
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
         onSwipedLeft: () => {
             setIsLoading(true);
-            handleGoNextStep();
+            handleBackToHome();
         },
         onSwipedRight: () => {
             setIsLoading(true);
@@ -85,7 +68,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
         onDoubleTouch: () => {
             VibrationProvider.repeatVibrate(500, 200, 2);
             setIsLoading(true);
-            handleGoNextStep();
+            handleBackToHome();
         },
     });
 
@@ -94,7 +77,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     useEffect(() => {
         VibrationProvider.vibrate(5000);
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [reservedBus]);
+    }, [selectedDestination]);
 
 
     // Render
@@ -104,8 +87,8 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
             <ReservationContainer
                 onClick={handleBusInfoClick}
             >
-                <ReservationBusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</ReservationBusName>
-                <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>
+                <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
+                <ArrivalMessage>{"정류장에 도착했습니다!"}</ArrivalMessage>
             </ReservationContainer>
         </Wrapper >
     );
@@ -135,7 +118,7 @@ const ReservationContainer = styled.div`
 `;
 
 
-const ReservationBusName = styled.h1` 
+const ReservationDestinationName = styled.h1` 
     font-size: 7vw;
     font-weight: bold;
     cursor: pointer;

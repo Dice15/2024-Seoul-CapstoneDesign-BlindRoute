@@ -1,4 +1,5 @@
 export default interface IStation {
+    seq: string;
     stId: string;
     stNm: string;
     tmX: string;
@@ -9,6 +10,7 @@ export default interface IStation {
 }
 
 export class Station implements IStation {
+    private _seq: string;
     private _stId: string;
     private _stNm: string;
     private _tmX: string;
@@ -17,7 +19,8 @@ export class Station implements IStation {
     private _posY: string;
     private _arsId: string;
 
-    constructor(stId: string, stNm: string, tmX: string, tmY: string, posX: string, posY: string, arsId: string) {
+    constructor(seq: string, stId: string, stNm: string, tmX: string, tmY: string, posX: string, posY: string, arsId: string) {
+        this._seq = seq;
         this._stId = stId;
         this._stNm = stNm;
         this._tmX = tmX;
@@ -25,6 +28,14 @@ export class Station implements IStation {
         this._posX = posX;
         this._posY = posY;
         this._arsId = arsId;
+    }
+
+    get seq(): string {
+        return this._seq;
+    }
+
+    set seq(value: string) {
+        this._seq = value;
     }
 
     get stId(): string {
@@ -89,6 +100,7 @@ export class Station implements IStation {
      */
     toObject(): IStation {
         return {
+            seq: this.seq,
             stId: this.stId,
             stNm: this.stNm,
             tmX: this.tmX,
@@ -105,6 +117,6 @@ export class Station implements IStation {
      * @returns {Station} Station 클래스의 인스턴스
      */
     static fromObject(obj: IStation): Station {
-        return new Station(obj.stId, obj.stNm, obj.tmX, obj.tmY, obj.posX, obj.posY, obj.arsId);
+        return new Station(obj.seq, obj.stId, obj.stNm, obj.tmX, obj.tmY, obj.posX, obj.posY, obj.arsId);
     }
 }

@@ -16,6 +16,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const requestParam = request.query;
+                console.log(requestParam.busRouteId)
                 await axios.get<GetDestinationByRouteApiResponse>(
                     "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute",
                     {
@@ -40,6 +41,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         response.status(200).json({
                             msg: "정상적으로 처리되었습니다.",
                             itemList: stationInfo.data.msgBody.itemList.slice(currSeq).map((stInfo) => ({
+                                seq: stInfo.seq,
                                 stId: stInfo.station,
                                 stNm: stInfo.stationNm,
                                 tmX: "",

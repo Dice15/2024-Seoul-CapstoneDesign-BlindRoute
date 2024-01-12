@@ -17,7 +17,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 
-export interface SelectBusProps {
+interface SelectBusProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     selectedStation: Station;
     buses: Bus[];

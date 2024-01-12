@@ -21,7 +21,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     {
                         params: {
                             serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
-                            stSrch: requestParam.vehId,
+                            vehId: requestParam.vehId,
                             resultType: "json"
                         }
                     }
@@ -31,7 +31,19 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 if (comMsgHeader.errMsg) {
                     response.status(500).json({ msg: msgHeader.headerMsg, item: null });
                 } else {
-                    response.status(200).json({ msg: msgHeader.headerMsg, item: { stId: msgBody.itemList[0].stId, stopFlag: msgBody.itemList[0].stopFlag } });
+                    response.status(200).json({
+                        msg: msgHeader.headerMsg,
+                        item: {
+                            seq: msgBody.itemList[0].stOrd,
+                            stId: msgBody.itemList[0].stId,
+                            stNm: "",
+                            tmX: "",
+                            tmY: "",
+                            posX: "",
+                            posY: "",
+                            arsId: "",
+                        }
+                    });
                 }
             } catch (error) {
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", item: null });

@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 
 
 /** SearchStation 컴포넌트 프로퍼티 */
-export interface SearchStationProps {
+interface SearchStationProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
     setStations: React.Dispatch<React.SetStateAction<Station[]>>;
 }

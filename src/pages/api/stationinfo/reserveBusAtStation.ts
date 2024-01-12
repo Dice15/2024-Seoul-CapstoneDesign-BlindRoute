@@ -71,14 +71,18 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
 
             try {
-                const deleteResult = await db.collection("boarding_reservations").deleteMany({
+                const deleteBoardingResult = await db.collection("boarding_reservations").deleteMany({
                     owner: session.user?.email,
                 });
 
-                if (deleteResult.acknowledged === undefined) {
+                const deletealightingResult = await db.collection("alighting_reservations").deleteMany({
+                    owner: session.user?.email,
+                });
+
+                if (deleteBoardingResult.acknowledged === undefined || deletealightingResult.acknowledged === undefined) {
                     response.status(500).json({ msg: "DB 삭제 중 오류가 발생했습니다.", item: null });
                 } else {
-                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: deleteResult.deletedCount });
+                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: deleteBoardingResult.deletedCount + deletealightingResult.deletedCount });
                 }
             } catch (error) {
                 response.status(502).json({ msg: "DB 삭제 중 오류가 발생했습니다.", item: null });

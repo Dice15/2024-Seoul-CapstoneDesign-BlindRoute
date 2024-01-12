@@ -38,23 +38,24 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     ).then(async (stationInfo) => {
                         const busArrInfo = stationInfo.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === reservation.busRouteId);
                         if (busArrInfo && busArrInfo.arrmsg1 !== "운행종료") {
+                            console.log(busArrInfo.arrmsg1, busArrInfo.vehId1)
                             return {
                                 arrmsg: busArrInfo.arrmsg1,
                                 vehId: busArrInfo.vehId1,
-                                ...(await axios.get<GetBusPosByVehIdApiResponse>(
-                                    "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
-                                    {
-                                        params: {
-                                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
-                                            vehId: busArrInfo.vehId1,
-                                            resultType: "json"
-                                        }
-                                    }
-                                ).then((busLocInfo) => {
-                                    const temp = busLocInfo.data.msgBody.itemList[0];
-                                    console.log(busArrInfo.isArrive1, busArrInfo.posX, busArrInfo.posY, "/", temp.posX, temp.posY);
-                                    return {}
-                                }))
+                                // ...(await axios.get<GetBusPosByVehIdApiResponse>(
+                                //     "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
+                                //     {
+                                //         params: {
+                                //             serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                //             vehId: busArrInfo.vehId1,
+                                //             resultType: "json"
+                                //         }
+                                //     }
+                                // ).then((busLocInfo) => {
+                                //     const temp = busLocInfo.data.msgBody.itemList[0];
+                                //     console.log(busArrInfo.isArrive1, busArrInfo.posX, busArrInfo.posY, "/", temp.posX, temp.posY);
+                                //     return {}
+                                // }))
                             }
                         }
                         return null;
