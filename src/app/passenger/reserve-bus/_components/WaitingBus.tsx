@@ -1,10 +1,12 @@
+"use client"
+
 import { Bus } from "@/core/type/Bus";
 import { ReserveBusStep } from "./ReserveBus";
 import { useEffect, useState } from "react";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { cancelReservation, getReservedBusArrInfo } from "@/core/api/blindrouteApi";
+import { cancelReservation, getDestinationByRoute, getReservedBusArrInfo } from "@/core/api/blindrouteApi";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
@@ -18,10 +20,12 @@ export interface WaitingBusProps {
         bus: Bus;
         reservationId: string;
     };
+    setBoardingVehId: React.Dispatch<React.SetStateAction<string | null>>;
+    setDestinations: React.Dispatch<React.SetStateAction<Station[]>>;
 }
 
 
-export default function WaitingBus({ setReserveStep, reservedBus }: WaitingBusProps) {
+export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVehId, setDestinations }: WaitingBusProps) {
     // States
     const [waitingMsg, setWaitingMsg] = useState("대기중");
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +39,8 @@ export default function WaitingBus({ setReserveStep, reservedBus }: WaitingBusPr
         switch (type) {
             case "guide": {
                 const currInfo = busArrInfo ? busArrInfo.arrmsg.split("[")[0] : "";
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다. 화면을 두번 터치를 하면 예약을 취소합니다`);
+                const arrMsg = currInfo === "" ? "" : `${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다.`;
+                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${arrMsg}. 화면을 두번 터치를 하면 예약을 취소합니다`);
                 break;
             }
         }
@@ -47,8 +52,26 @@ export default function WaitingBus({ setReserveStep, reservedBus }: WaitingBusPr
         cancelReservation().then(({ msg, deletedCount }) => {
             setIsLoading(false);
             setReserveStep({
-                prev: "waiting",
+                prev: "waitingBus",
                 curr: "selectBus"
+            });
+        });
+    }
+
+
+    /** 버스 도착하면 예약을 삭제하고 해당 버스의 도착지를 받아옴 */
+    const handleArrivedBus = () => {
+        cancelReservation().then(({ msg, deletedCount }) => {
+            getDestinationByRoute(reservedBus.bus.busRouteId, busArrInfo!.vehId).then(({ msg, itemList }) => {
+                setIsLoading(false);
+                if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
+                    const stIdx = itemList.findIndex((item) => item.stNm === reservedBus.station.stNm);
+                    setDestinations(itemList.slice(stIdx + 1));
+                }
+                setReserveStep({
+                    prev: "waitingBus",
+                    curr: "arrival"
+                });
             });
         });
     }
@@ -109,13 +132,14 @@ export default function WaitingBus({ setReserveStep, reservedBus }: WaitingBusPr
             if (newArrInfo !== null) {
                 if (busArrInfo !== null) {
                     if (newArrInfo.vehId !== busArrInfo.vehId) {
-                        setReserveStep({
-                            prev: "waiting",
-                            curr: "gettingOff"
-                        });
+                        setIsLoading(true);
+                        handleArrivedBus();
+                    } else {
+                        setBoardingVehId(newArrInfo.vehId);
                     }
+                } else {
+                    setBusArrInfo(newArrInfo);
                 }
-                setBusArrInfo(newArrInfo);
             }
         }, 2000);
 

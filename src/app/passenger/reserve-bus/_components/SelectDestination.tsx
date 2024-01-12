@@ -1,35 +1,35 @@
 "use client"
 
-
+import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
 import { useEffect, useRef, useState } from "react";
-import LoadingAnimation from "@/app/_components/LoadingAnimation";
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
-import 'swiper/css';
-import styled from "styled-components";
-import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
-import { Bus } from "@/core/type/Bus";
-import { Station } from "@/core/type/Station";
-import { reserveBus } from "@/core/api/blindrouteApi";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { useSwipeable } from "react-swipeable";
+import useTouchEvents from "@/core/hooks/useTouchEvents";
+import LoadingAnimation from "@/app/_components/LoadingAnimation";
+import styled from "styled-components";
+import { reserveBus } from "@/core/api/blindrouteApi";
+import { Bus } from "@/core/type/Bus";
 
 
-
-export interface SelectBusProps {
+export interface SelectDestinationProps {
     setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
-    selectedStation: Station;
-    buses: Bus[];
-    setReservedBus: React.Dispatch<React.SetStateAction<{ station: Station; bus: Bus, reservationId: string } | null>>;
+    reservedBus: {
+        station: Station;
+        bus: Bus;
+        reservationId: string;
+    };
+    destinations: Station[];
+    setSelectedDestination: React.Dispatch<React.SetStateAction<Station | null>>;
 }
 
 
-
-export default function SelectBus({ setReserveStep, selectedStation, buses, setReservedBus }: SelectBusProps) {
+export default function SelectDestination({ setReserveStep, reservedBus, destinations, setSelectedDestination }: SelectDestinationProps) {
     /* Ref */
-    const busInfoContainer = useRef<HTMLDivElement>(null);
-    const busListIndexRef = useRef<number>(0);
+    const stationInfoContainer = useRef<HTMLDivElement>(null);
+    const stationListIndexRef = useRef<number>(0);
     const isSlidingRef = useRef(false);
 
 
@@ -39,25 +39,21 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide" | "currBus" | "failedReservation" | "noVehicleFound") => {
+    const handleAnnouncement = (type: "guide" | "currStation" | "failedReservation") => {
         //return;
         switch (type) {
             case "guide": {
-                const bus = buses[busListIndexRef.current];
-                SpeechOutputProvider.speak(`버스를 선택하세요. "${bus.busRouteAbrv || bus.busRouteNm}번", 화면을 두번 터치하면 버스를 예약합니다.`);
+                const station = destinations[stationListIndexRef.current];
+                SpeechOutputProvider.speak(`하차할 도착지를 선택하세요, "${station.stNm}", 화면을 두번 터치하면 하차 예약이 등록됩니다.`);
                 break;
             }
-            case "currBus": {
-                const bus = buses[busListIndexRef.current];
-                SpeechOutputProvider.speak(`"${bus.busRouteAbrv || bus.busRouteNm}번", 화면을 두번 터치하면 버스를 예약합니다.`);
+            case "currStation": {
+                const station = destinations[stationListIndexRef.current];
+                SpeechOutputProvider.speak(`"${station.stNm}", 화면을 두번 터치하면 하차 예약이 등록됩니다.`);
                 break;
             }
             case "failedReservation": {
-                SpeechOutputProvider.speak(`버스를 예약하는데 실패했습니다`);
-                break;
-            }
-            case "noVehicleFound": {
-                SpeechOutputProvider.speak("지금은 운행하는 버스가 없습니다.")
+                SpeechOutputProvider.speak(`하차를 예약하는데 실패했습니다`);
                 break;
             }
         }
@@ -68,24 +64,21 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     const handleBackToPrev = () => {
         setIsLoading(false);
         setReserveStep({
-            prev: "selectBus",
-            curr: "selectStation"
+            prev: "selectDestination",
+            curr: "arrival"
         });
     }
 
 
-    /** 버스 예약 */
-    const handleReserveBus = () => {
-        reserveBus(selectedStation.stId, selectedStation.arsId, buses[busListIndexRef.current].busRouteId, "boarding").then(({ msg, reservationId }) => {
+    const reserveDestination = () => {
+        const station = destinations[stationListIndexRef.current];
+        reserveBus(station.stId, station.arsId, reservedBus.bus.busRouteId, "alighting").then(({ msg, reservationId }) => {
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
-                setReservedBus({ station: selectedStation, bus: buses[busListIndexRef.current], reservationId });
                 setReserveStep({
-                    prev: "selectBus",
-                    curr: "waitingBus"
+                    prev: "selectDestination",
+                    curr: "waitingDestination"
                 });
-            } else if (msg === "운행 종료되었습니다.") {
-                handleAnnouncement("noVehicleFound");
             } else {
                 handleAnnouncement("failedReservation");
             }
@@ -97,9 +90,9 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     const handleSlideChange = (swiper: SwiperClass) => {
         VibrationProvider.vibrate(200);
         isSlidingRef.current = true; // 슬라이드 중으로 상태 변경
-        busListIndexRef.current = swiper.realIndex;
+        stationListIndexRef.current = swiper.realIndex;
 
-        handleAnnouncement("currBus");
+        handleAnnouncement("currStation");
         setTimeout(() => isSlidingRef.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
     };
 
@@ -108,7 +101,7 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     const handleHorizontalSwiper = useSwipeable({
         onSwipedLeft: () => {
             setIsLoading(true);
-            setTimeout(() => { handleReserveBus(); }, 500);
+            setTimeout(() => { reserveDestination(); }, 500);
         },
         onSwipedRight: () => {
             setIsLoading(true);
@@ -118,17 +111,17 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     });
 
 
+
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
+    const handleStationInfoClick = useTouchEvents({
         onSingleTouch: () => {
             VibrationProvider.vibrate(1000);
-            handleAnnouncement("currBus");
+            handleAnnouncement("currStation");
         },
         onDoubleTouch: () => {
             VibrationProvider.repeatVibrate(500, 200, 2);
             setIsLoading(true);
-            setTimeout(() => { handleReserveBus(); }, 500);
-
+            setTimeout(() => { reserveDestination(); }, 500);
         }
     });
 
@@ -136,32 +129,31 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     // Effects
     useEffect(() => {
         setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [buses]);
+    }, [destinations]);
 
 
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
             <LoadingAnimation active={isLoading} />
-            <BusInfoContainer ref={busInfoContainer}>
+            <StationInfoContainer ref={stationInfoContainer}>
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={50}
                     onSlideChange={handleSlideChange}
                     speed={300}
-                    loop={true}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >
-                    {buses.map((bus, index) => (
+                    {destinations.map((station, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
-                            <BusInfo onClick={handleBusInfoClick}>
-                                <BusInfoName>{bus.busRouteAbrv || bus.busRouteNm}</BusInfoName>
-                            </BusInfo>
+                            <StationInfo onClick={handleStationInfoClick}>
+                                <StationInfoName>{station.stNm}</StationInfoName>
+                            </StationInfo>
                         </SwiperSlide>
                     ))}
                 </Swiper>
-            </BusInfoContainer>
+            </StationInfoContainer>
         </Wrapper >
     );
 }
@@ -176,7 +168,7 @@ const Wrapper = styled.div`
 `;
 
 
-const BusInfoContainer = styled.div`
+const StationInfoContainer = styled.div`
     height: 90%;
     width: 85%;
     border: 1px solid var(--main-border-color);
@@ -186,7 +178,7 @@ const BusInfoContainer = styled.div`
 `;
 
 
-const BusInfo = styled.div`
+const StationInfo = styled.div`
     height: 100%;
     width: 100%;
     display: flex;
@@ -196,7 +188,7 @@ const BusInfo = styled.div`
 `;
 
 
-const BusInfoName = styled.h1` 
+const StationInfoName = styled.h1` 
     width: 95%;
     text-align: center;
     font-size: 7vw;

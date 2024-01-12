@@ -84,7 +84,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
 
 
     /** 이전 단계로 이동 */
-    const handleBackToPrev = () => {
+    const handleBackToHome = () => {
         setIsLoading(false);
         router.replace("./");
     }
@@ -140,7 +140,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
         },
         onSwipedRight: () => {
             setIsLoading(true);
-            handleBackToPrev();
+            handleBackToHome();
         },
         trackMouse: true
     });

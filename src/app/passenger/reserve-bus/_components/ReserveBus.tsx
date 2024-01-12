@@ -9,11 +9,13 @@ import SelectStation from "./SelectStation";
 import { Bus } from "@/core/type/Bus";
 import SelectBus from "./SelectBus";
 import WaitingBus from "./WaitingBus";
+import ArrivalBus from "./ArrivalBus";
+import SelectDestination from "./SelectDestination";
 
 
 
-/** 컨트롤러 상태 */
-export type ReserveBusStep = "searchStation" | "selectStation" | "selectBus" | "waiting" | "arrival" | "gettingOff";
+/** 예약 단계 */
+export type ReserveBusStep = "searchStation" | "selectStation" | "selectBus" | "waitingBus" | "arrival" | "selectDestination" | "waitingDestination";
 
 
 
@@ -29,6 +31,10 @@ export default function ReserveBus() {
     const [selectedStation, setSelectedStation] = useState<Station | null>(null);
     const [buses, setBuses] = useState<Bus[]>([]);
     const [reservedBus, setReservedBus] = useState<{ station: Station; bus: Bus, reservationId: string } | null>(null);
+    const [boardingVehId, setBoardingVehId] = useState<string | null>(null);
+    const [destinations, setDestinations] = useState<Station[]>([]);
+    const [selectedDestination, setSelectedDestination] = useState<Station | null>(null);
+
 
 
     /* Handler */
@@ -57,10 +63,26 @@ export default function ReserveBus() {
                     setReservedBus={setReservedBus}
                 />
             }
-            case "waiting": {
+            case "waitingBus": {
                 return <WaitingBus
                     setReserveStep={setReserveStep}
                     reservedBus={reservedBus!}
+                    setBoardingVehId={setBoardingVehId}
+                    setDestinations={setDestinations}
+                />
+            }
+            case "arrival": {
+                return <ArrivalBus
+                    setReserveStep={setReserveStep}
+                    reservedBus={reservedBus!}
+                />
+            }
+            case "selectDestination": {
+                return <SelectDestination
+                    setReserveStep={setReserveStep}
+                    reservedBus={reservedBus!}
+                    destinations={destinations}
+                    setSelectedDestination={setSelectedDestination}
                 />
             }
             default: {
@@ -72,7 +94,7 @@ export default function ReserveBus() {
 
     /** 페이지 이동 애니메이션 */
     const getAnimationDirection = (): "left" | "right" => {
-        const stepIdx: ReserveBusStep[] = ["searchStation", "selectStation", "selectBus", "waiting", "arrival", "gettingOff"];
+        const stepIdx: ReserveBusStep[] = ["searchStation", "selectStation", "selectBus", "waitingBus", "arrival", "selectDestination"];
         const prevIdx = stepIdx.indexOf(reserveStep.prev);
         const currIdx = stepIdx.indexOf(reserveStep.curr);
         return currIdx >= prevIdx ? 'left' : 'right';

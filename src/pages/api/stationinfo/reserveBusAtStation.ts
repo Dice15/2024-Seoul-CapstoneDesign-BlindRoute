@@ -18,11 +18,13 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const requestParam: {
+                    stId: string;
                     arsId: string;
-                    busRouteId: string
+                    busRouteId: string;
+                    reservationType: 'boarding' | 'alighting';
                 } = request.body;
 
-                const reservedBusArrInfo = await axios.get<GetStationByUidItemApiResponse>(
+                await axios.get<GetStationByUidItemApiResponse>(
                     "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
                     {
                         params: {
@@ -35,10 +37,13 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     const busArrInfo = stationInfo.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === requestParam.busRouteId);
                     if (busArrInfo && busArrInfo.arrmsg1 !== "운행종료") {
                         try {
-                            const insertResult = await db.collection("boarding_reservations").insertOne({
+                            const collectionName = requestParam.reservationType === "boarding" ? "boarding_reservations" : "alighting_reservations";
+                            const insertResult = await db.collection(collectionName).insertOne({
                                 owner: session.user?.email,
+                                stId: requestParam.stId,
                                 arsId: requestParam.arsId,
-                                busRouteId: requestParam.busRouteId
+                                busRouteId: requestParam.busRouteId,
+                                reservationType: requestParam.reservationType
                             });
 
                             if (insertResult.acknowledged === undefined) {

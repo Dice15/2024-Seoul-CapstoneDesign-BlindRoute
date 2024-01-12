@@ -157,7 +157,7 @@ type ReserveBusResponse = {
  * 예약 결과 메시지와 예약 ID를 포함하는 객체를 반환합니다.
  * 요청이 실패하면 null과 "FAIL" 메시지를 반환합니다.
  */
-export async function reserveBus(arsId: string, busRouteId: string): Promise<{
+export async function reserveBus(stId: string, arsId: string, busRouteId: string, reservationType: 'boarding' | 'alighting'): Promise<{
     msg: string;
     reservationId: string | null;
 }> {
@@ -165,8 +165,10 @@ export async function reserveBus(arsId: string, busRouteId: string): Promise<{
         const response = await axios.post<ReserveBusResponse>(
             getApiUrl(`/api/stationinfo/reserveBusAtStation`),
             {
+                stId,
                 arsId,
-                busRouteId
+                busRouteId,
+                reservationType
             }
         );
 
@@ -281,10 +283,99 @@ export async function getReservedBusArrInfo(reservationId: string): Promise<{
 
 
 
+/*****************************************************************
+ * 예약된 버스의 도착지 정보를 가져오는 API 메서드입니다.
+ *****************************************************************/
+
+/** 예약된 버스 도착지 정보 응답 데이터 타입 */
+type GetDestinationByRouteResponse = {
+    msg: string;
+    itemList: IStation[];
+};
+
+/**
+ * 서버에서 예약된 버스의 도착지 정보를 가져옵니다.
+ * @param busRouteId 버스 노선 ID
+ * @param vehId 버스 차량 ID
+ * @returns {Promise<GetDestinationByRouteResponse>}
+ * 도착지 정보와 처리 결과 메시지를 포함하는 객체를 반환합니다.
+ * 요청이 실패하면 빈 배열과 "FAIL" 메시지를 반환합니다.
+ */
+export async function getDestinationByRoute(busRouteId: string, vehId: string): Promise<{
+    msg: string;
+    itemList: Station[];
+}> {
+    try {
+        const response = await axios.get<GetDestinationByRouteResponse>(
+            getApiUrl(`/api/businfo/getDestinationByRoute`),
+            {
+                params: { busRouteId, vehId }
+            }
+        );
+
+        const { msg, itemList } = response.data;
+        return {
+            msg: msg,
+            itemList: itemList.map((item) => Station.fromObject(item))
+        };
+    } catch (error) {
+        return {
+            msg: "버스 도착지 정보 요청 중 오류가 발생했습니다.",
+            itemList: []
+        };
+    }
+}
 
 
 
 
+/*****************************************************************
+ * 버스의 위치 정보를 가져오는 API 메서드입니다.
+ *****************************************************************/
+
+/** 버스 위치 정보 응답 데이터 타입 */
+type GetBusPosByVehIdResponse = {
+    msg: string;
+    item: {
+        stId: string;
+        stopFlag: string;
+    } | null;
+};
+
+/**
+ * 서버에서 버스의 위치 정보를 가져옵니다.
+ * @param vehId 버스 차량 ID
+ * @returns {Promise<GetBusPosByVehIdResponse>}
+ * 버스 위치 정보와 처리 결과 메시지를 포함하는 객체를 반환합니다.
+ * 요청이 실패하면 null과 "FAIL" 메시지를 반환합니다.
+ */
+export async function getBusPosByVehId(vehId: string): Promise<{
+    msg: string;
+    busPosInfo: {
+        stId: string;
+        stopFlag: string;
+    } | null;
+}> {
+    try {
+        const response = await axios.get<GetBusPosByVehIdResponse>(
+            getApiUrl(`/api/businfo/getBusPosByVehId`),
+            {
+                params: { vehId }
+            }
+        );
+
+        const { msg, item } = response.data;
+        return {
+            msg: msg,
+            busPosInfo: item
+        };
+    } catch (error) {
+        return {
+            msg: "버스 위치 정보 요청 중 오류가 발생했습니다.",
+            busPosInfo: null
+        };
+    }
+}
 
 
 
