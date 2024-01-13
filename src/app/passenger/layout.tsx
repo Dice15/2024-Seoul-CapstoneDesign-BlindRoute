@@ -9,7 +9,7 @@ export default function PassengerLayout({ children }: RootLayoutProps) {
     return (
         <div className={styles.wrapper}>
             <div className={styles.title}>
-                Blind Route
+                상단바 테스트
             </div>
             <div className={styles.contents}>
                 {children}
