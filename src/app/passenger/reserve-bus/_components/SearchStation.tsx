@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { ReserveBusStep } from "./ReserveBus";
@@ -30,6 +30,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
     // Refs
     const audioContainer = useRef<HTMLAudioElement>(null);
     const audioSource = useRef<HTMLSourceElement>(null);
+    const stationNameContainerRef = useRef<HTMLDivElement>(null);
 
 
     // States
@@ -123,6 +124,15 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
     });
 
 
+    /* Effect */
+    useEffect(() => {
+        // 컴포넌트가 마운트되면 StationNameContainer에 포커스 맞춤
+        if (stationNameContainerRef.current) {
+            stationNameContainerRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
@@ -131,7 +141,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
                 <source ref={audioSource} />
             </audio>
 
-            <StationNameContainer>
+            <StationNameContainer ref={stationNameContainerRef} tabIndex={0}>
                 <div></div>
                 <TextareaStationName placeholder="정류장 입력" maxLength={50} value={stationName} onChange={(e) => setStationName(e.target.value)} />
                 <ButtonVoiceRecognition onClick={() => {
