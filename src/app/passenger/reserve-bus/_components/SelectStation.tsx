@@ -2,7 +2,7 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
@@ -29,6 +29,7 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
     const stationInfoContainer = useRef<HTMLDivElement>(null);
     const stationListIndexRef = useRef<number>(0);
     const isSlidingRef = useRef(false);
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     /* State */
@@ -112,9 +113,18 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
     };
 
 
+    // Effect
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <StationInfoContainer ref={stationInfoContainer}>
                 <Swiper
@@ -147,6 +157,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

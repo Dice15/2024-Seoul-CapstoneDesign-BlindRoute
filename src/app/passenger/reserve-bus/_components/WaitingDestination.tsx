@@ -2,7 +2,7 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import styled from "styled-components";
 import { cancelReservation, getBusPosByVehId } from "@/core/api/blindrouteApi";
@@ -25,6 +25,10 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     const [isLoading, setIsLoading] = useState(false);
     const [desPosIdx, setDesPosIdx] = useState(-1);
     const [curPosIdx, setCurPosIdx] = useState(-1);
+
+
+    // Ref
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     // Handler
@@ -123,9 +127,17 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
 
 
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -144,6 +156,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

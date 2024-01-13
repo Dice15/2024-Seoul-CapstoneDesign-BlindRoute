@@ -2,7 +2,7 @@
 
 import { Bus } from "@/core/type/Bus";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { cancelReservation, getDestinationByRoute, getReservedBusArrInfo } from "@/core/api/blindrouteApi";
@@ -28,6 +28,10 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     // States
     const [isLoading, setIsLoading] = useState(false);
     const [busArrInfo, setBusArrInfo] = useState<{ arrmsg: string; vehId: string; } | null>(null);
+
+
+    // Ref
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     // Handler
@@ -127,9 +131,17 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
 
 
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -148,6 +160,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

@@ -10,7 +10,7 @@ import { useSwipeable } from "react-swipeable";
 import { useRouter } from "next/navigation";
 import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 interface ArrivalBusProps {
@@ -26,6 +26,10 @@ interface ArrivalBusProps {
 export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusProps) {
     // Const
     const router = useRouter();
+
+
+    // Ref
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     // States
@@ -96,10 +100,18 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
         setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
     }, [reservedBus]);
 
+    
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
 
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -118,6 +130,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

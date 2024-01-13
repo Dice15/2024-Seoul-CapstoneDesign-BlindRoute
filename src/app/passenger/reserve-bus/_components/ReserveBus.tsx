@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchStation from "./SearchStation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
@@ -97,6 +97,10 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
 
 /** ReserveBus 컴포넌트 */
 export default function ReserveBus() {
+    // Ref
+    const focusBlankRef = useRef<HTMLDivElement>(null);
+
+
     /* State */
     const [reserveStep, setReserveStep] = useState<{ prev: ReserveBusStep, curr: ReserveBusStep }>({ prev: "searchStation", curr: "searchStation" });
     const [stations, setStations] = useState<Station[]>([]);
@@ -183,9 +187,17 @@ export default function ReserveBus() {
     }, [reserveStep])
 
 
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper >
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <Title onClick={() => stepAnnouncement(reserveStep.curr, false)}>
                 {stepToTitle(reserveStep.curr)}
             </Title>
@@ -200,6 +212,10 @@ export default function ReserveBus() {
 const Wrapper = styled.div`
     height: 100%;
     width: 100%;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

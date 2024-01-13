@@ -31,6 +31,7 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
     const stationInfoContainer = useRef<HTMLDivElement>(null);
     const stationListIndexRef = useRef<number>(0);
     const isSlidingRef = useRef(false);
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     /* State */
@@ -115,9 +116,18 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
     };
 
 
+    // Effect
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <StationInfoContainer ref={stationInfoContainer}>
                 <Swiper
@@ -149,6 +159,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

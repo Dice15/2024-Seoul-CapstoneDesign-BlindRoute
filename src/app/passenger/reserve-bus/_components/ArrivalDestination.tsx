@@ -6,7 +6,7 @@ import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { Station } from "@/core/type/Station";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import styled from "styled-components";
 
@@ -19,6 +19,10 @@ interface ArrivalDestinationProps {
 export default function ArrivalDestination({ selectedDestination }: ArrivalDestinationProps) {
     // Const
     const router = useRouter();
+
+
+    // Ref
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     // States
@@ -72,10 +76,18 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
         setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
     }, [selectedDestination]);
 
+    
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
 
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -94,6 +106,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 

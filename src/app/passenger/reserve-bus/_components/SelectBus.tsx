@@ -2,7 +2,7 @@
 
 
 import { ReserveBusStep } from "./ReserveBus";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
@@ -30,6 +30,7 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     const busInfoContainer = useRef<HTMLDivElement>(null);
     const busListIndexRef = useRef<number>(0);
     const isSlidingRef = useRef(false);
+    const focusBlankRef = useRef<HTMLDivElement>(null);
 
 
     /* State */
@@ -119,9 +120,19 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     };
 
 
+    // Effect
+    useEffect(() => {
+        if (focusBlankRef.current) {
+            focusBlankRef.current.focus();
+        }
+    }, []);
+
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <BusInfoContainer ref={busInfoContainer}>
                 <Swiper
@@ -154,6 +165,10 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+
+const FocusBlank = styled.div`
 `;
 
 
