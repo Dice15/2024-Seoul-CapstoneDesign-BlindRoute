@@ -7,7 +7,7 @@ import ViewportHeightSetter from '@/core/modules/viewport-setter/ViewportHeightS
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Blind Route 테스트',
+  //title: 'Blind Route 테스트',
   description: '시각장애인을 위한 버스 탑승 보조 시스템 설계',
 }
 
