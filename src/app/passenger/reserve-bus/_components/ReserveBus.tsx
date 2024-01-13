@@ -87,11 +87,11 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
             }
             case "arrivalDestination": {
                 isPageInit && VibrationProvider.vibrate(5000);
-                SpeechOutputProvider.speak(`목적지에 도착했습니다.`);
+                SpeechOutputProvider.speak(`목적지에 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 홈 페이지로 이동합니다.`);
                 break;
             }
         }
-    }, 400);
+    }, 750);
 }
 
 
@@ -185,11 +185,8 @@ export default function ReserveBus() {
 
     // Render
     return (
-        <Wrapper>
-            <Title onClick={() => stepAnnouncement(reserveStep.curr, false)}>
-                {stepToTitle(reserveStep.curr)}
-            </Title>
-            <Contents>
+        <Wrapper onClick={() => stepAnnouncement(reserveStep.curr, false)}>
+            <Contents >
                 {getControllerForm()}
             </Contents>
         </Wrapper>
@@ -217,6 +214,6 @@ const Title = styled.div`
 
 
 const Contents = styled.div`
-    height: calc(100% - 65px);
+    height: calc(100% - 0px);
     width: 100%;
 `;

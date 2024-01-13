@@ -69,7 +69,6 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
     // Effects
     useEffect(() => {
         VibrationProvider.vibrate(5000);
-        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
         setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
     }, [selectedDestination]);
 

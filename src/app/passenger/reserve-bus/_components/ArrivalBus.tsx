@@ -93,7 +93,6 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     // Effects
     useEffect(() => {
         VibrationProvider.vibrate(5000);
-        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
         setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
     }, [reservedBus]);
 
