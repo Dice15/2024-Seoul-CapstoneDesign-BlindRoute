@@ -26,7 +26,6 @@ interface WaitingBusProps {
 
 export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVehId, setDestinations }: WaitingBusProps) {
     // States
-    const [waitingMsg, setWaitingMsg] = useState("대기중");
     const [isLoading, setIsLoading] = useState(false);
     const [busArrInfo, setBusArrInfo] = useState<{ arrmsg: string; vehId: string; } | null>(null);
 
@@ -98,24 +97,6 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     };
 
 
-    // Effects
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setWaitingMsg(prevMessage => {
-                if (prevMessage === "대기중") return "대기중.";
-                if (prevMessage === "대기중.") return "대기중..";
-                if (prevMessage === "대기중..") return "대기중...";
-                return "대기중";
-            });
-        }, 1000);
-
-        return () => {
-            clearInterval(intervalId);
-        }
-    }, [setWaitingMsg]);
-
-
-
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
         const intervalId = setInterval(async () => {
@@ -154,7 +135,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                 onClick={handleBusInfoClick}
             >
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
-                <WiatingMessage>{waitingMsg}</WiatingMessage>
+                <WiatingMessage>{"대기중"}</WiatingMessage>
             </ReservationContainer>
         </Wrapper >
     );

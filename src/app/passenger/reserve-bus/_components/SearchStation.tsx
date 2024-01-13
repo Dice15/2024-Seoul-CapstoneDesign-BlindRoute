@@ -101,7 +101,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
             SpeechInputProvider.stopRecognition();
         } else {
             setIsRecognizing(true);
-            setTimeout(() => { handleStationNameSTT(); }, 1000);
+            handleStationNameSTT();
         }
     };
 
