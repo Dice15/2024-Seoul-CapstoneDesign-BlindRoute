@@ -138,7 +138,10 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
                 >
                     {stations.map((station, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
-                            <StationInfo onClick={handleStationInfoClick}>
+                            <StationInfo
+                                onClick={handleStationInfoClick}
+                                tabIndex={1}
+                            >
                                 <StationName>{station.stNm}</StationName>
                                 <StationDirection>{`${station.stDir} 방면`}</StationDirection>
                             </StationInfo>

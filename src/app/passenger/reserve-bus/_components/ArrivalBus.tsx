@@ -8,7 +8,6 @@ import { Bus } from "@/core/type/Bus";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { useSwipeable } from "react-swipeable";
 import { useRouter } from "next/navigation";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { useEffect, useRef, useState } from "react";
 
@@ -81,17 +80,10 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("arrivalInfo");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            handleGoNextStep();
-        },
-    });
+    const handleBusInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("arrivalInfo");
+    }
 
 
     // Effects
@@ -100,7 +92,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
         setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
     }, [reservedBus]);
 
-    
+
     useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
@@ -115,6 +107,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>

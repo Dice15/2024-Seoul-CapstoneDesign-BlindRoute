@@ -1,7 +1,6 @@
 "use client"
 
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { Station } from "@/core/type/Station";
@@ -76,7 +75,7 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
         setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
     }, [selectedDestination]);
 
-    
+
     useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
@@ -91,6 +90,7 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
                 <ArrivalMessage>{"정류장에 도착했습니다!"}</ArrivalMessage>

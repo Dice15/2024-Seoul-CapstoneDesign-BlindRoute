@@ -128,7 +128,6 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     }, []);
 
 
-
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
@@ -146,7 +145,10 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
                 >
                     {buses.map((bus, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
-                            <BusInfo onClick={handleBusInfoClick}>
+                            <BusInfo
+                                onClick={handleBusInfoClick}
+                                tabIndex={1}
+                            >
                                 <BusName>{bus.busRouteAbrv || bus.busRouteNm}</BusName>
                                 <BusAdirection>{`${bus.adirection} 방면`}</BusAdirection>
                             </BusInfo>

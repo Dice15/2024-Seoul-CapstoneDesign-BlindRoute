@@ -90,6 +90,22 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     };
 
 
+    /** 탑승한 차량의 위치를 추적하여 목적지에 도착했는지 확인 */
+    const checkBusPosition = async () => {
+        const newBusPos = (await getBusPosByVehId(boardingVehId)).currStation;
+        if (newBusPos !== null) {
+            const newPosIdx = destinations.findIndex((station) => station.seq === newBusPos.seq);
+
+            if (newPosIdx === desPosIdx) {
+                setIsLoading(true);
+                handleArrivedDestination();
+            } else {
+                setCurPosIdx(newPosIdx);
+            }
+        }
+    };
+
+
     // Effects
     /** 대기중 메시지 이벤트 */
     useEffect(() => {
@@ -105,25 +121,9 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
-        const intervalId = setInterval(async () => {
-            const newBusPos = (await getBusPosByVehId(boardingVehId)).currStation;
-            if (newBusPos !== null) {
-                const newPosIdx = destinations.findIndex((station) => station.seq === newBusPos.seq);
-
-                // 버스의 다음 정류장이 복적지의 다음 정류장이면 도착했다고 간주
-                if (newPosIdx === desPosIdx) {
-                    SpeechOutputProvider.speak("버스가 도착했습니다");
-                    setIsLoading(true);
-                    handleArrivedDestination();
-                } else {
-                    setCurPosIdx(newPosIdx);
-                }
-            }
-        }, 10000);
-
-        return () => {
-            clearInterval(intervalId);
-        }
+        checkBusPosition();
+        const intervalId = setInterval(checkBusPosition, 10000);
+        return () => { clearInterval(intervalId); }
     }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
 
 
@@ -141,6 +141,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
                 <WiatingMessage>{"대기중"}</WiatingMessage>

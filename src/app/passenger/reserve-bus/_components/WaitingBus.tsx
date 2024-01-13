@@ -84,6 +84,29 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     }
 
 
+    /** 버스 도착 확인 */
+    const handleCheckBusArrival = async () => {
+        const newArrInfo = (await getReservedBusArrInfo(reservedBus.reservationId)).busArrInfo;
+        if (newArrInfo !== null) {
+            if (busArrInfo !== null) {
+                if (newArrInfo.vehId !== busArrInfo.vehId) {
+                    setIsLoading(true);
+                    handleArrivedBus();
+                } else {
+                    setBoardingVehId(newArrInfo.vehId);
+                    setBusArrInfo(newArrInfo);
+                }
+            } else {
+                setBusArrInfo(newArrInfo);
+            }
+        } else {
+            if (busArrInfo !== null) {
+                setIsLoading(true);
+                handleArrivedBus();
+            }
+        }
+    };
+
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
         onSwipedRight: () => {
@@ -103,31 +126,9 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
-        const intervalId = setInterval(async () => {
-            const newArrInfo = (await getReservedBusArrInfo(reservedBus.reservationId)).busArrInfo;
-            if (newArrInfo !== null) {
-                if (busArrInfo !== null) {
-                    if (newArrInfo.vehId !== busArrInfo.vehId) {
-                        setIsLoading(true);
-                        handleArrivedBus();
-                    } else {
-                        setBoardingVehId(newArrInfo.vehId);
-                        setBusArrInfo(newArrInfo);
-                    }
-                } else {
-                    setBusArrInfo(newArrInfo);
-                }
-            } else {
-                if (busArrInfo !== null) {
-                    setIsLoading(true);
-                    handleArrivedBus();
-                }
-            }
-        }, 10000);
-
-        return () => {
-            clearInterval(intervalId);
-        }
+        handleCheckBusArrival();
+        const intervalId = setInterval(handleCheckBusArrival, 10000);
+        return () => { clearInterval(intervalId); }
     }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
 
 
@@ -145,6 +146,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <WiatingMessage>{"대기중"}</WiatingMessage>
