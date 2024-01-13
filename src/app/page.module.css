@@ -8,11 +8,11 @@
 }
 
 .btnOps {
-    height: calc(calc(70vw * 0.125) - 4px);
-    width: calc(70vw - 4px);
+    height: calc(calc(70vw * 0.3) - 4px);
+    width: calc(85vw - 4px);
     border: 2px solid var(--main-border-color);
-    margin-bottom: calc(70vw * 0.125 * 0.5);
-    font-size: 3.5vw;
+    margin-bottom: calc(70vw * 0.3 * 0.5);
+    font-size: 6.5vw;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;

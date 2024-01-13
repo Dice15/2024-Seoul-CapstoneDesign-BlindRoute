@@ -65,12 +65,12 @@ export class SpeechOutputProvider {
     /**
      * clearSpeak 메서드는 현재 음성을 중지하고 모든 대기 중인 음성을 제거합니다.
      */
-    public static stopSpeak(): void {
-        const synth = window.speechSynthesis;
-
+    public static async stopSpeak(): Promise<void> {
+        this.speak(" ");
+        /*const synth = window.speechSynthesis;
         if (synth.speaking) {
             synth.cancel();
-        }
+        }*/
     }
 
 
@@ -94,26 +94,6 @@ export class SpeechOutputProvider {
             if (synth.speaking) {
                 synth.cancel();
             }
-
-            return new Promise<void>((resolve) => {
-                utterThis.onend = () => resolve();
-                synth.speak(utterThis);
-            });
-        }
-    }
-
-
-
-
-    public static async pushSpeak(textToRead: string): Promise<void> {
-        const synth = window.speechSynthesis;
-
-        if (textToRead !== "") {
-            const voices = await this.getVoices();  // 음성 목록을 가져옴
-            const utterThis = new SpeechSynthesisUtterance(textToRead);
-            utterThis.voice = voices.find(voice => voice.lang === 'ko-KR') || voices[0];
-            utterThis.pitch = 1;
-            utterThis.rate = 1;
 
             return new Promise<void>((resolve) => {
                 utterThis.onend = () => resolve();

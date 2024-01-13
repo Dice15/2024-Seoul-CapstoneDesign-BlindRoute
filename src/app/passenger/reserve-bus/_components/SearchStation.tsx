@@ -95,14 +95,15 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
 
 
     /** 음성 인식 시작 및 종료 */
-    const handleVoiceRecognition = () => {
-        if (isRecognizing) {
-            setIsRecognizing(false);
-            SpeechInputProvider.stopRecognition();
-        } else {
-            setIsRecognizing(true);
-            handleStationNameSTT();
-        }
+    const handleVoiceRecognition = (recognizingType: boolean) => {
+        setTimeout(() => {
+            SpeechOutputProvider.stopSpeak();
+            if (recognizingType) {
+                SpeechInputProvider.stopRecognition();
+            } else {
+                handleStationNameSTT();
+            }
+        }, 200);
     };
 
 
@@ -133,7 +134,10 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
             <StationNameContainer>
                 <div></div>
                 <TextareaStationName placeholder="정류장 입력" maxLength={50} value={stationName} onChange={(e) => setStationName(e.target.value)} />
-                <ButtonVoiceRecognition onClick={() => handleVoiceRecognition()}>
+                <ButtonVoiceRecognition onClick={() => {
+                    handleVoiceRecognition(isRecognizing);
+                    setIsRecognizing(!isRecognizing);
+                }}>
                     {isRecognizing ? "음성인식 종료" : "음성인식 시작"}
                 </ButtonVoiceRecognition>
             </StationNameContainer>
@@ -168,7 +172,7 @@ const StationNameContainer = styled.div`
 
 const TextareaStationName = styled.textarea`
     width: 95%;
-    height: 25vw;
+    height: 30vw;
     border: 0;
     background-color: var(--button-color);
     color: var(--button-text-color);
@@ -183,8 +187,8 @@ const TextareaStationName = styled.textarea`
 `;
 
 const ButtonVoiceRecognition = styled.button`
-    width: 90%;
-    height: 10vw;
+    width: 92%;
+    height: 15vw;
     font-size: 5vw;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
