@@ -119,7 +119,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
                     setCurPosIdx(newPosIdx);
                 }
             }
-        }, 2000);
+        }, 10000);
 
         return () => {
             clearInterval(intervalId);

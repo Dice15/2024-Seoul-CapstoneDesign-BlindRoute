@@ -123,7 +123,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                     handleArrivedBus();
                 }
             }
-        }, 2000);
+        }, 10000);
 
         return () => {
             clearInterval(intervalId);

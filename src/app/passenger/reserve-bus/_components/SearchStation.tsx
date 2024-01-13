@@ -141,16 +141,18 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
                 <source ref={audioSource} />
             </audio>
 
-            <StationNameContainer >
-                <div></div>
+            <StationNameContainer tabIndex={1} >
                 <TextareaStationName placeholder="정류장 입력" maxLength={50} value={stationName} onChange={(e) => setStationName(e.target.value)} />
-                <ButtonVoiceRecognition onClick={() => {
+            </StationNameContainer>
+            <ButtonVoiceRecognition
+                onClick={() => {
                     handleVoiceRecognition(isRecognizing);
                     setIsRecognizing(!isRecognizing);
-                }}>
-                    {isRecognizing ? "음성인식 종료" : "음성인식 시작"}
-                </ButtonVoiceRecognition>
-            </StationNameContainer>
+                }}
+                tabIndex={2}
+            >
+                {isRecognizing ? "음성인식 종료" : "음성인식 시작"}
+            </ButtonVoiceRecognition>
         </Wrapper>
     );
 }
@@ -160,6 +162,7 @@ const Wrapper = styled.div`
     height: 100%;
     width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 `;
@@ -170,15 +173,16 @@ const FocusBlank = styled.div`
 
 
 const StationNameContainer = styled.div`
-    height: 90%;
+    height: calc(90% - 15vw - 2.5vw - 1px - 7.5vw);
     width: 85%;
+    margin-bottom: 7.5vw;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);
     color: var(--main-font-color);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; 
+    justify-content: center; 
     align-items: center;
     padding: 2vw 0;
 `;
@@ -201,13 +205,13 @@ const TextareaStationName = styled.textarea`
 `;
 
 const ButtonVoiceRecognition = styled.button`
-    width: 92%;
+    width: 85%;
     height: 15vw;
     font-size: 5vw;
+    margin-bottom: 2%.5;
     border: 1px solid var(--main-border-color);
     border-radius: 8px;
     background-color: var(--main-color);
     color: var(--main-font-color);
     user-select: none;
-    margin-bottom: 2vw;
 `;
