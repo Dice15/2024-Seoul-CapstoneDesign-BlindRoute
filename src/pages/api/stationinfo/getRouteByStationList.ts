@@ -16,8 +16,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const requestParam = request.query;
-                const responseData = await axios.get<GetRouteByStationApiResponse>(
-                    "http://ws.bus.go.kr/api/rest/stationinfo/getRouteByStation",
+                const responseData = await axios.get<GetStationByUidItemApiResponse>(
+                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
                     {
                         params: {
                             serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
@@ -25,14 +25,32 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             resultType: "json"
                         }
                     }
-                );
-                const { comMsgHeader, msgHeader, msgBody } = responseData.data;
+                ).then((getStationByUidItemResponse) => {
+                    if (getStationByUidItemResponse.data.comMsgHeader.errMsg) {
+                        response.status(500).json({ msg: getStationByUidItemResponse.data.comMsgHeader.errMsg, itemList: [] });
+                    }
 
-                if (comMsgHeader.errMsg) {
-                    response.status(500).json({ msg: msgHeader.headerMsg, itemList: [] });
-                } else {
-                    response.status(200).json({ msg: msgHeader.headerMsg, itemList: msgBody.itemList });
-                }
+                    return getStationByUidItemResponse.data.msgBody.itemList.map((item) => ({
+                        busRouteId: item.busRouteId,
+                        busRouteNm: item.rtNm,
+                        busRouteAbrv: item.busRouteAbrv,
+                        length: "",
+                        busRouteType: item.routeType,
+                        stBegin: "",
+                        stEnd: "",
+                        term: item.term,
+                        nextBus: item.nextBus,
+                        firstBusTm: "",
+                        lastBusTm: "",
+                        firstBusTmLow: "",
+                        lastBusTmLow: "",
+                        adirection: item.adirection,
+                    }))
+                });
+
+
+                response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: responseData });
+
             } catch (error) {
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", itemList: [] });
             }
@@ -43,15 +61,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
             break;
         }
     }
-}
-
-
-interface GetRouteByStationApiResponse {
-    comMsgHeader: ComMsgHeader;
-    msgHeader: MsgHeader;
-    msgBody: {
-        itemList: BusRouteInfo[];
-    };
 }
 
 
@@ -72,18 +81,67 @@ interface MsgHeader {
 }
 
 
-interface BusRouteInfo {
+interface GetStationByUidItemApiResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: StationByUidItem[];
+    };
+}
+
+
+interface StationByUidItem {
+    stId: string;
+    stNm: string;
+    arsId: string;
     busRouteId: string;
-    busRouteNm: string;
+    rtNm: string;
     busRouteAbrv: string;
-    length: string;
-    busRouteType: string;
-    stBegin: string;
-    stEnd: string;
+    sectNm: string;
+    gpsX: string;
+    gpsY: string;
+    posX: string;
+    posY: string;
+    stationTp: string;
+    firstTm: string;
+    lastTm: string;
     term: string;
+    routeType: string;
     nextBus: string;
-    firstBusTm: string;
-    lastBusTm: string;
-    firstBusTmLow: string;
-    lastBusTmLow: string;
+    staOrd: string;
+    vehId1: string;
+    plainNo1: string | null;
+    sectOrd1: string;
+    stationNm1: string;
+    traTime1: string;
+    traSpd1: string;
+    isArrive1: string;
+    repTm1: string | null;
+    isLast1: string;
+    busType1: string;
+    vehId2: string;
+    plainNo2: string | null;
+    sectOrd2: string;
+    stationNm2: string;
+    traTime2: string;
+    traSpd2: string;
+    isArrive2: string;
+    repTm2: string | null;
+    isLast2: string;
+    busType2: string;
+    adirection: string;
+    arrmsg1: string;
+    arrmsg2: string;
+    arrmsgSec1: string;
+    arrmsgSec2: string;
+    nxtStn: string;
+    rerdieDiv1: string;
+    rerdieDiv2: string;
+    rerideNum1: string;
+    rerideNum2: string;
+    isFullFlag1: string;
+    isFullFlag2: string;
+    deTourAt: string;
+    congestion1: string;
+    congestion2: string;
 }

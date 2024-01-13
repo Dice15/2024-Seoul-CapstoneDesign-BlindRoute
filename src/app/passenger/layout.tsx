@@ -8,9 +8,6 @@ export default function PassengerLayout({ children }: RootLayoutProps) {
     // Render
     return (
         <div className={styles.wrapper}>
-            <div className={styles.title}>
-                상단바 테스트
-            </div>
             <div className={styles.contents}>
                 {children}
             </div>

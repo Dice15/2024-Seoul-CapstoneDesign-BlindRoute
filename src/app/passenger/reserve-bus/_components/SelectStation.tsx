@@ -2,14 +2,13 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import styled from "styled-components";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { getBuses } from "@/core/api/blindrouteApi";
 import { Bus } from "@/core/type/Bus";
 import { useSwipeable } from "react-swipeable";
@@ -38,17 +37,11 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide" | "currStation" | "noBusesFound") => {
-        //return;
+    const handleAnnouncement = (type: "currStation" | "noBusesFound") => {
         switch (type) {
-            case "guide": {
-                const station = stations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`정류장을 선택하세요, "${station.stNm}", 화면을 두번 터치하면 정류장의 버스를 검색합니다.`);
-                break;
-            }
             case "currStation": {
                 const station = stations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`"${station.stNm}", 화면을 두번 터치하면 정류장의 버스를 검색합니다.`);
+                SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
                 break;
             }
             case "noBusesFound": {
@@ -112,25 +105,11 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
     });
 
 
-
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleStationInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("currStation");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            setTimeout(() => { handleGetBuses(); }, 500);
-        }
-    });
-
-
-    // Effects
-    useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [stations]);
+    const handleStationInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("currStation");
+    };
 
 
     // Render
@@ -143,13 +122,15 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
                     spaceBetween={50}
                     onSlideChange={handleSlideChange}
                     speed={300}
+                    loop={true}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >
                     {stations.map((station, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
                             <StationInfo onClick={handleStationInfoClick}>
-                                <StationInfoName>{station.stNm}</StationInfoName>
+                                <StationName>{station.stNm}</StationName>
+                                <StationDirection>{`${station.stDir} 방면`}</StationDirection>
                             </StationInfo>
                         </SwiperSlide>
                     ))}
@@ -188,11 +169,19 @@ const StationInfo = styled.div`
     align-items: center;
 `;
 
-
-const StationInfoName = styled.h1` 
-    width: 95%;
+const StationName = styled.h1` 
     text-align: center;
-    font-size: 7vw;
+    margin-bottom: 8vw;
+    font-size: 6.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
+
+const StationDirection = styled.h3`
+    text-align: center;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

@@ -12,6 +12,7 @@ export default interface IBus {
     lastBusTm: string;
     firstBusTmLow: string;
     lastBusTmLow: string;
+    adirection: string;
 }
 
 
@@ -29,8 +30,9 @@ export class Bus implements IBus {
     private _lastBusTm: string;
     private _firstBusTmLow: string;
     private _lastBusTmLow: string;
+    private _adirection: string;
 
-    constructor(busRouteId: string, busRouteNm: string, busRouteAbrv: string, length: string, busRouteType: string, stBegin: string, stEnd: string, term: string, nextBus: string, firstBusTm: string, lastBusTm: string, firstBusTmLow: string, lastBusTmLow: string) {
+    constructor(busRouteId: string, busRouteNm: string, busRouteAbrv: string, length: string, busRouteType: string, stBegin: string, stEnd: string, term: string, nextBus: string, firstBusTm: string, lastBusTm: string, firstBusTmLow: string, lastBusTmLow: string, adirection: string) {
         this._busRouteId = busRouteId;
         this._busRouteNm = busRouteNm;
         this._busRouteAbrv = busRouteAbrv;
@@ -44,6 +46,7 @@ export class Bus implements IBus {
         this._lastBusTm = lastBusTm;
         this._firstBusTmLow = firstBusTmLow;
         this._lastBusTmLow = lastBusTmLow;
+        this._adirection = adirection;
     }
 
     get busRouteId(): string {
@@ -150,6 +153,14 @@ export class Bus implements IBus {
         this._lastBusTmLow = value;
     }
 
+    get adirection(): string {
+        return this._adirection;
+    }
+
+    set adirection(value: string) {
+        this._adirection = value;
+    }
+
     /**
      * BusRoute 인스턴스를 IBusRouteInfo 객체로 변환합니다.
      * @returns {IBus} IBusRouteInfo 객체
@@ -168,7 +179,8 @@ export class Bus implements IBus {
             firstBusTm: this._firstBusTm,
             lastBusTm: this._lastBusTm,
             firstBusTmLow: this._firstBusTmLow,
-            lastBusTmLow: this._lastBusTmLow
+            lastBusTmLow: this._lastBusTmLow,
+            adirection: this._adirection
         };
     }
 
@@ -178,6 +190,6 @@ export class Bus implements IBus {
      * @returns {Bus} BusRoute 클래스의 인스턴스
      */
     static fromObject(obj: IBus): Bus {
-        return new Bus(obj.busRouteId, obj.busRouteNm, obj.busRouteAbrv, obj.length, obj.busRouteType, obj.stBegin, obj.stEnd, obj.term, obj.nextBus, obj.firstBusTm, obj.lastBusTm, obj.firstBusTmLow, obj.lastBusTmLow);
+        return new Bus(obj.busRouteId, obj.busRouteNm, obj.busRouteAbrv, obj.length, obj.busRouteType, obj.stBegin, obj.stEnd, obj.term, obj.nextBus, obj.firstBusTm, obj.lastBusTm, obj.firstBusTmLow, obj.lastBusTmLow, obj.adirection);
     }
 }

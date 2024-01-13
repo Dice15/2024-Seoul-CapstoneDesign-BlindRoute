@@ -34,11 +34,11 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide") => {
+    const handleAnnouncement = (type: "arrivalInfo") => {
         //return;
         switch (type) {
-            case "guide": {
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}" 버스가 도착했습니다! 화면을 두번 터치하면 승차 완료 처리가 됩니다.`);
+            case "arrivalInfo": {
+                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}" 버스가 도착했습니다!`);
                 break;
             }
         }
@@ -56,7 +56,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     const handleGoNextStep = () => {
         setIsLoading(false);
         setReserveStep({
-            prev: "arrival",
+            prev: "arrivalBus",
             curr: "selectDestination"
         });
     }
@@ -80,7 +80,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     const handleBusInfoClick = useTouchEvents({
         onSingleTouch: () => {
             VibrationProvider.vibrate(1000);
-            handleAnnouncement("guide");
+            handleAnnouncement("arrivalInfo");
         },
         onDoubleTouch: () => {
             VibrationProvider.repeatVibrate(500, 200, 2);
@@ -93,7 +93,8 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
     // Effects
     useEffect(() => {
         VibrationProvider.vibrate(5000);
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
+        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
+        setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
     }, [reservedBus]);
 
 
@@ -104,7 +105,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
             <ReservationContainer
                 onClick={handleBusInfoClick}
             >
-                <ReservationBusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</ReservationBusName>
+                <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>
             </ReservationContainer>
         </Wrapper >
@@ -135,15 +136,19 @@ const ReservationContainer = styled.div`
 `;
 
 
-const ReservationBusName = styled.h1` 
-    font-size: 7vw;
+
+const BusName = styled.h1` 
+    text-align: center;
+    margin-bottom: 4vw;
+    font-size: 6.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
 `;
 
+
 const ArrivalMessage = styled.h3` 
-    font-size: 5vw;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

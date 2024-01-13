@@ -102,6 +102,25 @@ export class SpeechOutputProvider {
         }
     }
 
+
+
+
+    public static async pushSpeak(textToRead: string): Promise<void> {
+        const synth = window.speechSynthesis;
+
+        if (textToRead !== "") {
+            const voices = await this.getVoices();  // 음성 목록을 가져옴
+            const utterThis = new SpeechSynthesisUtterance(textToRead);
+            utterThis.voice = voices.find(voice => voice.lang === 'ko-KR') || voices[0];
+            utterThis.pitch = 1;
+            utterThis.rate = 1;
+
+            return new Promise<void>((resolve) => {
+                utterThis.onend = () => resolve();
+                synth.speak(utterThis);
+            });
+        }
+    }
 }
 
 

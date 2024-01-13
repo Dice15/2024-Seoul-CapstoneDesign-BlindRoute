@@ -2,14 +2,13 @@
 
 
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import styled from "styled-components";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { Bus } from "@/core/type/Bus";
 import { Station } from "@/core/type/Station";
 import { reserveBus } from "@/core/api/blindrouteApi";
@@ -39,17 +38,12 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide" | "currBus" | "failedReservation" | "noVehicleFound") => {
+    const handleAnnouncement = (type: "currBus" | "failedReservation" | "noVehicleFound") => {
         //return;
         switch (type) {
-            case "guide": {
-                const bus = buses[busListIndexRef.current];
-                SpeechOutputProvider.speak(`버스를 선택하세요. "${bus.busRouteAbrv || bus.busRouteNm}번", 화면을 두번 터치하면 버스를 예약합니다.`);
-                break;
-            }
             case "currBus": {
                 const bus = buses[busListIndexRef.current];
-                SpeechOutputProvider.speak(`"${bus.busRouteAbrv || bus.busRouteNm}번", 화면을 두번 터치하면 버스를 예약합니다.`);
+                SpeechOutputProvider.speak(`"${bus.busRouteAbrv || bus.busRouteNm}번", ${bus.adirection} 방면`);
                 break;
             }
             case "failedReservation": {
@@ -119,24 +113,10 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
 
 
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("currBus");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            setTimeout(() => { handleReserveBus(); }, 500);
-
-        }
-    });
-
-
-    // Effects
-    useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [buses]);
+    const handleBusInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("currBus");
+    };
 
 
     // Render
@@ -156,7 +136,8 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
                     {buses.map((bus, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
                             <BusInfo onClick={handleBusInfoClick}>
-                                <BusInfoName>{bus.busRouteAbrv || bus.busRouteNm}</BusInfoName>
+                                <BusName>{bus.busRouteAbrv || bus.busRouteNm}</BusName>
+                                <BusAdirection>{`${bus.adirection} 방면`}</BusAdirection>
                             </BusInfo>
                         </SwiperSlide>
                     ))}
@@ -196,10 +177,18 @@ const BusInfo = styled.div`
 `;
 
 
-const BusInfoName = styled.h1` 
-    width: 95%;
+const BusName = styled.h1` 
     text-align: center;
-    font-size: 7vw;
+    margin-bottom: 4vw;
+    font-size: 6.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
+const BusAdirection = styled.h3`
+    text-align: center;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

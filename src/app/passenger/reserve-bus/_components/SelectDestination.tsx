@@ -39,18 +39,12 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide" | "currStation" | "failedReservation") => {
+    const handleAnnouncement = (type: "currStation" | "failedReservation") => {
         //return;
         switch (type) {
-            case "guide": {
-                console.log(stationListIndexRef.current, destinations)
-                const station = destinations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`하차할 도착지를 선택하세요, "${station.stNm}", 화면을 두번 터치하면 하차 예약이 등록됩니다.`);
-                break;
-            }
             case "currStation": {
                 const station = destinations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`"${station.stNm}", 화면을 두번 터치하면 하차 예약이 등록됩니다.`);
+                SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
                 break;
             }
             case "failedReservation": {
@@ -66,7 +60,7 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
         setIsLoading(false);
         setReserveStep({
             prev: "selectDestination",
-            curr: "arrival"
+            curr: "arrivalBus"
         });
     }
 
@@ -115,23 +109,10 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
 
 
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleStationInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("currStation");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            setTimeout(() => { reserveDestination(); }, 500);
-        }
-    });
-
-
-    // Effects
-    useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [destinations]);
+    const handleStationInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("currStation");
+    };
 
 
     // Render
@@ -150,7 +131,8 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
                     {destinations.map((station, index) => (
                         <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
                             <StationInfo onClick={handleStationInfoClick}>
-                                <StationInfoName>{station.stNm}</StationInfoName>
+                                <StationName>{station.stNm}</StationName>
+                                <StationDirection>{`${station.stDir} 방면`}</StationDirection>
                             </StationInfo>
                         </SwiperSlide>
                     ))}
@@ -190,10 +172,19 @@ const StationInfo = styled.div`
 `;
 
 
-const StationInfoName = styled.h1` 
-    width: 95%;
+const StationName = styled.h1` 
     text-align: center;
-    font-size: 7vw;
+    margin-bottom: 4vw;
+    font-size: 6.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
+
+const StationDirection = styled.h3`
+    text-align: center;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

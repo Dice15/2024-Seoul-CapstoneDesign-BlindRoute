@@ -3,7 +3,6 @@
 import { Bus } from "@/core/type/Bus";
 import { ReserveBusStep } from "./ReserveBus";
 import { useEffect, useState } from "react";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { cancelReservation, getDestinationByRoute, getReservedBusArrInfo } from "@/core/api/blindrouteApi";
@@ -34,10 +33,9 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide") => {
-        //return;
+    const handleAnnouncement = (type: "arrivalInfo") => {
         switch (type) {
-            case "guide": {
+            case "arrivalInfo": {
                 const extractTimeInfo = (arrmsg: string) => {
                     const timePattern = /\d+분\d+초후|곧 도착/; // '1분56초후' 또는 '곧 도착'을 찾는 정규 표현식
                     const match = arrmsg.match(timePattern);
@@ -46,7 +44,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
                 const currInfo = busArrInfo ? extractTimeInfo(busArrInfo.arrmsg) : "";
                 const arrMsg = currInfo === "" ? "" : `${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다.`;
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}", 버스를 대기중입니다. ${arrMsg}. 화면을 두번 터치를 하면 예약을 취소합니다`);
+                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv}",  "${reservedBus.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
                 break;
             }
         }
@@ -76,7 +74,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                 }
                 setReserveStep({
                     prev: "waitingBus",
-                    curr: "arrival"
+                    curr: "arrivalBus"
                 });
             });
         });
@@ -94,26 +92,13 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("guide");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            handleCancelReservation();
-        },
-    });
+    const handleBusInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("arrivalInfo");
+    };
 
 
     // Effects
-    /** 대기중 메시지 이벤트 */
-    useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
-    }, [reservedBus]);
-
-
     useEffect(() => {
         const intervalId = setInterval(() => {
             setWaitingMsg(prevMessage => {
@@ -168,7 +153,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
             <ReservationContainer
                 onClick={handleBusInfoClick}
             >
-                <ReservationBusName>{reservedBus.bus.busRouteAbrv}</ReservationBusName>
+                <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <WiatingMessage>{waitingMsg}</WiatingMessage>
             </ReservationContainer>
         </Wrapper >
@@ -199,16 +184,19 @@ const ReservationContainer = styled.div`
 `;
 
 
-const ReservationBusName = styled.h1` 
+const BusName = styled.h1` 
     text-align: center;
-    font-size: 7vw;
+    margin-bottom: 4vw;
+    font-size: 6.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
 `;
 
-const WiatingMessage = styled.h3` 
-    font-size: 5vw;
+
+const WiatingMessage = styled.h3`
+    text-align: center;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

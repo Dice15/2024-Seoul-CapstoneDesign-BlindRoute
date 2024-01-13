@@ -30,16 +30,16 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide") => {
+    const handleAnnouncement = (type: "arrivalInfo") => {
         //return;
         switch (type) {
-            case "guide": {
+            case "arrivalInfo": {
                 const idxGap = desPosIdx - curPosIdx;
                 const arrMsg = (desPosIdx < 0 || curPosIdx < 0) ? ""
                     : idxGap < 0 ? "정류장에 도착했습니다."
                         : idxGap === 0 ? "정류장에 도착합니다!"
                             : `${idxGap}개의 정거장이 남았습니다`;
-                SpeechOutputProvider.speak(`"${selectedDestination.stNm}", 에 하차 대기중입니다. ${arrMsg}`);
+                SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
                 break;
             }
         }
@@ -81,23 +81,16 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("guide");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            handleCancelReservation();
-        },
-    });
+    const handleBusInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("arrivalInfo");
+    };
 
 
     // Effects
     /** 대기중 메시지 이벤트 */
     useEffect(() => {
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
+        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
     }, [selectedDestination]);
 
 
@@ -105,8 +98,6 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     useEffect(() => {
         setDesPosIdx(destinations.findIndex((station) => station.seq === selectedDestination.seq));
     }, [setDesPosIdx, destinations, selectedDestination]);
-
-
 
 
     useEffect(() => {
@@ -189,14 +180,15 @@ const ReservationContainer = styled.div`
 
 const ReservationDestinationName = styled.h1`
     text-align: center;
-    font-size: 7vw;
+    margin-bottom: 4vw;
+    font-size: 6.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
 `;
 
 const WiatingMessage = styled.h3`
-    font-size: 5vw;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

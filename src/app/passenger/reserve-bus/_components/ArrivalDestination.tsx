@@ -27,11 +27,11 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "guide") => {
+    const handleAnnouncement = (type: "arrivalInfo") => {
         //return;
         switch (type) {
-            case "guide": {
-                SpeechOutputProvider.speak(`"${selectedDestination.stNm}"에 도착했습니다.`);
+            case "arrivalInfo": {
+                SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 도착했습니다.`);
                 break;
             }
         }
@@ -60,23 +60,17 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = useTouchEvents({
-        onSingleTouch: () => {
-            VibrationProvider.vibrate(1000);
-            handleAnnouncement("guide");
-        },
-        onDoubleTouch: () => {
-            VibrationProvider.repeatVibrate(500, 200, 2);
-            setIsLoading(true);
-            handleBackToHome();
-        },
-    });
+    const handleBusInfoClick = () => {
+        VibrationProvider.vibrate(1000);
+        handleAnnouncement("arrivalInfo");
+    }
 
 
     // Effects
     useEffect(() => {
         VibrationProvider.vibrate(5000);
-        setTimeout(() => { handleAnnouncement("guide"); }, 400);
+        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
+        setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
     }, [selectedDestination]);
 
 
@@ -119,14 +113,15 @@ const ReservationContainer = styled.div`
 
 
 const ReservationDestinationName = styled.h1` 
-    font-size: 7vw;
+    font-size: 6.5vw;
+    margin-bottom: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
 `;
 
 const ArrivalMessage = styled.h3` 
-    font-size: 5vw;
+    font-size: 4vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

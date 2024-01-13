@@ -25,20 +25,46 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             resultType: "json"
                         }
                     }
-                );
-                const { comMsgHeader, msgHeader, msgBody } = responseData.data;
-
-                if (comMsgHeader.errMsg) {
-                    response.status(500).json({ msg: msgHeader.headerMsg, itemList: [] });
-                } else {
-                    response.status(200).json({
-                        msg: msgHeader.headerMsg,
-                        itemList: msgBody.itemList.map((item) => ({
+                ).then(async (getStationByNameResponse) =>
+                    await Promise.all(getStationByNameResponse.data.msgBody.itemList.map(async (stationInfo) => (
+                        {
+                            ...stationInfo,
                             seq: "",
-                            ...item
-                        }))
-                    });
-                }
+                            stDir: await axios.get<GetStationByUidItemApiResponse>(
+                                "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
+                                {
+                                    params: {
+                                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                        arsId: stationInfo.arsId,
+                                        resultType: "json"
+                                    }
+                                }
+                            ).then((getStationByUidItemResponse) => {
+                                const countingMap: {
+                                    [key in string]: number;
+                                } = {};
+
+                                const maxRequency = {
+                                    count: 0,
+                                    nxtStn: ""
+                                }
+
+                                getStationByUidItemResponse.data.msgBody.itemList.forEach((item) => {
+                                    if (countingMap[item.nxtStn] === undefined) countingMap[item.nxtStn] = 0;
+                                    if (++countingMap[item.nxtStn] > maxRequency.count) {
+                                        maxRequency.count = countingMap[item.nxtStn];
+                                        maxRequency.nxtStn = item.nxtStn;
+                                    }
+                                });
+
+                                return maxRequency.nxtStn;
+                            })
+                        }
+                    )))
+                );
+
+                response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: responseData });
+
             } catch (error) {
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", itemList: [] });
             }
@@ -86,4 +112,70 @@ interface StationInfo {
     posX: string;
     posY: string;
     arsId: string;
+}
+
+
+interface GetStationByUidItemApiResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: StationByUidItem[];
+    };
+}
+
+
+interface StationByUidItem {
+    stId: string;
+    stNm: string;
+    arsId: string;
+    busRouteId: string;
+    rtNm: string;
+    busRouteAbrv: string;
+    sectNm: string;
+    gpsX: string;
+    gpsY: string;
+    posX: string;
+    posY: string;
+    stationTp: string;
+    firstTm: string;
+    lastTm: string;
+    term: string;
+    routeType: string;
+    nextBus: string;
+    staOrd: string;
+    vehId1: string;
+    plainNo1: string | null;
+    sectOrd1: string;
+    stationNm1: string;
+    traTime1: string;
+    traSpd1: string;
+    isArrive1: string;
+    repTm1: string | null;
+    isLast1: string;
+    busType1: string;
+    vehId2: string;
+    plainNo2: string | null;
+    sectOrd2: string;
+    stationNm2: string;
+    traTime2: string;
+    traSpd2: string;
+    isArrive2: string;
+    repTm2: string | null;
+    isLast2: string;
+    busType2: string;
+    adirection: string;
+    arrmsg1: string;
+    arrmsg2: string;
+    arrmsgSec1: string;
+    arrmsgSec2: string;
+    nxtStn: string;
+    rerdieDiv1: string;
+    rerdieDiv2: string;
+    rerideNum1: string;
+    rerideNum2: string;
+    isFullFlag1: string;
+    isFullFlag2: string;
+    deTourAt: string;
+    congestion1: string;
+    congestion2: string;
 }

@@ -36,11 +36,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 resultType: "json"
                             }
                         }
-                    ).then((busPosition) => {
+                    ).then(async (busPosition) => {
                         const currSeq = stationInfo.data.msgBody.itemList.findIndex((stInfo) => stInfo.seq === busPosition.data.msgBody.itemList[0].stOrd);
+
                         response.status(200).json({
                             msg: "정상적으로 처리되었습니다.",
-                            itemList: stationInfo.data.msgBody.itemList.slice(currSeq).map((stInfo) => ({
+                            itemList: await Promise.all(stationInfo.data.msgBody.itemList.slice(currSeq).map(async (stInfo) => ({
                                 seq: stInfo.seq,
                                 stId: stInfo.station,
                                 stNm: stInfo.stationNm,
@@ -49,7 +50,36 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 posX: stInfo.posX,
                                 posY: stInfo.gpsY,
                                 arsId: stInfo.arsId,
-                            }))
+                                stDir: await axios.get<GetStationByUidItemApiResponse>(
+                                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
+                                    {
+                                        params: {
+                                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                            arsId: stInfo.arsId,
+                                            resultType: "json"
+                                        }
+                                    }
+                                ).then((getStationByUidItemResponse) => {
+                                    const countingMap: {
+                                        [key in string]: number;
+                                    } = {};
+
+                                    const maxRequency = {
+                                        count: 0,
+                                        nxtStn: ""
+                                    }
+
+                                    getStationByUidItemResponse.data.msgBody.itemList.forEach((item) => {
+                                        if (countingMap[item.nxtStn] === undefined) countingMap[item.nxtStn] = 0;
+                                        if (++countingMap[item.nxtStn] > maxRequency.count) {
+                                            maxRequency.count = countingMap[item.nxtStn];
+                                            maxRequency.nxtStn = item.nxtStn;
+                                        }
+                                    });
+
+                                    return maxRequency.nxtStn;
+                                })
+                            })))
                         });
                     });
                 });
@@ -141,4 +171,70 @@ interface BusPosition {
     lastStnId: string;
     isFullFlag: string;
     congetion: string;
+}
+
+
+interface GetStationByUidItemApiResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: StationByUidItem[];
+    };
+}
+
+
+interface StationByUidItem {
+    stId: string;
+    stNm: string;
+    arsId: string;
+    busRouteId: string;
+    rtNm: string;
+    busRouteAbrv: string;
+    sectNm: string;
+    gpsX: string;
+    gpsY: string;
+    posX: string;
+    posY: string;
+    stationTp: string;
+    firstTm: string;
+    lastTm: string;
+    term: string;
+    routeType: string;
+    nextBus: string;
+    staOrd: string;
+    vehId1: string;
+    plainNo1: string | null;
+    sectOrd1: string;
+    stationNm1: string;
+    traTime1: string;
+    traSpd1: string;
+    isArrive1: string;
+    repTm1: string | null;
+    isLast1: string;
+    busType1: string;
+    vehId2: string;
+    plainNo2: string | null;
+    sectOrd2: string;
+    stationNm2: string;
+    traTime2: string;
+    traSpd2: string;
+    isArrive2: string;
+    repTm2: string | null;
+    isLast2: string;
+    busType2: string;
+    adirection: string;
+    arrmsg1: string;
+    arrmsg2: string;
+    arrmsgSec1: string;
+    arrmsgSec2: string;
+    nxtStn: string;
+    rerdieDiv1: string;
+    rerdieDiv2: string;
+    rerideNum1: string;
+    rerideNum2: string;
+    isFullFlag1: string;
+    isFullFlag2: string;
+    deTourAt: string;
+    congestion1: string;
+    congestion2: string;
 }
