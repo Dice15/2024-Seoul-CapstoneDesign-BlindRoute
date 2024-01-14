@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import SearchStation from "./SearchStation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
@@ -14,6 +14,7 @@ import WaitingDestination from "./WaitingDestination";
 import ArrivalDestination from "./ArrivalDestination";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
+import { Boarding } from "@/core/type/Boarding";
 
 
 
@@ -103,35 +104,29 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
 
 /** ReserveBus 컴포넌트 */
 export default function ReserveBus() {
-    // Ref
-    const focusBlankRef = useRef<HTMLDivElement>(null);
-
-
     /* State */
-    const [reserveStep, setReserveStep] = useState<{ prev: ReserveBusStep, curr: ReserveBusStep }>({ prev: "searchStation", curr: "searchStation" });
+    const [step, setStep] = useState<ReserveBusStep>("searchStation");
     const [stations, setStations] = useState<Station[]>([]);
     const [selectedStation, setSelectedStation] = useState<Station | null>(null);
     const [buses, setBuses] = useState<Bus[]>([]);
-    const [reservedBus, setReservedBus] = useState<{ station: Station; bus: Bus, reservationId: string } | null>(null);
-    const [boardingVehId, setBoardingVehId] = useState<string | null>(null);
+    const [boarding, setBoarding] = useState<Boarding | null>(null);
     const [destinations, setDestinations] = useState<Station[]>([]);
     const [selectedDestination, setSelectedDestination] = useState<Station | null>(null);
 
 
-
     /* Handler */
     /** 페이지 상태에 따른 알맞는 컨트롤러 반환 */
-    const getControllerForm = () => {
-        switch (reserveStep.curr) {
+    const getControllerForm = useCallback(() => {
+        switch (step) {
             case "searchStation": {
                 return <SearchStation
-                    setReserveStep={setReserveStep}
+                    setStep={setStep}
                     setStations={setStations}
                 />;
             }
             case "selectStation": {
                 return <SelectStation
-                    setReserveStep={setReserveStep}
+                    setStep={setStep}
                     stations={stations}
                     setSelectedStation={setSelectedStation}
                     setBuses={setBuses}
@@ -139,38 +134,38 @@ export default function ReserveBus() {
             }
             case "selectBus": {
                 return <SelectBus
-                    setReserveStep={setReserveStep}
+                    setStep={setStep}
                     selectedStation={selectedStation!}
                     buses={buses}
-                    setReservedBus={setReservedBus}
+                    setBoarding={setBoarding}
                 />
             }
             case "waitingBus": {
                 return <WaitingBus
-                    setReserveStep={setReserveStep}
-                    reservedBus={reservedBus!}
-                    setBoardingVehId={setBoardingVehId}
+                    setStep={setStep}
+                    boarding={boarding!}
+                    setBoarding={setBoarding}
                     setDestinations={setDestinations}
                 />
             }
             case "arrivalBus": {
                 return <ArrivalBus
-                    setReserveStep={setReserveStep}
-                    reservedBus={reservedBus!}
+                    setStep={setStep}
+                    boarding={boarding!}
                 />
             }
             case "selectDestination": {
                 return <SelectDestination
-                    setReserveStep={setReserveStep}
-                    reservedBus={reservedBus!}
+                    setStep={setStep}
+                    boarding={boarding!}
                     destinations={destinations.slice(1)}
                     setSelectedDestination={setSelectedDestination}
                 />
             }
             case "waitingDestination": {
                 return <WaitingDestination
-                    setReserveStep={setReserveStep}
-                    boardingVehId={boardingVehId!}
+                    setStep={setStep}
+                    boarding={boarding!}
                     destinations={destinations}
                     selectedDestination={selectedDestination!}
                 />
@@ -184,28 +179,21 @@ export default function ReserveBus() {
                 return <></>;
             }
         }
-    };
+    }, [boarding, buses, destinations, selectedDestination, selectedStation, stations, step]);
 
 
     /* Effect */
+    /** 페이지 랜더링 시 음성안내 */
     useEffect(() => {
-        stepAnnouncement(reserveStep.curr, true);
-    }, [reserveStep])
-
-
-    useEffect(() => {
-        if (focusBlankRef.current) {
-            focusBlankRef.current.focus();
-        }
-    }, []);
+        stepAnnouncement(step, true);
+    }, [step])
 
 
     // Render
     return (
         <Wrapper>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
-            <Title onClick={() => stepAnnouncement(reserveStep.curr, false)}>
-                {stepToTitle(reserveStep.curr)}
+            <Title onClick={() => stepAnnouncement(step, false)} tabIndex={10}>
+                {stepToTitle(step)}
             </Title>
             <Contents>
                 {getControllerForm()}
@@ -218,10 +206,6 @@ export default function ReserveBus() {
 const Wrapper = styled.div`
     height: 100%;
     width: 100%;
-`;
-
-
-const FocusBlank = styled.div`
 `;
 
 

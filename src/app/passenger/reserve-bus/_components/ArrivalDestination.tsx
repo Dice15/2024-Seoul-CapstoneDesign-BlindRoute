@@ -5,7 +5,7 @@ import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { Station } from "@/core/type/Station";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import styled from "styled-components";
 
@@ -30,43 +30,42 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "arrivalInfo") => {
-        //return;
+    const handleAnnouncement = useCallback((type: "arrivalInfo") => {
         switch (type) {
             case "arrivalInfo": {
                 SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 도착했습니다.`);
                 break;
             }
         }
-    }
+    }, [selectedDestination.stDir, selectedDestination.stNm]);
 
 
     /** 이전 단계로 이동 */
-    const handleBackToHome = () => {
+    const handleBackToHome = useCallback(() => {
         setIsLoading(false);
         router.replace("./");
-    }
+    }, [router]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedLeft: () => {
+        onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             handleBackToHome();
-        },
-        onSwipedRight: () => {
+        }, [handleBackToHome]),
+        onSwipedRight: useCallback(() => {
             setIsLoading(true);
             handleBackToHome();
-        },
+        }, [handleBackToHome]),
         trackMouse: true
     });
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = () => {
+    const handleBusInfoClick = useCallback(() => {
         VibrationProvider.vibrate(1000);
         handleAnnouncement("arrivalInfo");
-    }
+    }, [handleAnnouncement]);
 
 
     // Effects
@@ -78,8 +77,13 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
 
     useEffect(() => {
-        setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
-    }, [selectedDestination]);
+        const timer = setTimeout(() => {
+            setIsLoading(true);
+            handleBackToHome();
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    }, [handleBackToHome]);
 
 
     // Render

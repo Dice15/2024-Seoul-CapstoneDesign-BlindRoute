@@ -2,7 +2,7 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
@@ -16,7 +16,7 @@ import { useSwipeable } from "react-swipeable";
 
 
 interface SelectStationProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
+    setStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
     stations: Station[];
     setSelectedStation: React.Dispatch<React.SetStateAction<Station | null>>
     setBuses: React.Dispatch<React.SetStateAction<Bus[]>>;
@@ -24,7 +24,7 @@ interface SelectStationProps {
 
 
 
-export default function SelectStation({ setReserveStep, stations, setSelectedStation, setBuses }: SelectStationProps) {
+export default function SelectStation({ setStep, stations, setSelectedStation, setBuses }: SelectStationProps) {
     /* Ref */
     const stationInfoContainer = useRef<HTMLDivElement>(null);
     const stationListIndexRef = useRef<number>(0);
@@ -38,7 +38,7 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "currStation" | "noBusesFound") => {
+    const handleAnnouncement = useCallback((type: "currStation" | "noBusesFound") => {
         switch (type) {
             case "currStation": {
                 const station = stations[stationListIndexRef.current];
@@ -50,67 +50,61 @@ export default function SelectStation({ setReserveStep, stations, setSelectedSta
                 break;
             }
         }
-    }
+    }, [stations]);
 
 
     /** 이전 단계로 이동 */
-    const handleBackToPrev = () => {
+    const handleBackToPrev = useCallback(() => {
         setIsLoading(false);
-        setReserveStep({
-            prev: "selectStation",
-            curr: "searchStation"
-        });
-    }
+        setStep("searchStation");
+    }, [setStep]);
 
 
     /** 선택한 정류장를 경유하는 버스노선을 가져옴 */
-    const handleGetBuses = () => {
+    const handleGetBuses = useCallback(() => {
         getBuses(stations[stationListIndexRef.current].arsId).then(({ msg, itemList }) => {
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                 setSelectedStation(stations[stationListIndexRef.current])
                 setBuses(itemList);
-                setReserveStep({
-                    prev: "selectStation",
-                    curr: "selectBus"
-                });
+                setStep("selectBus");
             } else {
                 handleAnnouncement("noBusesFound");
             }
         });
-    }
+    }, [handleAnnouncement, setBuses, setSelectedStation, setStep, stations]);
 
 
     /** 스와이프로 아이템이 변경되었을 때 발생하는 이벤트 */
-    const handleSlideChange = (swiper: SwiperClass) => {
+    const handleSlideChange = useCallback((swiper: SwiperClass) => {
         VibrationProvider.vibrate(200);
         isSlidingRef.current = true; // 슬라이드 중으로 상태 변경
         stationListIndexRef.current = swiper.realIndex;
 
         handleAnnouncement("currStation");
         setTimeout(() => isSlidingRef.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
-    };
+    }, [handleAnnouncement]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedLeft: () => {
+        onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             setTimeout(() => { handleGetBuses(); }, 500);
-        },
-        onSwipedRight: () => {
+        }, [handleGetBuses]),
+        onSwipedRight: useCallback(() => {
             setIsLoading(true);
             handleBackToPrev();
-        },
+        }, [handleBackToPrev]),
         trackMouse: true
     });
 
 
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleStationInfoClick = () => {
+    const handleStationInfoClick = useCallback(() => {
         VibrationProvider.vibrate(1000);
         handleAnnouncement("currStation");
-    };
+    }, [handleAnnouncement]);
 
 
     // Effect

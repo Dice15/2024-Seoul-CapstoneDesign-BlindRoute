@@ -3,26 +3,21 @@
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
 import { ReserveBusStep } from "./ReserveBus";
-import { Station } from "@/core/type/Station";
-import { Bus } from "@/core/type/Bus";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { useSwipeable } from "react-swipeable";
 import { useRouter } from "next/navigation";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Boarding } from "@/core/type/Boarding";
 
 
 interface ArrivalBusProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
-    reservedBus: {
-        station: Station;
-        bus: Bus;
-        reservationId: string;
-    };
+    setStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    boarding: Boarding;
 }
 
 
-export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusProps) {
+export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
     // Const
     const router = useRouter();
 
@@ -37,53 +32,49 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "arrivalInfo") => {
-        //return;
+    const handleAnnouncement = useCallback((type: "arrivalInfo") => {
         switch (type) {
             case "arrivalInfo": {
-                SpeechOutputProvider.speak(`"${reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}" 버스가 도착했습니다!`);
+                SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다!`);
                 break;
             }
         }
-    }
+    }, [boarding.bus.busRouteAbrv, boarding.bus.busRouteNm]);
 
 
     /** 이전 단계로 이동 */
-    const handleBackToHome = () => {
+    const handleBackToHome = useCallback(() => {
         setIsLoading(false);
         router.replace("./");
-    }
+    }, [router]);
 
 
     /** 하차 등록 단계로 이동 */
-    const handleGoNextStep = () => {
+    const handleGoNextStep = useCallback(() => {
         setIsLoading(false);
-        setReserveStep({
-            prev: "arrivalBus",
-            curr: "selectDestination"
-        });
-    }
+        setStep("selectDestination");
+    }, [setStep]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedLeft: () => {
+        onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             handleGoNextStep();
-        },
-        onSwipedRight: () => {
+        }, [handleGoNextStep]),
+        onSwipedRight: useCallback(() => {
             setIsLoading(true);
             handleBackToHome();
-        },
+        }, [handleBackToHome]),
         trackMouse: true
     });
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = () => {
+    const handleBusInfoClick = useCallback(() => {
         VibrationProvider.vibrate(1000);
         handleAnnouncement("arrivalInfo");
-    }
+    }, [handleAnnouncement]);
 
 
     // Effects
@@ -95,8 +86,14 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
 
     useEffect(() => {
-        setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
-    }, [reservedBus]);
+        const timer = setTimeout(() => {
+            setIsLoading(true);
+            handleGoNextStep();
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    }, [handleGoNextStep]);
+
 
 
     // Render
@@ -107,7 +104,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
                 onClick={handleBusInfoClick}
                 tabIndex={1}
             >
-                <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
+                <BusName>{boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}</BusName>
                 <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>
             </ReservationContainer>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />

@@ -2,25 +2,25 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import styled from "styled-components";
 import { cancelReservation, getBusPosByVehId } from "@/core/api/blindrouteApi";
 import { useSwipeable } from "react-swipeable";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
+import { Boarding } from "@/core/type/Boarding";
 
 
 interface WaitingDestinationProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
-    boardingVehId: string;
+    setStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    boarding: Boarding;
     destinations: Station[];
     selectedDestination: Station;
 }
 
 
-export default function WaitingDestination({ setReserveStep, boardingVehId, destinations, selectedDestination }: WaitingDestinationProps) {
+export default function WaitingDestination({ setStep, boarding, destinations, selectedDestination }: WaitingDestinationProps) {
     // States
     const [isLoading, setIsLoading] = useState(false);
     const [desPosIdx, setDesPosIdx] = useState(-1);
@@ -34,7 +34,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "arrivalInfo") => {
+    const handleAnnouncement = useCallback((type: "arrivalInfo") => {
         //return;
         switch (type) {
             case "arrivalInfo": {
@@ -47,11 +47,11 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
                 break;
             }
         }
-    }
+    }, [curPosIdx, desPosIdx, selectedDestination.stDir, selectedDestination.stNm]);
 
 
     /** 버스 예약 취소 */
-    const handleCancelReservation = () => {
+    const handleCancelReservation = useCallback(() => {
         cancelReservation().then(({ msg, deletedCount }) => {
             if (intervalIdRef.current !== null) {
                 clearInterval(intervalIdRef.current);
@@ -61,48 +61,42 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
             setTimeout(() => {
                 SpeechOutputProvider.speak("목적지 예약을 취소하였습니다.").then(() => {
                     setIsLoading(false);
-                    setReserveStep({
-                        prev: "waitingDestination",
-                        curr: "selectDestination"
-                    });
+                    setStep("selectDestination");
                 });
             }, 200);
         });
-    }
+    }, [setStep]);
 
 
     /** 목적지에 도착하면 예약을 삭제함 */
-    const handleArrivedDestination = () => {
+    const handleArrivedDestination = useCallback(() => {
         cancelReservation().then(({ msg, deletedCount }) => {
             setIsLoading(false);
-            setReserveStep({
-                prev: "waitingDestination",
-                curr: "arrivalDestination"
-            });
+            setStep("arrivalDestination");
         });
-    }
+    }, [setStep]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedRight: () => {
+        onSwipedRight: useCallback(() => {
             setIsLoading(true);
             handleCancelReservation();
-        },
+        }, [handleCancelReservation]),
         trackMouse: true
     });
 
 
     /** 화면 터치 이벤트 */
-    const handleBusInfoClick = () => {
+    const handleBusInfoClick = useCallback(() => {
         VibrationProvider.vibrate(1000);
         handleAnnouncement("arrivalInfo");
-    };
+    }, [handleAnnouncement]);
 
 
     /** 탑승한 차량의 위치를 추적하여 목적지에 도착했는지 확인 */
-    const handleCheckDestinationArrival = async () => {
-        const newBusPos = (await getBusPosByVehId(boardingVehId)).currStation;
+    const handleCheckDestinationArrival = useCallback(async () => {
+        const newBusPos = (await getBusPosByVehId(boarding.vehId)).currStation;
         if (newBusPos !== null) {
             const newPosIdx = destinations.findIndex((station) => station.seq === newBusPos.seq);
 
@@ -113,23 +107,10 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
                 setCurPosIdx(newPosIdx);
             }
         }
-    };
+    }, [boarding.vehId, desPosIdx, destinations, handleArrivedDestination]);
 
 
     // Effects
-    /** 대기중 메시지 이벤트 */
-    useEffect(() => {
-        setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
-    }, [selectedDestination]);
-
-
-    /** 목적지 정류장의 seq 저장 */
-    useEffect(() => {
-        setDesPosIdx(destinations.findIndex((station) => station.seq === selectedDestination.seq));
-    }, [setDesPosIdx, destinations, selectedDestination]);
-
-
-    /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
@@ -137,17 +118,37 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     }, []);
 
 
+    /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
-        setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
+        const timer = setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
+
+        if (intervalIdRef.current !== null) {
+            clearInterval(intervalIdRef.current);
+            intervalIdRef.current = null;
+        }
         intervalIdRef.current = setInterval(handleCheckDestinationArrival, 10000);
 
         return () => {
+            clearTimeout(timer);
             if (intervalIdRef.current !== null) {
                 clearInterval(intervalIdRef.current);
                 intervalIdRef.current = null;
             }
         };
-    }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
+    }, [handleCheckDestinationArrival]);
+
+
+    /** 목적지 정류장의 seq 저장 */
+    useEffect(() => {
+        setDesPosIdx(destinations.findIndex((station) => station.seq === selectedDestination.seq));
+    }, [destinations, selectedDestination.seq]);
+
+
+    /** 대기중 메시지 이벤트 */
+    useEffect(() => {
+        const timer = setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
+        return () => clearTimeout(timer);
+    }, [handleAnnouncement]);
 
 
     // Render

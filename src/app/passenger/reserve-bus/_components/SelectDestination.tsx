@@ -2,31 +2,26 @@
 
 import { Station } from "@/core/type/Station";
 import { ReserveBusStep } from "./ReserveBus";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { useSwipeable } from "react-swipeable";
-import useTouchEvents from "@/core/hooks/useTouchEvents";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
 import { reserveBus } from "@/core/api/blindrouteApi";
-import { Bus } from "@/core/type/Bus";
+import { Boarding } from "@/core/type/Boarding";
 
 
 interface SelectDestinationProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
-    reservedBus: {
-        station: Station;
-        bus: Bus;
-        reservationId: string;
-    };
+    setStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
+    boarding: Boarding;
     destinations: Station[];
     setSelectedDestination: React.Dispatch<React.SetStateAction<Station | null>>;
 }
 
 
-export default function SelectDestination({ setReserveStep, reservedBus, destinations, setSelectedDestination }: SelectDestinationProps) {
+export default function SelectDestination({ setStep, boarding, destinations, setSelectedDestination }: SelectDestinationProps) {
     /* Ref */
     const stationInfoContainer = useRef<HTMLDivElement>(null);
     const stationListIndexRef = useRef<number>(0);
@@ -40,7 +35,7 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "currStation" | "failedReservation") => {
+    const handleAnnouncement = useCallback((type: "currStation" | "failedReservation") => {
         //return;
         switch (type) {
             case "currStation": {
@@ -53,67 +48,61 @@ export default function SelectDestination({ setReserveStep, reservedBus, destina
                 break;
             }
         }
-    }
+    }, [destinations]);
 
 
     /** 이전 단계로 이동 */
-    const handleBackToPrev = () => {
+    const handleBackToPrev = useCallback(() => {
         setIsLoading(false);
-        setReserveStep({
-            prev: "selectDestination",
-            curr: "arrivalBus"
-        });
-    }
+        setStep("arrivalBus");
+    }, [setStep]);
 
 
-    const reserveDestination = () => {
+    const reserveDestination = useCallback(() => {
         const station = destinations[stationListIndexRef.current];
-        reserveBus(station.stId, station.arsId, reservedBus.bus.busRouteId, "alighting").then(({ msg, reservationId }) => {
+        reserveBus(station.stId, station.arsId, boarding.bus.busRouteId, "alighting").then(({ msg, reservationId }) => {
             setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
                 setSelectedDestination(station);
-                setReserveStep({
-                    prev: "selectDestination",
-                    curr: "waitingDestination"
-                });
+                setStep("waitingDestination");
             } else {
                 handleAnnouncement("failedReservation");
             }
         });
-    }
+    }, [boarding.bus.busRouteId, destinations, handleAnnouncement, setSelectedDestination, setStep]);
 
 
     /** 스와이프로 아이템이 변경되었을 때 발생하는 이벤트 */
-    const handleSlideChange = (swiper: SwiperClass) => {
+    const handleSlideChange = useCallback((swiper: SwiperClass) => {
         VibrationProvider.vibrate(200);
         isSlidingRef.current = true; // 슬라이드 중으로 상태 변경
         stationListIndexRef.current = swiper.realIndex;
 
         handleAnnouncement("currStation");
         setTimeout(() => isSlidingRef.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
-    };
+    }, [handleAnnouncement]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedLeft: () => {
+        onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             setTimeout(() => { reserveDestination(); }, 500);
-        },
-        onSwipedRight: () => {
+        }, [reserveDestination]),
+        onSwipedRight: useCallback(() => {
             setIsLoading(true);
             handleBackToPrev();
-        },
+        }, [handleBackToPrev]),
         trackMouse: true
     });
 
 
 
     /** vertical 스와이프 아이템 터치 이벤트 */
-    const handleStationInfoClick = () => {
+    const handleStationInfoClick = useCallback(() => {
         VibrationProvider.vibrate(1000);
         handleAnnouncement("currStation");
-    };
+    }, [handleAnnouncement]);
 
 
     // Effect

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { ReserveBusStep } from "./ReserveBus";
@@ -15,14 +15,14 @@ import { useRouter } from "next/navigation";
 
 /** SearchStation 컴포넌트 프로퍼티 */
 interface SearchStationProps {
-    setReserveStep: React.Dispatch<React.SetStateAction<{ prev: ReserveBusStep; curr: ReserveBusStep; }>>;
+    setStep: React.Dispatch<React.SetStateAction<ReserveBusStep>>;
     setStations: React.Dispatch<React.SetStateAction<Station[]>>;
 }
 
 
 
 /** SearchStation 컴포넌트 */
-export default function SearchStation({ setReserveStep, setStations }: SearchStationProps) {
+export default function SearchStation({ setStep, setStations }: SearchStationProps) {
     // Const
     const router = useRouter();
 
@@ -40,7 +40,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = (type: "noWordsDetected" | "noStationsFound") => {
+    const handleAnnouncement = useCallback((type: "noWordsDetected" | "noStationsFound") => {
         //return;
         switch (type) {
             case "noWordsDetected": {
@@ -52,28 +52,28 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
                 break;
             }
         }
-    }
+    }, [stationName]);
 
 
     /** 버스 정류장 이름 음성 인식 */
-    const handleStationNameSTT = () => {
+    const handleStationNameSTT = useCallback(() => {
         SpeechInputProvider.startRecognition((result: string) => {
             const maxLength = 30;
             const inputText = Array.from(result).slice(0, maxLength).join('');
             setStationName(inputText);
         });
-    };
+    }, []);
 
 
     /** 이전 단계로 이동 */
-    const handleBackToHome = () => {
+    const handleBackToHome = useCallback(() => {
         setIsLoading(false);
         router.replace("./");
-    }
+    }, [router]);
 
 
     /** 버스 데이터 가져오기 */
-    const handleGetStations = () => {
+    const handleGetStations = useCallback(() => {
         if (stationName === "") {
             handleAnnouncement("noWordsDetected");
             setIsLoading(false);
@@ -82,37 +82,34 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
                 setIsLoading(false);
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     setStations(itemList);
-                    setReserveStep({
-                        prev: "searchStation",
-                        curr: "selectStation"
-                    })
+                    setStep("selectStation");
                 } else {
                     handleAnnouncement("noStationsFound");
                 }
             });
         }
-    };
+    }, [handleAnnouncement, setStations, setStep, stationName]);
 
 
     /** 음성 인식 시작 및 종료 */
-    const handleVoiceRecognition = () => {
+    const handleVoiceRecognition = useCallback(() => {
         SpeechOutputProvider.stopSpeak();
         handleStationNameSTT();
-    };
+    }, [handleStationNameSTT]);
 
 
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
-        onSwipedLeft: () => {
+        onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             VibrationProvider.vibrate(1000);
             setTimeout(() => { handleGetStations(); }, 1000);
-        },
-        onSwipedRight: () => {
+        }, [handleGetStations]),
+        onSwipedRight: useCallback(() => {
             VibrationProvider.vibrate(1000);
             setIsLoading(true);
             handleBackToHome();
-        },
+        }, [handleBackToHome]),
         trackMouse: true
     });
 
