@@ -196,7 +196,7 @@ export default function ReserveBus() {
 
     // Render
     return (
-        <Wrapper >
+        <Wrapper>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <Title onClick={() => stepAnnouncement(reserveStep.curr, false)}>
                 {stepToTitle(reserveStep.curr)}

@@ -5,7 +5,7 @@ export default async function PassengerPage() {
     // Render
     return (
         <div className={styles.wrapper}>
-            <Link href={"./passenger"} className={styles.start}>
+            <Link href={"./passenger/reserve-bus"} className={styles.start}>
                 예약하기
             </Link>
         </div>

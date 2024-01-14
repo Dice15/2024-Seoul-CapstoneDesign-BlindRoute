@@ -144,6 +144,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
         <Wrapper {...handleHorizontalSwiper}>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
+
             <ReservationContainer
                 onClick={handleBusInfoClick}
                 tabIndex={1}
@@ -160,6 +161,7 @@ const Wrapper = styled.div`
     height: 100%;
     width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 `;
