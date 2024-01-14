@@ -32,6 +32,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     // Ref
     const focusBlankRef = useRef<HTMLDivElement>(null);
+    const intervalIdRef = useRef<number | null>(null);
 
 
     // Handler
@@ -57,6 +58,10 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     /** 버스 예약 취소 */
     const handleCancelReservation = () => {
         cancelReservation().then(({ msg, deletedCount }) => {
+            if (intervalIdRef.current !== null) {
+                clearInterval(intervalIdRef.current);
+            }
+
             setIsLoading(false);
             setReserveStep({
                 prev: "waitingBus",
@@ -134,9 +139,15 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     useEffect(() => {
         setTimeout(() => { handleCheckBusArrival(); }, 2500);
-        const intervalId = setInterval(handleCheckBusArrival, 10000);
-        return () => { clearInterval(intervalId); }
+        intervalIdRef.current = window.setInterval(handleCheckBusArrival, 10000);
+
+        return () => {
+            if (intervalIdRef.current !== null) {
+                clearInterval(intervalIdRef.current);
+            }
+        }
     }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
+
 
 
     // Render

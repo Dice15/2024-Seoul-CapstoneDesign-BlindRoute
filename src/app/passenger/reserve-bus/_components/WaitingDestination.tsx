@@ -29,6 +29,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     // Ref
     const focusBlankRef = useRef<HTMLDivElement>(null);
+    const intervalIdRef = useRef<number | null>(null);
 
 
     // Handler
@@ -52,6 +53,11 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
     /** 버스 예약 취소 */
     const handleCancelReservation = () => {
         cancelReservation().then(({ msg, deletedCount }) => {
+            if (intervalIdRef.current !== null) {
+                clearInterval(intervalIdRef.current);
+                intervalIdRef.current = null;
+            }
+
             setIsLoading(false);
             setReserveStep({
                 prev: "waitingDestination",
@@ -129,8 +135,14 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     useEffect(() => {
         setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
-        const intervalId = setInterval(handleCheckDestinationArrival, 10000);
-        return () => { clearInterval(intervalId); }
+        intervalIdRef.current = window.setInterval(handleCheckDestinationArrival, 10000);
+
+        return () => {
+            if (intervalIdRef.current !== null) {
+                clearInterval(intervalIdRef.current);
+                intervalIdRef.current = null;
+            }
+        };
     }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
 
 
