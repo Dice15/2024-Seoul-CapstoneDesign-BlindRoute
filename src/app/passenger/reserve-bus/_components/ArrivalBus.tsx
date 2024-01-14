@@ -27,6 +27,7 @@ export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
 
 
     // States
+    const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -35,11 +36,22 @@ export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
     const handleAnnouncement = useCallback((type: "arrivalInfo") => {
         switch (type) {
             case "arrivalInfo": {
-                SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다!`);
+                if (isFirstAnnouncement) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다! 10초 뒤 목적지 선택 페이지로 이동합니다.`);
+                        setIsFirstAnnouncement(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다! 잠시 후 목적지 선택 페이지로 이동합니다.`);
+                }
                 break;
             }
         }
-    }, [boarding.bus.busRouteAbrv, boarding.bus.busRouteNm]);
+    }, [boarding.bus.busRouteAbrv, boarding.bus.busRouteNm, isFirstAnnouncement]);
 
 
     /** 이전 단계로 이동 */
@@ -83,6 +95,14 @@ export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
             focusBlankRef.current.focus();
         }
     }, []);
+
+
+    /** 랜더링 시 페이지 안내음성 */
+    useEffect(() => {
+        if (isFirstAnnouncement) {
+            handleAnnouncement("arrivalInfo");
+        }
+    }, [isFirstAnnouncement, handleAnnouncement])
 
 
     useEffect(() => {

@@ -34,15 +34,31 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
 
 
     // States
+    const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [stationName, setStationName] = useState<string>("");
 
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = useCallback((type: "noWordsDetected" | "noStationsFound") => {
+    const handleAnnouncement = useCallback((type: "guide" | "noWordsDetected" | "noStationsFound") => {
         //return;
         switch (type) {
+            case "guide": {
+                if (isFirstAnnouncement) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                        setIsFirstAnnouncement(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                }
+                break;
+            }
             case "noWordsDetected": {
                 SpeechOutputProvider.speak("인식된 단어가 없습니다. 다시 시도해주세요.");
                 break;
@@ -52,7 +68,7 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
                 break;
             }
         }
-    }, [stationName]);
+    }, [isFirstAnnouncement, stationName]);
 
 
     /** 버스 정류장 이름 음성 인식 */
@@ -132,6 +148,13 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
             focusBlankRef.current.focus();
         }
     }, []);
+
+
+    useEffect(() => {
+        if (isFirstAnnouncement) {
+            handleAnnouncement("guide");
+        }
+    }, [isFirstAnnouncement, handleAnnouncement])
 
 
     // Render

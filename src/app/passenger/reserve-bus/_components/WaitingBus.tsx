@@ -28,7 +28,8 @@ interface BusArrivalInfo {
 
 export default function WaitingBus({ setStep, boarding, setBoarding, setDestinations }: WaitingBusProps) {
     // States
-    const [isFirstRender, setIsFirstRender] = useState(true);
+    const [isFirstCheckArrival, setIsFirstCheckArrival] = useState(true);
+    const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [busArrInfo, setBusArrInfo] = useState<BusArrivalInfo | null>(null);
 
@@ -51,11 +52,24 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
 
                 const currInfo = busArrInfo ? extractTimeInfo(busArrInfo.arrmsg) : "";
                 const arrMsg = currInfo === "" ? "" : `${currInfo}${currInfo === "곧 도착" ? "" : "에 도착"}합니다.`;
-                SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+
+                if (isFirstAnnouncement) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        const guide = isFirstAnnouncement ? "버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다." : "";
+                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                        setIsFirstAnnouncement(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                }
                 break;
             }
         }
-    }, [boarding.bus.adirection, boarding.bus.busRouteAbrv, busArrInfo]);
+    }, [boarding.bus.adirection, boarding.bus.busRouteAbrv, busArrInfo, isFirstAnnouncement]);
 
 
     /** 버스 예약 취소 */
@@ -115,6 +129,7 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
         }
     }, [boarding.bus, boarding.reservationId, boarding.station, busArrInfo, handleArrivedBus, setBoarding]);
 
+
     /** horizontal 스와이프 이벤트 */
     const handleHorizontalSwiper = useSwipeable({
         onSwipedRight: useCallback(() => {
@@ -142,13 +157,21 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
     }, []);
 
 
+    /** 랜더링 시 페이지 안내음성 */
+    useEffect(() => {
+        if (isFirstAnnouncement) {
+            handleAnnouncement("arrivalInfo");
+        }
+    }, [isFirstAnnouncement, handleAnnouncement])
+
+
     /** 첫번쨰 랜더링일 때는 바로 버스 도착정보를 체크함 */
     useEffect(() => {
-        if (isFirstRender) {
+        if (isFirstCheckArrival) {
             handleCheckBusArrival();
-            setIsFirstRender(false);
+            setIsFirstCheckArrival(false);
         }
-    }, [isFirstRender, setIsFirstRender, handleCheckBusArrival]);
+    }, [isFirstCheckArrival, setIsFirstCheckArrival, handleCheckBusArrival]);
 
 
     /** 예약한 버스가 도착했는지 12초마다 확인함 */

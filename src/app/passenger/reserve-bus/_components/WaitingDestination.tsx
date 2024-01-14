@@ -22,7 +22,8 @@ interface WaitingDestinationProps {
 
 export default function WaitingDestination({ setStep, boarding, destinations, selectedDestination }: WaitingDestinationProps) {
     // States
-    const [isFirstRender, setIsFirstRender] = useState(true);
+    const [isFirstCheckArrival, setIsFirstCheckArrival] = useState(true);
+    const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [desPosIdx, setDesPosIdx] = useState(-1);
     const [curPosIdx, setCurPosIdx] = useState(-1);
@@ -36,7 +37,6 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
     // Handler
     /** 안내 음성 */
     const handleAnnouncement = useCallback((type: "arrivalInfo") => {
-        //return;
         switch (type) {
             case "arrivalInfo": {
                 const idxGap = desPosIdx - curPosIdx;
@@ -44,11 +44,24 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
                     : idxGap < 0 ? "정류장에 도착했습니다."
                         : idxGap === 0 ? "정류장에 도착합니다!"
                             : `${idxGap}개의 정거장이 남았습니다`;
-                SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
+
+                if (isFirstAnnouncement) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        const guide = isFirstAnnouncement ? "목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다." : "";
+                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                        setIsFirstAnnouncement(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
+                }
                 break;
             }
         }
-    }, [curPosIdx, desPosIdx, selectedDestination.stDir, selectedDestination.stNm]);
+    }, [boarding.bus.adirection, boarding.bus.busRouteAbrv, curPosIdx, desPosIdx, isFirstAnnouncement, selectedDestination.stDir, selectedDestination.stNm]);
 
 
     /** 버스 예약 취소 */
@@ -112,6 +125,7 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
 
 
     // Effects
+    /** 랜더링 시 포커스 지정 */
     useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
@@ -119,13 +133,21 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
     }, []);
 
 
+    /** 랜더링 시 페이지 안내음성 */
+    useEffect(() => {
+        if (isFirstAnnouncement) {
+            handleAnnouncement("arrivalInfo");
+        }
+    }, [isFirstAnnouncement, handleAnnouncement])
+
+
     /** 첫번쨰 랜더링일 때는 바로 버스 도착정보를 체크함 */
     useEffect(() => {
-        if (isFirstRender) {
+        if (isFirstCheckArrival) {
             handleCheckDestinationArrival();
-            setIsFirstRender(false);
+            setIsFirstCheckArrival(false);
         }
-    }, [isFirstRender, setIsFirstRender, handleCheckDestinationArrival]);
+    }, [isFirstCheckArrival, setIsFirstCheckArrival, handleCheckDestinationArrival]);
 
 
     /** 예약한 버스가 도착했는지 12초마다 확인함 */

@@ -25,6 +25,7 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
 
     // States
+    const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -33,11 +34,22 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
     const handleAnnouncement = useCallback((type: "arrivalInfo") => {
         switch (type) {
             case "arrivalInfo": {
-                SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 도착했습니다.`);
+                if (isFirstAnnouncement) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 도착했습니다! 10초 뒤 홈 페이지로 이동합니다.`);
+                        setIsFirstAnnouncement(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 도착했습니다! 잠시 후 홈 페이지로 이동합니다.`);
+                }
                 break;
             }
         }
-    }, [selectedDestination.stDir, selectedDestination.stNm]);
+    }, [isFirstAnnouncement, selectedDestination.stDir, selectedDestination.stNm]);
 
 
     /** 이전 단계로 이동 */
@@ -74,6 +86,14 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
             focusBlankRef.current.focus();
         }
     }, []);
+
+
+    /** 랜더링 시 페이지 안내음성 */
+    useEffect(() => {
+        if (isFirstAnnouncement) {
+            handleAnnouncement("arrivalInfo");
+        }
+    }, [isFirstAnnouncement, handleAnnouncement])
 
 
     useEffect(() => {

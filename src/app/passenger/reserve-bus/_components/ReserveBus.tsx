@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SearchStation from "./SearchStation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
@@ -58,7 +58,7 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
     setTimeout(() => {
         switch (step) {
             case "searchStation": {
-                SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                //SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
@@ -73,12 +73,12 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
                 break;
             }
             case "waitingBus": {
-                SpeechOutputProvider.speak(`버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다.`);
+                //SpeechOutputProvider.speak(`버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "arrivalBus": {
-                SpeechOutputProvider.speak(`버스가 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 목적지 선택 페이지로 이동합니다.`);
+                //SpeechOutputProvider.speak(`버스가 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 목적지 선택 페이지로 이동합니다.`);
                 isPageInit && VibrationProvider.vibrate(5000);
                 break;
             }
@@ -88,12 +88,12 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
                 break;
             }
             case "waitingDestination": {
-                SpeechOutputProvider.speak(`목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다.`);
+                //SpeechOutputProvider.speak(`목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "arrivalDestination": {
-                SpeechOutputProvider.speak(`목적지에 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 홈 페이지로 이동합니다.`);
+                //SpeechOutputProvider.speak(`목적지에 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 홈 페이지로 이동합니다.`);
                 isPageInit && VibrationProvider.vibrate(5000);
                 break;
             }
