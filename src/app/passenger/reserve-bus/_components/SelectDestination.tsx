@@ -30,17 +30,29 @@ export default function SelectDestination({ setStep, boarding, destinations, set
 
 
     /* State */
+    const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
 
     // Handler
     /** 안내 음성 */
     const handleAnnouncement = useCallback((type: "currStation" | "failedReservation") => {
-        //return;
         switch (type) {
             case "currStation": {
                 const station = destinations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
+                if (isFirstRender) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        const guide = isFirstRender ? "목적지를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : "";
+                        SpeechOutputProvider.speak(`${guide} "${station.stNm}", ${station.stDir} 방면`);
+                        setIsFirstRender(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
+                }
                 break;
             }
             case "failedReservation": {
@@ -48,7 +60,7 @@ export default function SelectDestination({ setStep, boarding, destinations, set
                 break;
             }
         }
-    }, [destinations]);
+    }, [destinations, isFirstRender]);
 
 
     /** 이전 단계로 이동 */
@@ -61,11 +73,14 @@ export default function SelectDestination({ setStep, boarding, destinations, set
     const reserveDestination = useCallback(() => {
         const station = destinations[stationListIndexRef.current];
         reserveBus(station.stId, station.arsId, boarding.bus.busRouteId, "alighting").then(({ msg, reservationId }) => {
-            setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
                 setSelectedDestination(station);
-                setStep("waitingDestination");
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setStep("waitingDestination");
+                }, 1000);
             } else {
+                setIsLoading(false);
                 handleAnnouncement("failedReservation");
             }
         });
@@ -121,8 +136,10 @@ export default function SelectDestination({ setStep, boarding, destinations, set
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={50}
+                    onInit={() => { destinations.length <= 1 && handleAnnouncement("currStation"); }}
                     onSlideChange={handleSlideChange}
                     speed={300}
+                    loop={destinations.length > 1 ? true : false}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >

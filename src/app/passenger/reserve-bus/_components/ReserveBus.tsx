@@ -63,12 +63,12 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
                 break;
             }
             case "selectStation": {
-                SpeechOutputProvider.speak(`정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
+                //SpeechOutputProvider.speak(`정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "selectBus": {
-                SpeechOutputProvider.speak(`버스를 선택하세요. 위아래 스와이프로 버스를 선택할 수 있습니다.`);
+                //SpeechOutputProvider.speak(`버스를 선택하세요. 위아래 스와이프로 버스를 선택할 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
@@ -83,12 +83,12 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
                 break;
             }
             case "selectDestination": {
-                SpeechOutputProvider.speak(`목적지를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
+                //SpeechOutputProvider.speak(`목적지를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "waitingDestination": {
-                SpeechOutputProvider.speak(`버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다.`);
+                SpeechOutputProvider.speak(`목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다.`);
                 isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }

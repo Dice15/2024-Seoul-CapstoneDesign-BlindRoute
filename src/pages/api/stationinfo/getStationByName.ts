@@ -21,7 +21,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     {
                         params: {
                             serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
-                            stSrch: requestParam.stationName,
+                            stSrch: (requestParam.stationName as string).replace(/\s+/g, ''),
                             resultType: "json"
                         }
                     }

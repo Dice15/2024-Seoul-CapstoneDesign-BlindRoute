@@ -35,6 +35,7 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
 
 
     /* State */
+    const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -44,7 +45,19 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
         switch (type) {
             case "currBus": {
                 const bus = buses[busListIndexRef.current];
-                SpeechOutputProvider.speak(`"${bus.busRouteAbrv || bus.busRouteNm}번", ${bus.adirection} 방면`);
+                if (isFirstRender) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        const guide = isFirstRender ? "버스를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : "";
+                        SpeechOutputProvider.speak(`${guide} "${bus.busRouteAbrv || bus.busRouteNm}번", ${bus.adirection} 방면`);
+                        setIsFirstRender(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${bus.busRouteAbrv || bus.busRouteNm}번", ${bus.adirection} 방면`);
+                }
                 break;
             }
             case "failedReservation": {
@@ -56,7 +69,7 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
                 break;
             }
         }
-    }, [buses]);
+    }, [buses, isFirstRender]);
 
 
     /** 이전 단계로 이동 */
@@ -69,13 +82,17 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
     /** 버스 예약 */
     const handleReserveBus = useCallback(() => {
         reserveBus(selectedStation.stId, selectedStation.arsId, buses[busListIndexRef.current].busRouteId, "boarding").then(({ msg, reservationId }) => {
-            setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
                 setBoarding(new Boarding(selectedStation, buses[busListIndexRef.current], "", reservationId))
-                setStep("waitingBus");
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setStep("waitingBus");
+                }, 1000);
             } else if (msg === "운행 종료되었습니다.") {
+                setIsLoading(false);
                 handleAnnouncement("noVehicleFound");
             } else {
+                setIsLoading(false);
                 handleAnnouncement("failedReservation");
             }
         });
@@ -130,9 +147,10 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={50}
+                    onInit={() => { buses.length <= 1 && handleAnnouncement("currBus"); }}
                     onSlideChange={handleSlideChange}
                     speed={300}
-                    loop={true}
+                    loop={buses.length > 1 ? true : false}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >

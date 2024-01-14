@@ -28,6 +28,7 @@ interface BusArrivalInfo {
 
 export default function WaitingBus({ setStep, boarding, setBoarding, setDestinations }: WaitingBusProps) {
     // States
+    const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [busArrInfo, setBusArrInfo] = useState<BusArrivalInfo | null>(null);
 
@@ -78,12 +79,14 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
     const handleArrivedBus = useCallback(() => {
         cancelReservation().then(({ msg, deletedCount }) => {
             getDestinationByRoute(boarding.bus.busRouteId, busArrInfo!.vehId).then(({ msg, itemList }) => {
-                setIsLoading(false);
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     const stIdx = itemList.findIndex((item) => item.stNm === boarding.station.stNm);
                     setDestinations(itemList.slice(stIdx));
                 }
-                setStep("arrivalBus");
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setStep("arrivalBus");
+                }, 1000);
             });
         });
     }, [boarding.bus.busRouteId, boarding.station.stNm, busArrInfo, setDestinations, setStep]);
@@ -139,32 +142,30 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
     }, []);
 
 
-    /** 예약한 버스가 도착했는지 2초마다 확인함 */
+    /** 첫번쨰 랜더링일 때는 바로 버스 도착정보를 체크함 */
     useEffect(() => {
-        const timer = setTimeout(() => { handleCheckBusArrival(); }, 2500);
+        if (isFirstRender) {
+            handleCheckBusArrival();
+            setIsFirstRender(false);
+        }
+    }, [isFirstRender, setIsFirstRender, handleCheckBusArrival]);
 
+
+    /** 예약한 버스가 도착했는지 12초마다 확인함 */
+    useEffect(() => {
         if (intervalIdRef.current !== null) {
             clearInterval(intervalIdRef.current);
             intervalIdRef.current = null;
         }
-        intervalIdRef.current = setInterval(handleCheckBusArrival, 10000);
+        intervalIdRef.current = setInterval(handleCheckBusArrival, 12000);
 
         return () => {
-            clearTimeout(timer);
             if (intervalIdRef.current !== null) {
                 clearInterval(intervalIdRef.current);
                 intervalIdRef.current = null;
             }
         }
     }, [handleCheckBusArrival]);
-
-
-    /** 대기중 메시지 이벤트 */
-    useEffect(() => {
-        const timer = setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
-        return () => clearTimeout(timer);
-    }, [handleAnnouncement]);
-
 
 
     // Render
@@ -176,7 +177,7 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
                 tabIndex={1}
             >
                 <BusName>{boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}</BusName>
-                <WiatingMessage>{"대기중"}</WiatingMessage>
+                <WiatingMessage>{"버스 대기중"}</WiatingMessage>
             </ReservationContainer>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >

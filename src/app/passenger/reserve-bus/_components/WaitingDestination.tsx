@@ -22,6 +22,7 @@ interface WaitingDestinationProps {
 
 export default function WaitingDestination({ setStep, boarding, destinations, selectedDestination }: WaitingDestinationProps) {
     // States
+    const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [desPosIdx, setDesPosIdx] = useState(-1);
     const [curPosIdx, setCurPosIdx] = useState(-1);
@@ -118,18 +119,24 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
     }, []);
 
 
-    /** 예약한 버스가 도착했는지 2초마다 확인함 */
+    /** 첫번쨰 랜더링일 때는 바로 버스 도착정보를 체크함 */
     useEffect(() => {
-        const timer = setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
+        if (isFirstRender) {
+            handleCheckDestinationArrival();
+            setIsFirstRender(false);
+        }
+    }, [isFirstRender, setIsFirstRender, handleCheckDestinationArrival]);
 
+
+    /** 예약한 버스가 도착했는지 12초마다 확인함 */
+    useEffect(() => {
         if (intervalIdRef.current !== null) {
             clearInterval(intervalIdRef.current);
             intervalIdRef.current = null;
         }
-        intervalIdRef.current = setInterval(handleCheckDestinationArrival, 10000);
+        intervalIdRef.current = setInterval(handleCheckDestinationArrival, 12000);
 
         return () => {
-            clearTimeout(timer);
             if (intervalIdRef.current !== null) {
                 clearInterval(intervalIdRef.current);
                 intervalIdRef.current = null;
@@ -144,13 +151,6 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
     }, [destinations, selectedDestination.seq]);
 
 
-    /** 대기중 메시지 이벤트 */
-    useEffect(() => {
-        const timer = setTimeout(() => { handleAnnouncement("arrivalInfo"); }, 400);
-        return () => clearTimeout(timer);
-    }, [handleAnnouncement]);
-
-
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
@@ -160,7 +160,7 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
                 tabIndex={1}
             >
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
-                <WiatingMessage>{"대기중"}</WiatingMessage>
+                <WiatingMessage>{"목적지로 이동중"}</WiatingMessage>
             </ReservationContainer>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >

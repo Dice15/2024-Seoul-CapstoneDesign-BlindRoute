@@ -65,6 +65,12 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
     }, []);
 
 
+    /** 음성 인식 종료 */
+    const handleStopSTT = useCallback(() => {
+        SpeechInputProvider.stopRecognition();
+    }, []);
+
+
     /** 이전 단계로 이동 */
     const handleBackToHome = useCallback(() => {
         setIsLoading(false);
@@ -76,14 +82,16 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
     const handleGetStations = useCallback(() => {
         if (stationName === "") {
             handleAnnouncement("noWordsDetected");
-            setIsLoading(false);
         } else {
             getStations(stationName).then(({ msg, itemList }) => {
-                setIsLoading(false);
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     setStations(itemList);
-                    setStep("selectStation");
+                    setTimeout(() => {
+                        setIsLoading(false);
+                        setStep("selectStation");
+                    }, 1000)
                 } else {
+                    setIsLoading(false);
                     handleAnnouncement("noStationsFound");
                 }
             });
@@ -91,7 +99,7 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
     }, [handleAnnouncement, setStations, setStep, stationName]);
 
 
-    /** 음성 인식 시작 및 종료 */
+    /** 음성 인식 시작 */
     const handleVoiceRecognition = useCallback(() => {
         SpeechOutputProvider.stopSpeak();
         handleStationNameSTT();
@@ -103,13 +111,17 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
         onSwipedLeft: useCallback(() => {
             setIsLoading(true);
             VibrationProvider.vibrate(1000);
-            setTimeout(() => { handleGetStations(); }, 1000);
-        }, [handleGetStations]),
+            setTimeout(() => {
+                handleStopSTT();
+                handleGetStations();
+            }, 1000);
+        }, [handleGetStations, handleStopSTT]),
         onSwipedRight: useCallback(() => {
             VibrationProvider.vibrate(1000);
+            handleStopSTT();
             setIsLoading(true);
             handleBackToHome();
-        }, [handleBackToHome]),
+        }, [handleBackToHome, handleStopSTT]),
         trackMouse: true
     });
 

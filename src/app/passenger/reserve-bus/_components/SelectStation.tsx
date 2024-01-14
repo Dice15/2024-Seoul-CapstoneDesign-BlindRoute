@@ -33,6 +33,7 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
 
 
     /* State */
+    const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -42,7 +43,19 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
         switch (type) {
             case "currStation": {
                 const station = stations[stationListIndexRef.current];
-                SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
+                if (isFirstRender) {
+                    const delay = 700;
+                    for (let i = 0; i < delay; i += 50) {
+                        setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
+                    }
+                    setTimeout(() => {
+                        const guide = isFirstRender ? "정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : "";
+                        SpeechOutputProvider.speak(`${guide} "${station.stNm}", ${station.stDir} 방면`);
+                        setIsFirstRender(false);
+                    }, delay)
+                } else {
+                    SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
+                }
                 break;
             }
             case "noBusesFound": {
@@ -50,7 +63,7 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
                 break;
             }
         }
-    }, [stations]);
+    }, [isFirstRender, stations]);
 
 
     /** 이전 단계로 이동 */
@@ -63,12 +76,15 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
     /** 선택한 정류장를 경유하는 버스노선을 가져옴 */
     const handleGetBuses = useCallback(() => {
         getBuses(stations[stationListIndexRef.current].arsId).then(({ msg, itemList }) => {
-            setIsLoading(false);
             if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                 setSelectedStation(stations[stationListIndexRef.current])
                 setBuses(itemList);
-                setStep("selectBus");
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setStep("selectBus");
+                }, 1000);
             } else {
+                setIsLoading(false);
                 handleAnnouncement("noBusesFound");
             }
         });
@@ -123,9 +139,10 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
                 <Swiper
                     slidesPerView={1}
                     spaceBetween={50}
+                    onInit={() => { stations.length <= 1 && handleAnnouncement("currStation"); }}
                     onSlideChange={handleSlideChange}
                     speed={300}
-                    loop={true}
+                    loop={stations.length > 1 ? true : false}
                     direction="vertical"
                     style={{ height: "100%", width: "100%" }}
                 >

@@ -27,6 +27,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     }
                 );
                 const { comMsgHeader, msgHeader, msgBody } = responseData.data;
+                console.log(msgHeader.headerMsg, msgBody.itemList[0].stOrd, msgBody.itemList[0].stId)
 
                 if (comMsgHeader.errMsg) {
                     response.status(500).json({ msg: msgHeader.headerMsg, item: null });
