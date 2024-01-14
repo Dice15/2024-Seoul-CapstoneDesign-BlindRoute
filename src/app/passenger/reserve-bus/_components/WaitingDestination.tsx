@@ -52,7 +52,7 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
                     }
                     setTimeout(() => {
                         const guide = isFirstAnnouncement ? "목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다." : "";
-                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
                         setIsFirstAnnouncement(false);
                     }, delay)
                 } else {
