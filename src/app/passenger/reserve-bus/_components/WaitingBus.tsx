@@ -32,7 +32,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     // Ref
     const focusBlankRef = useRef<HTMLDivElement>(null);
-    const intervalIdRef = useRef<number | null>(null);
+    const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
 
     // Handler
@@ -62,11 +62,15 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                 clearInterval(intervalIdRef.current);
             }
 
-            setIsLoading(false);
-            setReserveStep({
-                prev: "waitingBus",
-                curr: "selectBus"
-            });
+            setTimeout(() => {
+                SpeechOutputProvider.speak("버스 예약을 취소하였습니다.").then(() => {
+                    setIsLoading(false);
+                    setReserveStep({
+                        prev: "waitingBus",
+                        curr: "selectBus"
+                    });
+                });
+            }, 200);
         });
     }
 
@@ -129,7 +133,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     };
 
 
-    /** 예약한 버스가 도착했는지 2초마다 확인함 */
+
     useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
@@ -137,9 +141,10 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
     }, []);
 
 
+    /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
         setTimeout(() => { handleCheckBusArrival(); }, 2500);
-        intervalIdRef.current = window.setInterval(handleCheckBusArrival, 10000);
+        intervalIdRef.current = setInterval(handleCheckBusArrival, 10000);
 
         return () => {
             if (intervalIdRef.current !== null) {

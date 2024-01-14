@@ -29,7 +29,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     // Ref
     const focusBlankRef = useRef<HTMLDivElement>(null);
-    const intervalIdRef = useRef<number | null>(null);
+    const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
 
     // Handler
@@ -58,11 +58,15 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
                 intervalIdRef.current = null;
             }
 
-            setIsLoading(false);
-            setReserveStep({
-                prev: "waitingDestination",
-                curr: "selectDestination"
-            });
+            setTimeout(() => {
+                SpeechOutputProvider.speak("목적지 예약을 취소하였습니다.").then(() => {
+                    setIsLoading(false);
+                    setReserveStep({
+                        prev: "waitingDestination",
+                        curr: "selectDestination"
+                    });
+                });
+            }, 200);
         });
     }
 
@@ -135,7 +139,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     useEffect(() => {
         setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
-        intervalIdRef.current = window.setInterval(handleCheckDestinationArrival, 10000);
+        intervalIdRef.current = setInterval(handleCheckDestinationArrival, 10000);
 
         return () => {
             if (intervalIdRef.current !== null) {

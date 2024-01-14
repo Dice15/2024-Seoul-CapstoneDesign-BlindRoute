@@ -57,43 +57,43 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
     setTimeout(() => {
         switch (step) {
             case "searchStation": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "selectStation": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak(`정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "selectBus": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak(`버스를 선택하세요. 위아래 스와이프로 버스를 선택할 수 있습니다.`);
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "waitingBus": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak(`버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다.`);
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "arrivalBus": {
-                isPageInit && VibrationProvider.vibrate(5000);
                 SpeechOutputProvider.speak(`버스가 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 목적지 선택 페이지로 이동합니다.`);
+                isPageInit && VibrationProvider.vibrate(5000);
                 break;
             }
             case "selectDestination": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak(`목적지를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "waitingDestination": {
-                isPageInit && VibrationProvider.vibrate(1000);
                 SpeechOutputProvider.speak(`버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다.`);
+                isPageInit && VibrationProvider.vibrate(1000);
                 break;
             }
             case "arrivalDestination": {
-                isPageInit && VibrationProvider.vibrate(5000);
                 SpeechOutputProvider.speak(`목적지에 도착했습니다. ${isPageInit ? "10초 뒤" : "잠시 후"} 자동으로 홈 페이지로 이동합니다.`);
+                isPageInit && VibrationProvider.vibrate(5000);
                 break;
             }
         }
