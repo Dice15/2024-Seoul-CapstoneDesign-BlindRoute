@@ -88,30 +88,29 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
     // Effects
     useEffect(() => {
-        VibrationProvider.vibrate(5000);
-        setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
-    }, [reservedBus]);
-
-
-    useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
         }
     }, []);
 
 
+    useEffect(() => {
+        VibrationProvider.vibrate(5000);
+        setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
+    }, [reservedBus]);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
-                tabIndex={1}
             >
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>
             </ReservationContainer>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >
     );
 }

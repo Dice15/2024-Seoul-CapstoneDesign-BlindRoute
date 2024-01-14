@@ -131,7 +131,6 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <BusInfoContainer ref={busInfoContainer}>
                 <Swiper
@@ -156,6 +155,7 @@ export default function SelectBus({ setReserveStep, selectedStation, buses, setR
                     ))}
                 </Swiper>
             </BusInfoContainer>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >
     );
 }

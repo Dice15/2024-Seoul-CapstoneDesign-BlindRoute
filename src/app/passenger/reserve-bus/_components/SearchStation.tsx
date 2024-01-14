@@ -135,7 +135,6 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <audio ref={audioContainer}>
                 <source ref={audioSource} />
@@ -153,6 +152,7 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
             >
                 {isRecognizing ? "음성인식 종료" : "음성인식 시작"}
             </ButtonVoiceRecognition>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper>
     );
 }

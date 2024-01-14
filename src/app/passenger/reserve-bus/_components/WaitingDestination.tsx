@@ -91,7 +91,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
 
     /** 탑승한 차량의 위치를 추적하여 목적지에 도착했는지 확인 */
-    const checkBusPosition = async () => {
+    const handleCheckDestinationArrival = async () => {
         const newBusPos = (await getBusPosByVehId(boardingVehId)).currStation;
         if (newBusPos !== null) {
             const newPosIdx = destinations.findIndex((station) => station.seq === newBusPos.seq);
@@ -121,23 +121,22 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
 
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
-        checkBusPosition();
-        const intervalId = setInterval(checkBusPosition, 10000);
-        return () => { clearInterval(intervalId); }
-    }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
-
-
-    useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
         }
     }, []);
 
 
+    useEffect(() => {
+        setTimeout(() => { handleCheckDestinationArrival(); }, 2500);
+        const intervalId = setInterval(handleCheckDestinationArrival, 10000);
+        return () => { clearInterval(intervalId); }
+    }, [boardingVehId, destinations, desPosIdx, setIsLoading, setCurPosIdx]);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
@@ -146,6 +145,7 @@ export default function WaitingDestination({ setReserveStep, boardingVehId, dest
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
                 <WiatingMessage>{"대기중"}</WiatingMessage>
             </ReservationContainer>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >
     );
 }

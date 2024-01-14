@@ -71,30 +71,29 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
     // Effects
     useEffect(() => {
-        VibrationProvider.vibrate(5000);
-        setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
-    }, [selectedDestination]);
-
-
-    useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
         }
     }, []);
 
 
+    useEffect(() => {
+        VibrationProvider.vibrate(5000);
+        setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
+    }, [selectedDestination]);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
-                tabIndex={1}
             >
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
                 <ArrivalMessage>{"정류장에 도착했습니다!"}</ArrivalMessage>
             </ReservationContainer>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >
     );
 }

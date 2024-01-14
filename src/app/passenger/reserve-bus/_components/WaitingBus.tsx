@@ -126,25 +126,23 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
 
     /** 예약한 버스가 도착했는지 2초마다 확인함 */
     useEffect(() => {
-        handleCheckBusArrival();
-        const intervalId = setInterval(handleCheckBusArrival, 10000);
-        return () => { clearInterval(intervalId); }
-    }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
-
-
-    useEffect(() => {
         if (focusBlankRef.current) {
             focusBlankRef.current.focus();
         }
     }, []);
 
 
+    useEffect(() => {
+        setTimeout(() => { handleCheckBusArrival(); }, 2500);
+        const intervalId = setInterval(handleCheckBusArrival, 10000);
+        return () => { clearInterval(intervalId); }
+    }, [reservedBus, busArrInfo, setIsLoading, setBusArrInfo, setBoardingVehId]);
+
+
     // Render
     return (
         <Wrapper {...handleHorizontalSwiper}>
-            <FocusBlank ref={focusBlankRef} tabIndex={0} />
             <LoadingAnimation active={isLoading} />
-
             <ReservationContainer
                 onClick={handleBusInfoClick}
                 tabIndex={1}
@@ -152,6 +150,7 @@ export default function WaitingBus({ setReserveStep, reservedBus, setBoardingVeh
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <WiatingMessage>{"대기중"}</WiatingMessage>
             </ReservationContainer>
+            <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper >
     );
 }
