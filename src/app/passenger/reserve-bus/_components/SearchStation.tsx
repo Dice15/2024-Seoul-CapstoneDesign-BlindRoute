@@ -35,7 +35,6 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
 
     // States
     const [isLoading, setIsLoading] = useState(false);
-    const [isRecognizing, setIsRecognizing] = useState(false);
     const [stationName, setStationName] = useState<string>("");
 
 
@@ -96,15 +95,9 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
 
 
     /** 음성 인식 시작 및 종료 */
-    const handleVoiceRecognition = (recognizingType: boolean) => {
-        setTimeout(() => {
-            SpeechOutputProvider.stopSpeak();
-            if (recognizingType) {
-                SpeechInputProvider.stopRecognition();
-            } else {
-                handleStationNameSTT();
-            }
-        }, 200);
+    const handleVoiceRecognition = () => {
+        SpeechOutputProvider.stopSpeak();
+        handleStationNameSTT();
     };
 
 
@@ -144,13 +137,10 @@ export default function SearchStation({ setReserveStep, setStations }: SearchSta
                 <TextareaStationName placeholder="정류장 입력" maxLength={50} value={stationName} onChange={(e) => setStationName(e.target.value)} />
             </StationNameContainer>
             <ButtonVoiceRecognition
-                onClick={() => {
-                    handleVoiceRecognition(isRecognizing);
-                    setIsRecognizing(!isRecognizing);
-                }}
+                onClick={handleVoiceRecognition}
                 tabIndex={2}
             >
-                {isRecognizing ? "음성인식 종료" : "음성인식 시작"}
+                {"음성인식 시작"}
             </ButtonVoiceRecognition>
             <FocusBlank ref={focusBlankRef} tabIndex={0} />
         </Wrapper>
