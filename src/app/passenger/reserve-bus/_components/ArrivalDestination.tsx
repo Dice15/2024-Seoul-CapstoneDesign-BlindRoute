@@ -78,7 +78,6 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
 
 
     useEffect(() => {
-        VibrationProvider.vibrate(5000);
         setTimeout(() => { setIsLoading(true); handleBackToHome(); }, 10000);
     }, [selectedDestination]);
 
@@ -89,6 +88,7 @@ export default function ArrivalDestination({ selectedDestination }: ArrivalDesti
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <ReservationDestinationName>{selectedDestination.stNm}</ReservationDestinationName>
                 <ArrivalMessage>{"정류장에 도착했습니다!"}</ArrivalMessage>
@@ -110,6 +110,8 @@ const Wrapper = styled.div`
 
 
 const FocusBlank = styled.div`
+    height:0px;
+    width: 85%;
 `;
 
 

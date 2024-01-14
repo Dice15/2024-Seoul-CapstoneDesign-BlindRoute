@@ -91,7 +91,7 @@ function stepAnnouncement(step: ReserveBusStep, isPageInit: boolean) {
                 break;
             }
         }
-    }, isPageInit ? 750 : 0);
+    }, isPageInit ? 400 : 0);
 }
 
 

@@ -162,6 +162,8 @@ const Wrapper = styled.div`
 
 
 const FocusBlank = styled.div`
+    height:0px;
+    width: 85%;
 `;
 
 

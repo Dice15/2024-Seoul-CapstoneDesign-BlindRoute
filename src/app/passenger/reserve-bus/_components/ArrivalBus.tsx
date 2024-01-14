@@ -95,7 +95,6 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
 
 
     useEffect(() => {
-        VibrationProvider.vibrate(5000);
         setTimeout(() => { setIsLoading(true); handleGoNextStep(); }, 10000);
     }, [reservedBus]);
 
@@ -106,6 +105,7 @@ export default function ArrivalBus({ setReserveStep, reservedBus }: ArrivalBusPr
             <LoadingAnimation active={isLoading} />
             <ReservationContainer
                 onClick={handleBusInfoClick}
+                tabIndex={1}
             >
                 <BusName>{reservedBus.bus.busRouteAbrv || reservedBus.bus.busRouteNm}</BusName>
                 <ArrivalMessage>{"버스가 도착했습니다!"}</ArrivalMessage>
@@ -127,6 +127,8 @@ const Wrapper = styled.div`
 
 
 const FocusBlank = styled.div`
+    height:0px;
+    width: 85%;
 `;
 
 
