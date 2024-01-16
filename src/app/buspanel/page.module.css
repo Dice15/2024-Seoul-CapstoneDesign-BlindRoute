@@ -1,0 +1,22 @@
+.wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.start {
+    height: 90%;
+    width: 90%;
+    border: 1px solid var(--main-border-color);
+    border-radius: 8px;
+    background-color: var(--main-color);
+    color: var(--main-font-color);
+    font-size: 7vw;
+    font-weight: 550;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}

@@ -5,6 +5,7 @@
 import axios from "axios";
 import IStation, { Station } from "../type/Station";
 import IBus, { Bus } from "../type/Bus";
+import IBusPanel, { BusPanel } from "../type/BusPanel";
 
 
 /**
@@ -367,6 +368,101 @@ export async function getBusPosByVehId(vehId: string): Promise<{
         return {
             msg: "버스 위치 정보 요청 중 오류가 발생했습니다.",
             currStation: null
+        };
+    }
+}
+
+
+
+
+/*****************************************************************
+ * 서버에서 버스 노선번호와 차량번호를 가져오는 API 메서드입니다.
+ *****************************************************************/
+
+/** 버스 노선번호와 차량번호 응답 데이터 타입 */
+type GetBusPanelResponse = {
+    msg: string;
+    item: IBusPanel | null;
+};
+
+/**
+ * 서버에서 버스 노선번호와 차량번호 정보를 가져옵니다.
+ * @returns {Promise<GetBusPanelResponse>}
+ * 버스 노선번호와 차량번호 정보와 처리 결과 메시지를 포함하는 객체를 반환합니다.
+ * 요청이 실패하면 null과 "FAIL" 메시지를 반환합니다.
+ */
+export async function getBusPanel(): Promise<{
+    msg: string;
+    item: BusPanel | null;
+}> {
+    try {
+        const response = await axios.get<GetBusPanelResponse>(
+            getApiUrl(`/api/buspanelinfo/getPanelVehInfo`),
+        );
+
+        const { msg, item } = response.data;
+        return {
+            msg,
+            item: item === null ? null : BusPanel.fromObject(item)
+        };
+    } catch (error) {
+        return {
+            msg: "버스 노선번호와 차량번호 정보 요청 중 오류가 발생했습니다.",
+            item: null
+        };
+    }
+}
+
+
+
+
+/*****************************************************************
+ * 버스가 향하는 정류장의 이름과 예약 개수를 가져오는 API 메서드입니다.
+ *****************************************************************/
+
+/** 정류장 이름과 예약 개수 응답 데이터 타입 */
+type GetStationReservationResponse = {
+    msg: string;
+    item: {
+        stNm: string;
+        boardingNum: string;
+        alightingNum: string;
+    } | null;
+};
+
+/**
+ * 서버에서 버스 차량번호를 기반으로 해당 버스가 향하는 정류장의 이름과 예약 개수를 가져옵니다.
+ * @param busRouteId 버스 노선 ID
+ * @param vehId 버스 차량 ID
+ * @returns {Promise<GetStationReservationResponse>}
+ * 정류장의 이름과 예약 개수를 포함하는 객체를 반환합니다.
+ * 요청이 실패하면 null과 오류 메시지를 반환합니다.
+ */
+export async function getStationReservation(busRouteId: string, vehId: string): Promise<{
+    msg: string;
+    item: {
+        stNm: string;
+        boardingNum: string;
+        alightingNum: string;
+    } | null;
+}> {
+    try {
+        const response = await axios.get<GetStationReservationResponse>(
+            getApiUrl(`/api/businfo/getStationReservation`),
+            {
+                params: { busRouteId, vehId }
+            }
+        );
+
+        const { msg, item } = response.data;
+        return {
+            msg: msg,
+            item: item
+        };
+    } catch (error) {
+        return {
+            msg: "정류장 예약 정보 요청 중 오류가 발생했습니다.",
+            item: null
         };
     }
 }

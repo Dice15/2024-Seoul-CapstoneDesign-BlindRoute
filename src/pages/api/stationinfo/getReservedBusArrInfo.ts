@@ -35,8 +35,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 resultType: "json"
                             }
                         }
-                    ).then(async (stationInfo) => {
-                        const busArrInfo = stationInfo.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === reservation.busRouteId);
+                    ).then(async (stationBusRouteInfo) => {
+                        const busArrInfo = stationBusRouteInfo.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === reservation.busRouteId);
                         if (busArrInfo && busArrInfo.arrmsg1 !== "운행종료") {
                             console.log(busArrInfo.arrmsg1, busArrInfo.vehId1)
                             return {
@@ -77,6 +77,7 @@ interface ReservationDbResponse {
     owner: string;
     arsId: string;
     busRouteId: string;
+    reservationType: 'boarding' | 'alighting';
 }
 
 
