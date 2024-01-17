@@ -42,16 +42,16 @@ export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
                         setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
                     }
                     setTimeout(() => {
-                        SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다! 10초 뒤 목적지 선택 페이지로 이동합니다.`);
+                        SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}", "${boarding.bus.adirection} 방면" 버스가 도착했습니다! 10초 뒤 목적지 선택 페이지로 이동합니다.`);
                         setIsFirstAnnouncement(false);
                     }, delay)
                 } else {
-                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}" 버스가 도착했습니다! 잠시 후 목적지 선택 페이지로 이동합니다.`);
+                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv || boarding.bus.busRouteNm}", "${boarding.bus.adirection} 방면" 버스가 도착했습니다! 잠시 후 목적지 선택 페이지로 이동합니다.`);
                 }
                 break;
             }
         }
-    }, [boarding.bus.busRouteAbrv, boarding.bus.busRouteNm, isFirstAnnouncement]);
+    }, [boarding.bus.adirection, boarding.bus.busRouteAbrv, boarding.bus.busRouteNm, isFirstAnnouncement]);
 
 
     /** 이전 단계로 이동 */

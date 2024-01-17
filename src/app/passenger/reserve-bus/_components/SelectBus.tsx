@@ -51,7 +51,7 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
                         setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
                     }
                     setTimeout(() => {
-                        const guide = isFirstRender ? "버스를 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : "";
+                        const guide = isFirstRender ? "버스를 선택하세요. 위아래 스와이프로 버스를 선택할 수 있습니다." : "";
                         SpeechOutputProvider.speak(`${guide} "${bus.busRouteAbrv || bus.busRouteNm}번", ${bus.adirection} 방면`);
                         setIsFirstRender(false);
                     }, delay)

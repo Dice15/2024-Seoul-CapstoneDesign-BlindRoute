@@ -106,7 +106,7 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
     const handleHorizontalSwiper = useSwipeable({
         onSwipedLeft: useCallback(() => {
             setIsLoading(true);
-            setTimeout(() => { handleGetBuses(); }, 500);
+            setTimeout(() => { handleGetBuses(); }, 1000);
         }, [handleGetBuses]),
         onSwipedRight: useCallback(() => {
             setIsLoading(true);

@@ -101,7 +101,7 @@ export default function BusAnnouncement() {
             clearInterval(intervalIdRef.current);
             intervalIdRef.current = null;
         }
-        intervalIdRef.current = setInterval(handleCheckBusArrival, 12000);
+        intervalIdRef.current = setInterval(handleCheckBusArrival, 4000);
 
         return () => {
             if (intervalIdRef.current !== null) {
