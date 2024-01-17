@@ -29,7 +29,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         }
                     }
                 ).then(async (getBusPosByVehIdResponse) => {
-                    const station = await axios.get<GetArrInfoByRouteAllApiResponse>(
+                    const vehInfo = getBusPosByVehIdResponse.data.msgBody.itemList[0];
+                    const destination = await axios.get<GetArrInfoByRouteAllApiResponse>(
                         "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRouteAll",
                         {
                             params: {
@@ -38,22 +39,59 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 resultType: "json"
                             }
                         }
-                    ).then((getArrInfoByRouteAllResponse) => {
-                        return getArrInfoByRouteAllResponse.data.msgBody.itemList.find((item) => item.stId === getBusPosByVehIdResponse.data.msgBody.itemList[0].stId)
+                    ).then(async (getArrInfoByRouteAllResponse) => {
+                        const stations = getArrInfoByRouteAllResponse.data.msgBody.itemList;
+                        const currStationIdx = stations.findIndex((item) => item.stId === vehInfo.stId);
+                        const nearbyStation = (await axios.get<GetStationByPosApiResponse>(
+                            "http://ws.bus.go.kr/api/rest/stationinfo/getStationByPos",
+                            {
+                                params: {
+                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                    tmX: vehInfo.tmX,
+                                    tmY: vehInfo.tmY,
+                                    radius: 125,
+                                    resultType: "json"
+                                }
+                            }
+                        )).data.msgBody.itemList;
+                        const nearbyDestination = nearbyStation === null ? undefined : nearbyStation.find((item) => item.arsId === stations[currStationIdx + 1].arsId);
+
+                        console.log(nearbyStation && nearbyStation.length);
+                        console.log(stations.length);
+                        console.log(stations[currStationIdx].stNm, stations[currStationIdx + 1].stNm)
+
+                        return currStationIdx === -1 || currStationIdx >= stations.length - 1
+                            ? undefined
+                            : {
+                                recentDestination: stations[currStationIdx],
+                                currDestination: nearbyDestination,
+                                nextDestination: nearbyDestination === undefined
+                                    ? currStationIdx + 1 < stations.length ? stations[currStationIdx + 1].stNm : undefined
+                                    : currStationIdx + 2 < stations.length ? stations[currStationIdx + 2].stNm : undefined
+                            };
                     });
 
-                    return station === undefined
+                    return destination === undefined
                         ? null
-                        : {
-                            stNm: station.stNm,
-                            boardingNum: (await db.collection("boarding_reservations").find<ReservationDbResponse>({ stId: station.stId }).toArray()).length.toString(),
-                            alightingNum: (await db.collection("alighting_reservations").find<ReservationDbResponse>({ stId: station.stId }).toArray()).length.toString(),
-                        }
+                        : destination.currDestination !== undefined
+                            ? {
+                                currStNm: destination.currDestination.stationNm,
+                                nextStNm: destination.nextDestination,
+                                currBoardingNum: (await db.collection("boarding_reservations").find<ReservationDbResponse>({ stId: destination.currDestination.stationId }).toArray()).length.toString(),
+                                currAlightingNum: (await db.collection("alighting_reservations").find<ReservationDbResponse>({ stId: destination.currDestination.stationId }).toArray()).length.toString(),
+                            }
+                            : {
+                                currStNm: destination.recentDestination.stNm,
+                                nextStNm: destination.nextDestination,
+                                currBoardingNum: (await db.collection("boarding_reservations").find<ReservationDbResponse>({ stId: destination.recentDestination.stId }).toArray()).length.toString(),
+                                currAlightingNum: (await db.collection("alighting_reservations").find<ReservationDbResponse>({ stId: destination.recentDestination.stId }).toArray()).length.toString(),
+                            }
                 });
 
                 response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: stationReservation });
 
             } catch (error) {
+                console.log(error);
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", item: null });
             }
             break;
@@ -89,6 +127,15 @@ interface GetArrInfoByRouteAllApiResponse {
     msgHeader: MsgHeader;
     msgBody: {
         itemList: BusStopInfo[];
+    };
+}
+
+
+interface GetStationByPosApiResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: StationInfo[];
     };
 }
 
@@ -218,4 +265,17 @@ interface BusStopInfo {
     arrmsg1: string;
     arrmsg2: string;
     deTourAt: string;
+}
+
+
+interface StationInfo {
+    stationId: string;
+    stationNm: string;
+    gpsX: string;
+    gpsY: string;
+    posX: string;
+    posY: string;
+    stationTp: string;
+    arsId: string;
+    dist: string;
 }

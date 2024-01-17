@@ -31,10 +31,14 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 }
                             }
                         ).then(async (stationInfo) => {
-                            return stationInfo.data.msgBody.itemList.length === 0 ? null : {
-                                busRouteId: stationInfo.data.msgBody.itemList[0].busRouteId,
-                                vehId: stationInfo.data.msgBody.itemList[0].vehId1
-                            }
+                            const station = stationInfo.data.msgBody.itemList.find((item) => item.busRouteId === recentBoadingReservation.busRouteId);
+
+                            return station === undefined
+                                ? null
+                                : {
+                                    busRouteId: station.busRouteId,
+                                    vehId: station.vehId1
+                                }
                         });
                 });
 

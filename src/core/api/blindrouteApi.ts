@@ -380,35 +380,35 @@ export async function getBusPosByVehId(vehId: string): Promise<{
  *****************************************************************/
 
 /** 버스 노선번호와 차량번호 응답 데이터 타입 */
-type GetBusPanelResponse = {
+type GetPanelInfoResponse = {
     msg: string;
     item: IBusPanel | null;
 };
 
 /**
  * 서버에서 버스 노선번호와 차량번호 정보를 가져옵니다.
- * @returns {Promise<GetBusPanelResponse>}
+ * @returns {Promise<GetPanelInfoResponse>}
  * 버스 노선번호와 차량번호 정보와 처리 결과 메시지를 포함하는 객체를 반환합니다.
  * 요청이 실패하면 null과 "FAIL" 메시지를 반환합니다.
  */
-export async function getBusPanel(): Promise<{
+export async function getPanelInfo(): Promise<{
     msg: string;
-    item: BusPanel | null;
+    busPanel: BusPanel | null;
 }> {
     try {
-        const response = await axios.get<GetBusPanelResponse>(
-            getApiUrl(`/api/buspanelinfo/getPanelVehInfo`),
+        const response = await axios.get<GetPanelInfoResponse>(
+            getApiUrl(`/api/buspanelinfo/getPanelInfo`),
         );
 
         const { msg, item } = response.data;
         return {
             msg,
-            item: item === null ? null : BusPanel.fromObject(item)
+            busPanel: item === null ? null : BusPanel.fromObject(item)
         };
     } catch (error) {
         return {
             msg: "버스 노선번호와 차량번호 정보 요청 중 오류가 발생했습니다.",
-            item: null
+            busPanel: null
         };
     }
 }
@@ -421,12 +421,13 @@ export async function getBusPanel(): Promise<{
  *****************************************************************/
 
 /** 정류장 이름과 예약 개수 응답 데이터 타입 */
-type GetStationReservationResponse = {
+type GetReservationByPanelResponse = {
     msg: string;
     item: {
-        stNm: string;
-        boardingNum: string;
-        alightingNum: string;
+        currStNm: string;
+        nextStNm: string | undefined;
+        currBoardingNum: string;
+        currAlightingNum: string;
     } | null;
 };
 
@@ -434,21 +435,22 @@ type GetStationReservationResponse = {
  * 서버에서 버스 차량번호를 기반으로 해당 버스가 향하는 정류장의 이름과 예약 개수를 가져옵니다.
  * @param busRouteId 버스 노선 ID
  * @param vehId 버스 차량 ID
- * @returns {Promise<GetStationReservationResponse>}
+ * @returns {Promise<GetReservationByPanelResponse>}
  * 정류장의 이름과 예약 개수를 포함하는 객체를 반환합니다.
  * 요청이 실패하면 null과 오류 메시지를 반환합니다.
  */
-export async function getStationReservation(busRouteId: string, vehId: string): Promise<{
+export async function getReservationByPanel(busRouteId: string, vehId: string): Promise<{
     msg: string;
-    item: {
-        stNm: string;
-        boardingNum: string;
-        alightingNum: string;
+    stResInfo: {
+        currStNm: string;
+        nextStNm: string | undefined;
+        currBoardingNum: string;
+        currAlightingNum: string;
     } | null;
 }> {
     try {
-        const response = await axios.get<GetStationReservationResponse>(
-            getApiUrl(`/api/businfo/getStationReservation`),
+        const response = await axios.get<GetReservationByPanelResponse>(
+            getApiUrl(`/api/buspanelinfo/getReservationByPanel`),
             {
                 params: { busRouteId, vehId }
             }
@@ -457,12 +459,12 @@ export async function getStationReservation(busRouteId: string, vehId: string): 
         const { msg, item } = response.data;
         return {
             msg: msg,
-            item: item
+            stResInfo: item
         };
     } catch (error) {
         return {
             msg: "정류장 예약 정보 요청 중 오류가 발생했습니다.",
-            item: null
+            stResInfo: null
         };
     }
 }
