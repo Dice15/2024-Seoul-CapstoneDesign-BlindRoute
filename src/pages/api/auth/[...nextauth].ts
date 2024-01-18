@@ -28,7 +28,7 @@ export const authOptions: AuthOptions = {
             clientId: process.env.BLINDROUTE_GOOGLE_LOCAL_ID,
             clientSecret: process.env.BLINDROUTE_GOOGLE_LOCAL_SECRET,
         }),
-        CredentialsProvider({
+        /*CredentialsProvider({
             // 로그인페이지 폼 자동생성해주는 코드 
             name: "credentials",
             credentials: {
@@ -54,7 +54,7 @@ export const authOptions: AuthOptions = {
                 }
                 return null;
             }
-        })
+        })*/
     ],
 
     // 세션 설정: JWT 방식을 사용하며, 세션의 최대 유지 기간을 30일로 설정합니다.
