@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Blind Route',
   description: '시각장애인을 위한 버스 탑승 보조 시스템 설계',
+  manifest: "/manifest.json",
 }
 
 interface RootLayoutProps {

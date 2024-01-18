@@ -57,7 +57,7 @@ export default function ArrivalBus({ setStep, boarding }: ArrivalBusProps) {
     /** 이전 단계로 이동 */
     const handleBackToHome = useCallback(() => {
         setIsLoading(false);
-        router.replace("./");
+        router.replace("../");
     }, [router]);
 
 

@@ -90,7 +90,7 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
     /** 이전 단계로 이동 */
     const handleBackToHome = useCallback(() => {
         setIsLoading(false);
-        router.replace("./");
+        router.replace("../");
     }, [router]);
 
 
