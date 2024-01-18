@@ -3,7 +3,7 @@
   "background_color": "#FFFFFF",
   "display": "standalone",
   "start_url": "/",
-  "name": "BlindRoute App",
+  "name": "BlindRoute",
   "short_name": "BlindRoute",
   "description": "시각장애인을 위한 버스 탑승 보조 시스템 설계",
   "icons": [
