@@ -7,7 +7,8 @@ import ViewportHeightSetter from '@/core/modules/viewport-setter/ViewportHeightS
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  manifest: "/manifest.json",
+  manifest: "./manifest.json",
+  title: "blindroute"
 }
 
 interface RootLayoutProps {

@@ -1,24 +1,26 @@
 {
+  "id": "BlindRoute",
+  "name": "BlindRoute",
+  "short_name": "BlindRoute",
   "theme_color": "#FFFFFF",
   "background_color": "#FFFFFF",
   "display": "standalone",
+  "orientation": "portrait",
+  "scope": ".",
   "start_url": "/",
-  "name": "BlindRoute",
-  "short_name": "BlindRoute",
-  "description": "시각장애인을 위한 버스 탑승 보조 시스템 설계",
   "icons": [
     {
-      "src": "/icons/favicon.ico",
+      "src": "./icons/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "./icons/icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "./icons/icon-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
