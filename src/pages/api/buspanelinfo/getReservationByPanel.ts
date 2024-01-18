@@ -23,7 +23,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
                     {
                         params: {
-                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY2),
                             vehId: requestParam.vehId,
                             resultType: "json"
                         }
@@ -34,7 +34,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRouteAll",
                         {
                             params: {
-                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY2),
                                 busRouteId: requestParam.busRouteId,
                                 resultType: "json"
                             }
@@ -46,7 +46,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             "http://ws.bus.go.kr/api/rest/stationinfo/getStationByPos",
                             {
                                 params: {
-                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY2),
                                     tmX: vehInfo.tmX,
                                     tmY: vehInfo.tmY,
                                     radius: 125,
@@ -55,10 +55,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             }
                         )).data.msgBody.itemList;
                         const nearbyDestination = nearbyStation === null ? undefined : nearbyStation.find((item) => item.arsId === stations[currStationIdx + 1].arsId);
-
-                        console.log(nearbyStation && nearbyStation.length);
-                        console.log(stations.length);
-                        console.log(stations[currStationIdx].stNm, stations[currStationIdx + 1].stNm)
 
                         return currStationIdx === -1 || currStationIdx >= stations.length - 1
                             ? undefined
@@ -91,7 +87,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 response.status(200).json({ msg: "정상적으로 처리되었습니다.", item: stationReservation });
 
             } catch (error) {
-                console.log(error);
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", item: null });
             }
             break;

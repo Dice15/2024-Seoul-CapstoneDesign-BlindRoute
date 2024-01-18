@@ -20,14 +20,13 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
                     {
                         params: {
-                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY1),
                             vehId: requestParam.vehId,
                             resultType: "json"
                         }
                     }
                 );
                 const { comMsgHeader, msgHeader, msgBody } = responseData.data;
-                console.log(msgHeader.headerMsg, msgBody.itemList[0].stOrd, msgBody.itemList[0].stId)
 
                 if (comMsgHeader.errMsg) {
                     response.status(500).json({ msg: msgHeader.headerMsg, item: null });

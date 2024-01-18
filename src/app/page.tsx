@@ -13,13 +13,13 @@ export default async function AppRoot() {
   // Render
   return (
     <div className={styles.wrapper}>
-      <Link href={"./passenger"} className={styles.linkOps}><button className={styles.btnOps}>사용자 앱</button></Link>
-      <Link href={"./buspanel"} className={styles.linkOps}><button className={styles.btnOps}>버스 내부 IoT</button></Link>
+      <Link href={"./passenger/reserve-bus"} className={styles.linkOps}><button className={styles.btnOps}>시작하기</button></Link>
+      {/* <Link href={"./buspanel"} className={styles.linkOps}><button className={styles.btnOps}>버스 내부 IoT</button></Link> */}
       <AuthButton
         isAuth={isAuth}
         authButtons={{
-          signInButton: <button className={styles.btnOps}>로그인</button>,
-          signOutButton: <button className={styles.btnOps}>로그아웃</button>
+          signInButton: <button className={`${styles.btnOps} ${styles.btnAuth}`}>로그인</button>,
+          signOutButton: <button className={`${styles.btnOps} ${styles.btnAuth}`}>로그아웃</button>
         }}
       />
     </div>

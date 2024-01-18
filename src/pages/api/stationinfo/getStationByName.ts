@@ -20,7 +20,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName",
                     {
                         params: {
-                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
                             stSrch: (requestParam.stationName as string).replace(/\s+/g, ''),
                             resultType: "json"
                         }
@@ -34,7 +34,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
                                 {
                                     params: {
-                                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
                                         arsId: stationInfo.arsId,
                                         resultType: "json"
                                     }

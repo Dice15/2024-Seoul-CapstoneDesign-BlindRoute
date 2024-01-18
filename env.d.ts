@@ -1,7 +1,9 @@
 namespace NodeJS {
     interface ProcessEnv {
-        DATA_API_ENCODING: string;
-        DATA_API_DECODING: string;
+        DATA_API_ENCODING_KEY1: string;
+        DATA_API_ENCODING_KEY2: string;
+        DATA_API_ENCODING_KEY3: string;
+        DATA_API_ENCODING_KEY4: string;
         BLINDROUTE_MONGODB_URI: string;
         BLINDROUTE_NEXTAUTH_SECRET: string;
         BLINDROUTE_GITHUB_LOCAL_ID: string;

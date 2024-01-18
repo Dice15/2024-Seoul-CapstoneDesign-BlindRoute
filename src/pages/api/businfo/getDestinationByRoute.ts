@@ -16,12 +16,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const requestParam = request.query;
-                console.log(requestParam.busRouteId)
                 await axios.get<GetDestinationByRouteApiResponse>(
                     "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute",
                     {
                         params: {
-                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
                             busRouteId: requestParam.busRouteId,
                             resultType: "json"
                         }
@@ -31,7 +30,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId",
                         {
                             params: {
-                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
                                 vehId: requestParam.vehId,
                                 resultType: "json"
                             }
@@ -54,7 +53,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                     "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
                                     {
                                         params: {
-                                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING),
+                                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
                                             arsId: stInfo.arsId,
                                             resultType: "json"
                                         }
