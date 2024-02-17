@@ -24,7 +24,13 @@
 
 </br>
 
-# UI 한눈에 보기
+# UI/UX 설계
+<h3>다음 자료를 참고하여 설계</h3>
+<ul>
+  <li>시각장애인 애플리케이션 콘텐츠 지침</li>
+  <li>중앙대학교 시각장애인을 위한 앱 디자인 논문</li>
+  <li>구글 Talkback 기본 동작 가이드</li>
+</ul>
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/6eecc19e-de1c-4e61-8efd-743375b4e631" width="700">
 </br>
 </br>
