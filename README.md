@@ -29,7 +29,7 @@
 <ul>
   <li>시각장애인 애플리케이션 콘텐츠 지침</li>
   <li>중앙대학교 시각장애인을 위한 앱 디자인 논문</li>
-  <li>구글 Talkback 기본 동작 가이드</li>
+  <li>구글 Talkback 기본 동작 가이드 (안드로이드OS 시각장애인 설정)</li>
 </ul>
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/6eecc19e-de1c-4e61-8efd-743375b4e631" width="700">
 </br>
@@ -55,7 +55,7 @@
 
 # 구동방법
 <h3>링크 : https://blindroute.vercel.app</h3>
-<h4>(모바일 환경에 맞게 구현)</h4>
+<h4>(모바일 환경에 맞게 구현, 시각장애인 설정 구글 talkback과 호환)</h4>
 </br>
 </br>
 
@@ -67,5 +67,7 @@
 </br>
 
 # 상장
+<h4>왼쪽 : 2023 동국대학교 겨울 ICIP & 캡스톤디자인</h4>
+<h4>오른쪽 : 2023 서울 지역사회공헌 캡스톤디자인 Fair (상장은 2024년 2월 말에 지급)</h4>
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/7871f447-0b2e-4cca-a17b-182464ac317f" width="700">
 </br>
