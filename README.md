@@ -39,7 +39,7 @@
 
 
 # 소스코드 바로가기
-- 사용자 웹 페이지 : [userpage](src/app)
+- 사용자 웹 페이지 : [userpage](src/app/passenger)
 - API 및 Auth 구현 : [apiroutes](src/pages/api)
 - 미들 웨어 구현 : [middleware](src/middleware.ts)
 </br>
