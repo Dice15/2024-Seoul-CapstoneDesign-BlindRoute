@@ -3,24 +3,24 @@
 </br>
 
 # 프로젝트 개요
-<h3>2023 서울 지역사회공헌 캡스톤디자인 Fair - 벨류업 프로젝트</h3>
-<p>-> 기간 : 2023.03 ~ 2023.11 / 우수상(의장상), 혁신상(회장상)</p>
+<h3>2023 서울 지역사회공헌 캡스톤디자인 Fair (최종 벨류업)</h3>
+<p>-> 기간 : 2023.12 ~ 2024.01 / 우수상(의장상), 혁신상(회장상)</p>
 
-|전공|이름|역할|주요 업무|
-|-------|-----|-----|-----|
-|컴퓨터공학전공|문정훈|팀장|웹 풀스택 개발 (Nextjs, Typescript)|
-|컴퓨터공학전공|손기민|팀원|웹 테스팅, 문서 관리 및 발표|
-|컴퓨터공학전공|정채우|팀원|복지관 인터뷰, 담당 교수님 면담|
+|전공|이름|역할|주요 업무|기술 스택|
+|-------|-----|-----|-----|-----|
+|컴퓨터공학전공|문정훈|팀장|웹 풀스택 개발|![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white) ![React.js](https://img.shields.io/badge/React.js-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)|
+|컴퓨터공학전공|손기민|팀원|웹 테스팅, 문서 관리 및 발표||
+|컴퓨터공학전공|정채우|팀원|복지관 인터뷰, 담당 교수님 면담||
 
 <h3>2023 동국대학교 겨울 ICIP & 캡스톤디자인</h3>
-<p>-> 기간 : 2023.12 ~ 2024.01 / 우수상(교원상)</p>
+<p>-> 기간 : 2023.03 ~ 2023.11 / 우수상(교원상)</p>
   
-|전공|이름|역할|주요 업무|
-|-------|-----|-----|-----|
-|컴퓨터공학전공|문정훈|팀장|웹 프론트 개발 (React, Typescript)|
-|컴퓨터공학전공|남동호|팀원|웹 백엔드 개발 (Spring boot)|
-|컴퓨터공학전공|김준섭|팀원|버스번호판 인식 (YOLO v5)|
-|컴퓨터공학전공|정채우|팀원|버스 번호 추출 (OCR)|
+|전공|이름|역할|주요 업무|기술 스택|
+|-------|-----|-----|-----|-----|
+|컴퓨터공학전공|문정훈|팀장|웹 프론트 개발|![React.js](https://img.shields.io/badge/React.js-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)|
+|컴퓨터공학전공|남동호|팀원|웹 백엔드 개발 (Spring boot)|![Spring](https://img.shields.io/badge/Spring-6DB33F?style=flat-square&logo=spring&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=springboot&logoColor=white) ![Oracle DB](https://img.shields.io/badge/Oracle%20DB-F80000?style=flat-square&logo=oracle&logoColor=white)|
+|컴퓨터공학전공|김준섭|팀원|버스번호판 인식 (YOLO v5)|![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Django](https://img.shields.io/badge/Django-092E20?style=flat-square&logo=django&logoColor=white) ![YOLO v5](https://img.shields.io/badge/YOLO%20v5-000000?style=flat-square)|
+|컴퓨터공학전공|정채우|팀원|버스 번호 추출 (OCR)|![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![VOLO OCR](https://img.shields.io/badge/VOLO%20OCR-000000?style=flat-square)|
 
 </br>
 
