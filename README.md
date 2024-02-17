@@ -9,8 +9,8 @@
 |전공|이름|역할|주요 업무|기술 스택|
 |-------|-----|-----|-----|-----|
 |컴퓨터공학전공|문정훈|팀장|웹 풀스택 개발|![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white) ![React.js](https://img.shields.io/badge/React.js-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)|
-|컴퓨터공학전공|손기민|팀원|웹 테스팅, 문서 관리 및 발표||
-|컴퓨터공학전공|정채우|팀원|복지관 인터뷰, 담당 교수와 면담||
+|컴퓨터공학전공|손기민|팀원|웹 테스팅, 문서관리, 발표||
+|컴퓨터공학전공|정채우|팀원|복지관/교수와 인터뷰||
 
 <h3>2023 동국대학교 겨울 ICIP & 캡스톤디자인</h3>
 <p>-> 기간 : 2023.03 ~ 2023.11 / 우수상(교원상)</p>
