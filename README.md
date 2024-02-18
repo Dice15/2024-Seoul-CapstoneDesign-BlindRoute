@@ -35,10 +35,10 @@
 </br>
 </br>
 
-# 구동모습
-<h3>데모 시나리오</h3>
+# 데모 시연
+<h3>시나리오</h3>
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/d4d31eae-a14e-4562-87a8-06db2676921c" width="700"> 
-<h3>데모 시연</h3>
+<h3>영상</h3>
 <h4>※ 음성입력/안내가 있는 웹 사이트 이므로 원본영상을 시청하는 것을 추천합니다 ※</h4>
 <p>(링크 : https://youtu.be/ELm7Vdc6aMQ)</p>
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/1bcfbb03-6e47-417b-a1db-13085fe2333d" width="700">
@@ -53,9 +53,16 @@
 </br>
 </br>
 
-# 구동방법
-<h3>링크 : https://blindroute.vercel.app</h3>
+# 사이트 링크
+<h3>https://blindroute.vercel.app</h3>
 <h4>(모바일 환경에 맞게 구현, 시각장애인 설정 구글 talkback과 호환)</h4>
+</br>
+</br>
+
+# 상장
+<h4>왼쪽 : 2023 동국대학교 겨울 ICIP & 캡스톤디자인</h4>
+<h4>오른쪽 : 2023 서울 지역사회공헌 캡스톤디자인 Fair (상장은 2024년 2월 말에 지급)</h4>
+<img src="https://github.com/Dice15/BlindRoute/assets/102275981/7871f447-0b2e-4cca-a17b-182464ac317f" width="700">
 </br>
 </br>
 
@@ -64,10 +71,4 @@
 - API 및 Auth 구현 : [apiroutes](src/pages/api)
 - 미들 웨어 구현 : [middleware](src/middleware.ts)
 </br>
-</br>
-
-# 상장
-<h4>왼쪽 : 2023 동국대학교 겨울 ICIP & 캡스톤디자인</h4>
-<h4>오른쪽 : 2023 서울 지역사회공헌 캡스톤디자인 Fair (상장은 2024년 2월 말에 지급)</h4>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/7871f447-0b2e-4cca-a17b-182464ac317f" width="700">
 </br>
