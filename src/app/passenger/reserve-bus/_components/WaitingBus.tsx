@@ -9,7 +9,7 @@ import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
 import { useSwipeable } from "react-swipeable";
-import { Boarding } from "@/core/type/Boarding";
+import { Boarding, BoardingBuilder } from "@/core/type/Boarding";
 
 
 interface WaitingBusProps {
@@ -115,7 +115,10 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
                     setIsLoading(true);
                     handleArrivedBus();
                 } else {
-                    setBoarding(new Boarding(boarding.station, boarding.bus, newArrInfo.vehId, boarding.reservationId));
+                    setBoarding(new BoardingBuilder(boarding.station, boarding.bus)
+                        .vehId(newArrInfo.vehId)
+                        .reservationId(boarding.reservationId)
+                        .build());
                     setBusArrInfo(newArrInfo);
                 }
             } else {

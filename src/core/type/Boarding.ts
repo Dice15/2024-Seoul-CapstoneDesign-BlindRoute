@@ -67,4 +67,33 @@ export class Boarding implements IBoarding {
     static fromObject(obj: IBoarding): Boarding {
         return new Boarding(obj.station, obj.bus, obj.vehId, obj.reservationId);
     }
-}    
+}
+
+
+export class BoardingBuilder {
+    private _station: Station;
+    private _bus: Bus;
+    private _vehId: string;
+    private _reservationId: string;
+
+    constructor(station: Station, bus: Bus) {
+        this._station = station;
+        this._bus = bus;
+        this._vehId = "";
+        this._reservationId = "";
+    }
+
+    public vehId(vehId: string): BoardingBuilder {
+        this._vehId = vehId;
+        return this;
+    }
+
+    public reservationId(reservationId: string): BoardingBuilder {
+        this._reservationId = reservationId;
+        return this;
+    }
+
+    public build(): Boarding {
+        return new Boarding(this._station, this._bus, this._vehId, this._reservationId);
+    }
+}

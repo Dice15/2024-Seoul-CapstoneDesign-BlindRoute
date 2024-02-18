@@ -13,7 +13,7 @@ import { Bus } from "@/core/type/Bus";
 import { Station } from "@/core/type/Station";
 import { reserveBus } from "@/core/api/blindrouteApi";
 import { useSwipeable } from "react-swipeable";
-import { Boarding } from "@/core/type/Boarding";
+import { Boarding, BoardingBuilder } from "@/core/type/Boarding";
 
 
 
@@ -83,7 +83,9 @@ export default function SelectBus({ setStep, selectedStation, buses, setBoarding
     const handleReserveBus = useCallback(() => {
         reserveBus(selectedStation.stId, selectedStation.arsId, buses[busListIndexRef.current].busRouteId, "boarding").then(({ msg, reservationId }) => {
             if (msg === "정상적으로 처리되었습니다." && reservationId !== null) {
-                setBoarding(new Boarding(selectedStation, buses[busListIndexRef.current], "", reservationId))
+                setBoarding(new BoardingBuilder(selectedStation, buses[busListIndexRef.current])
+                    .reservationId(reservationId)
+                    .build());
                 setTimeout(() => {
                     setIsLoading(false);
                     setStep("waitingBus");
