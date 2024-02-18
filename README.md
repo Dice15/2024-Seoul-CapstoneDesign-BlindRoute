@@ -47,15 +47,15 @@
 </br>
 </br>
 
-# API 명세서
-<h3>서울시 BIS API를 기반으로 제작</h3>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/e5198f37-3ef3-470a-b5ab-b4400e84edff" width="700"> 
-</br>
-</br>
-
 # 사이트 링크
 <h3>https://blindroute.vercel.app</h3>
 <h4>(모바일 환경에 맞게 구현, 시각장애인 설정 구글 talkback과 호환)</h4>
+</br>
+</br>
+
+# API 명세서
+<h3>서울시 BIS API를 기반으로 제작</h3>
+<img src="https://github.com/Dice15/BlindRoute/assets/102275981/e5198f37-3ef3-470a-b5ab-b4400e84edff" width="700"> 
 </br>
 </br>
 
