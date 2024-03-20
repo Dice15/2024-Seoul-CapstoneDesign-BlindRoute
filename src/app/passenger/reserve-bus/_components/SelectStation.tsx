@@ -50,11 +50,11 @@ export default function SelectStation({ setStep, stations, setSelectedStation, s
                     }
                     setTimeout(() => {
                         const guide = isFirstRender ? "정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : "";
-                        SpeechOutputProvider.speak(`${guide} "${station.stNm}", ${station.stDir} 방면`);
+                        SpeechOutputProvider.speak(`${guide} "${station.stNm}", ${station.stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`);
                         setIsFirstRender(false);
                     }, delay)
                 } else {
-                    SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면`);
+                    SpeechOutputProvider.speak(`"${station.stNm}", ${station.stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`);
                 }
                 break;
             }

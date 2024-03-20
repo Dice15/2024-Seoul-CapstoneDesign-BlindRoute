@@ -60,11 +60,11 @@ export default function WaitingBus({ setStep, boarding, setBoarding, setDestinat
                     }
                     setTimeout(() => {
                         const guide = isFirstAnnouncement ? "버스를 대기 중입니다. 화면을 터치하면 버스 도착까지 남은 시간을 알 수 있습니다." : "";
-                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                        SpeechOutputProvider.speak(`${guide} "${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}. 오른쪽으로 스와이프하면 예약을 취소합니다.`);
                         setIsFirstAnnouncement(false);
                     }, delay)
                 } else {
-                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}`);
+                    SpeechOutputProvider.speak(`"${boarding.bus.busRouteAbrv}",  "${boarding.bus.adirection} 방면" 버스를 대기중입니다. ${arrMsg}. 오른쪽으로 스와이프하면 예약을 취소합니다.`);
                 }
                 break;
             }

@@ -51,11 +51,11 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
                         setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
                     }
                     setTimeout(() => {
-                        SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                        SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 또는 음성인식으로 입력할 수 있습니다. 입력 후 왼쪽으로 스와이프하면 정류장 검색을 시작합니다.");
                         setIsFirstAnnouncement(false);
                     }, delay)
                 } else {
-                    SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
+                    SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 또는 음성인식으로 입력할 수 있습니다. 입력 후 왼쪽으로 스와이프하면 정류장 검색을 시작합니다.");
                 }
                 break;
             }

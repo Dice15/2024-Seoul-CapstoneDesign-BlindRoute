@@ -52,11 +52,11 @@ export default function WaitingDestination({ setStep, boarding, destinations, se
                     }
                     setTimeout(() => {
                         const guide = isFirstAnnouncement ? "목적지 대기 중입니다. 화면을 터치하면 목적지까지 남은 정류장의 수를 알 수 있습니다." : "";
-                        SpeechOutputProvider.speak(`${guide} "${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
+                        SpeechOutputProvider.speak(`${guide} "${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}. 오른쪽으로 스와이프하면 예약을 취소합니다.`);
                         setIsFirstAnnouncement(false);
                     }, delay)
                 } else {
-                    SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}`);
+                    SpeechOutputProvider.speak(`"${selectedDestination.stNm}", "${selectedDestination.stDir} 방면" 정류장에 하차 대기중입니다. ${arrMsg}. 오른쪽으로 스와이프하면 예약을 취소합니다.`);
                 }
                 break;
             }
