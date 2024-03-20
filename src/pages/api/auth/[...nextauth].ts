@@ -19,7 +19,17 @@ declare module "next-auth/jwt" {
 export const authOptions: AuthOptions = {
     // 인증 공급자를 설정합니다.
     providers: [
-        // Github 소셜로그인
+        CredentialsProvider({
+            name: 'Guest User',
+            credentials: {},
+            authorize: async () => {
+                return {
+                    id: 'guest',
+                    name: 'Guest User',
+                    email: 'guest@guest.com',
+                };
+            },
+        }),
         GithubProvider({
             clientId: process.env.BLINDROUTE_GITHUB_LOCAL_ID,
             clientSecret: process.env.BLINDROUTE_GITHUB_LOCAL_SECRET,
@@ -28,33 +38,6 @@ export const authOptions: AuthOptions = {
             clientId: process.env.BLINDROUTE_GOOGLE_LOCAL_ID,
             clientSecret: process.env.BLINDROUTE_GOOGLE_LOCAL_SECRET,
         }),
-        /*CredentialsProvider({
-            // 로그인페이지 폼 자동생성해주는 코드 
-            name: "credentials",
-            credentials: {
-                email: { label: "email", type: "text" },
-                password: { label: "password", type: "password" },
-            },
-
-            // 로그인요청시 실행되는코드
-            // 직접 DB에서 아이디와 비번을 비교하고 맞으면 return User, 틀리면 return null 해야함
-            async authorize(credentials) {
-                if (credentials) {
-                    const user = await (await MongoDbProvider.getDb(process.env.BLINDROUTE_MONGODB_URI)).collection("user_cred").findOne({ email: credentials.email })
-                    if (user) {
-                        const passwordCheck = await bcrypt.compare(credentials.password, user.password);
-                        if (passwordCheck) {
-                            return {
-                                id: user._id.toString(),
-                                name: user.name,
-                                email: user.email,
-                            }
-                        }
-                    }
-                }
-                return null;
-            }
-        })*/
     ],
 
     // 세션 설정: JWT 방식을 사용하며, 세션의 최대 유지 기간을 30일로 설정합니다.
