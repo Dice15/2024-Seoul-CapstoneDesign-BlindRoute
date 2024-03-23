@@ -35,6 +35,14 @@
 <img src="https://github.com/Dice15/BlindRoute/assets/102275981/6eecc19e-de1c-4e61-8efd-743375b4e631" width="700">
 </br>
 </br>
+</br>
+
+# 배포 사이트 (모바일 환경 권장)
+<h3>웹 사이트 : https://blindroute.vercel.app (게스트 로그인 가능)</h3>
+<h3>시연 영상 : https://blindroute.vercel.app](https://youtu.be/ELm7Vdc6aMQ </h3>
+</br>
+</br>
+
 
 # 데모 시연
 <h3>시나리오</h3>
@@ -48,11 +56,6 @@
 </br>
 </br>
 
-# 배포 사이트 (모바일 환경 권장)
-<h3>웹 사이트 : https://blindroute.vercel.app </h3>
-<h3>시연 영상 : https://blindroute.vercel.app](https://youtu.be/ELm7Vdc6aMQ </h3>
-</br>
-</br>
 
 # API 명세서
 <h3>서울시 BIS API를 기반으로 제작</h3>
