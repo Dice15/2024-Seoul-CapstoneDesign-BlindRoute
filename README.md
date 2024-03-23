@@ -37,7 +37,8 @@
 </br>
 </br>
 
-# 배포 사이트 (모바일 환경 권장)
+# 배포 사이트 (모바일 환경 지원)
+<h3>데스크톱은 F12(개발자 도구)를 통해 모바일 설정 권장</h3>
 <h3>웹 사이트 : https://blindroute.vercel.app (게스트 로그인 가능)</h3>
 <h3>시연 영상 : https://blindroute.vercel.app](https://youtu.be/ELm7Vdc6aMQ </h3>
 </br>
