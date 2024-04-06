@@ -2,7 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import axios from 'axios';
+import OpenAI from "openai";
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY1 });
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
     const session = await getServerSession(request, response, authOptions);
@@ -16,55 +18,72 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const requestParam = request.query;
-                const responseData = await axios.get<GetStationByNameApiResponse>(
-                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName",
-                    {
-                        params: {
-                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                            stSrch: (requestParam.stationName as string).replace(/\s+/g, ''),
-                            resultType: "json"
-                        }
-                    }
-                ).then(async (getStationByNameResponse) =>
-                    await Promise.all(getStationByNameResponse.data.msgBody.itemList.map(async (stationInfo) => (
+                const prompt = requestParam.stationName as string;
+                console.log(prompt);
+                const gptReponse = await openai.chat.completions.create({
+                    messages: [
                         {
-                            ...stationInfo,
-                            seq: "",
-                            stDir: await axios.get<GetStationByUidItemApiResponse>(
-                                "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
-                                {
-                                    params: {
-                                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                                        arsId: stationInfo.arsId,
-                                        resultType: "json"
-                                    }
-                                }
-                            ).then((getStationByUidItemResponse) => {
-                                const countingMap: {
-                                    [key in string]: number;
-                                } = {};
+                            role: "user",
+                            content: `다음 문장에서 버스 정류장 이름을 추출하고 오타가 있다면 수정 후, 버스 정류장 이름만 대답해봐: ${prompt}`,
+                        },
+                    ],
+                    model: "gpt-3.5-turbo",
+                });
 
-                                const maxRequency = {
-                                    count: 0,
-                                    nxtStn: ""
-                                }
-
-                                getStationByUidItemResponse.data.msgBody.itemList.forEach((item) => {
-                                    if (countingMap[item.nxtStn] === undefined) countingMap[item.nxtStn] = 0;
-                                    if (++countingMap[item.nxtStn] > maxRequency.count) {
-                                        maxRequency.count = countingMap[item.nxtStn];
-                                        maxRequency.nxtStn = item.nxtStn;
-                                    }
-                                });
-
-                                return maxRequency.nxtStn;
-                            })
+                if (gptReponse.choices && gptReponse.choices.length > 0) {
+                    const stationName = gptReponse.choices[0].message.content as string;
+                    console.log(stationName);
+                    const responseData = await axios.get<GetStationByNameApiResponse>(
+                        "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName",
+                        {
+                            params: {
+                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                stSrch: stationName,
+                                resultType: "json"
+                            }
                         }
-                    )))
-                );
+                    ).then(async (getStationByNameResponse) =>
+                        await Promise.all(getStationByNameResponse.data.msgBody.itemList.map(async (stationInfo) => (
+                            {
+                                ...stationInfo,
+                                seq: "",
+                                stDir: await axios.get<GetStationByUidItemApiResponse>(
+                                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid",
+                                    {
+                                        params: {
+                                            serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                            arsId: stationInfo.arsId,
+                                            resultType: "json"
+                                        }
+                                    }
+                                ).then((getStationByUidItemResponse) => {
+                                    const countingMap: {
+                                        [key in string]: number;
+                                    } = {};
 
-                response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: responseData });
+                                    const maxRequency = {
+                                        count: 0,
+                                        nxtStn: ""
+                                    }
 
+                                    getStationByUidItemResponse.data.msgBody.itemList.forEach((item) => {
+                                        if (countingMap[item.nxtStn] === undefined) countingMap[item.nxtStn] = 0;
+                                        if (++countingMap[item.nxtStn] > maxRequency.count) {
+                                            maxRequency.count = countingMap[item.nxtStn];
+                                            maxRequency.nxtStn = item.nxtStn;
+                                        }
+                                    });
+
+                                    return maxRequency.nxtStn;
+                                })
+                            }
+                        )))
+                    );
+
+                    response.status(200).json({ msg: "정상적으로 처리되었습니다.", itemList: responseData });
+                } else {
+                    response.status(200).json({ name: "버스 정류장 이름을 추출할 수 없습니다." });
+                }
             } catch (error) {
                 response.status(502).json({ msg: "API 요청 중 오류가 발생했습니다.", itemList: [] });
             }
