@@ -131,8 +131,8 @@ export class SpeechInputProvider {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = true;  // 연속적인 음성 인식을 사용
-            this.recognition.interimResults = true;  // 중간 결과를 반환
+            this.recognition.continuous = false;    // 연속적인 음성 인식을 사용
+            this.recognition.interimResults = false;    // 중간 결과를 반환
         } else {
             console.error('Speech recognition not supported in this browser.');
         }

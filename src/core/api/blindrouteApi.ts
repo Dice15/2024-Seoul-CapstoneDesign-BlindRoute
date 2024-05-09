@@ -471,8 +471,35 @@ export async function getReservationByPanel(busRouteId: string, vehId: string): 
 
 
 
+type GetChatAdotResponse = {
+    msg: string;
+    message: string;
+};
 
+export async function getChatAdot(userMessage: string): Promise<{
+    msg: string;
+    message: string;
+}> {
+    try {
+        const response = await axios.get<GetChatAdotResponse>(
+            getApiUrl(`/api/chatadot/getChatResult`),
+            {
+                params: { message: userMessage }
+            }
+        );
 
+        const { msg, message } = response.data;
+        return {
+            msg: msg,
+            message: message
+        };
+    } catch (error) {
+        return {
+            msg: "답변 중 오류가 발생했습니다.",
+            message: ""
+        };
+    }
+}
 
 
 
