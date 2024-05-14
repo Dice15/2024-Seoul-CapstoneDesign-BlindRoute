@@ -81,7 +81,7 @@ export default function ChatAdot() {
 
                 if (message.includes("@blindroute")) {
                     const route = parseBlindroute(extractBlindroute(message) || "");
-                    setAdotMessage(`${route.start}에서 ${route.destination}로 안내를 시작하겠습니다`);
+                    setAdotMessage(`${route.start}에서 ${route.destination}까지 안내를 시작하겠습니다`);
                     setRoute(route);
                 }
                 else {
@@ -153,7 +153,7 @@ const UserMessage = styled.p`
     width: calc(100% - 14%);
     margin: 2% 7%;
     z-index: 101;
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
     color: #666e7e;
     white-space: normal; 
@@ -168,7 +168,7 @@ const ReturnMessage = styled.p`
     padding-left: 3%;
     border-left: 0.2em solid #666e7e;
     z-index: 101;
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
     color: #666e7e;
     white-space: normal;
