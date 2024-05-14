@@ -1,8 +1,4 @@
 import styles from "@/app/page.module.css";
-import AuthButton from "@/app/_components/AuthButton";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import Link from "next/link";
-import { getServerSession } from "next-auth";
 import ChatAdot from "./_components/ChatAdot";
 
 
@@ -14,9 +10,7 @@ export default async function AppRoot() {
   // Render
   return (
     <div className={styles.wrapper}>
-      <ChatAdot>
-
-      </ChatAdot>
+      <ChatAdot />
     </div >
   );
   // return (

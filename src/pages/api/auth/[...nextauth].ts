@@ -2,7 +2,6 @@ import MongoDbProvider from "@/core/modules/database/MongoDbProvider";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import NextAuth, { AuthOptions, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from 'bcrypt';
 import { JWT } from "next-auth/jwt";
 import GithubProvider from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
