@@ -10,6 +10,7 @@ namespace NodeJS {
         BLINDROUTE_GITHUB_LOCAL_SECRET: string;
         BLINDROUTE_GOOGLE_LOCAL_ID: string;
         BLINDROUTE_GOOGLE_LOCAL_SECRET: string;
-        OPENAI_API_KEY1: string;
+        OPENAI_API_KEY: string;
+        BLINDROUTE_ASSISTANT: string;
     }
 }

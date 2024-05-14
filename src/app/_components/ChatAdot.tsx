@@ -4,13 +4,13 @@ import styled from "styled-components";
 import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { getChatAdot } from "@/core/api/blindrouteApi";
 import axios from 'axios';
 
 export default function ChatAdot() {
-    const [userMessage, setUserMessage] = useState("");
-    const [adotMessage, setAdotMessage] = useState("");
-
+    const [chatId, setChatId] = useState<string | null>(null);
+    const [userMessage, setUserMessage] = useState<string | null>(null);
+    const [adotMessage, setAdotMessage] = useState<string | null>(null);
+    const [route, setRoute] = useState<{ start: string; destination: string; } | null>(null);
 
     const handleSubmitText = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
@@ -34,66 +34,69 @@ export default function ChatAdot() {
     }, []);
 
 
+    const extractBlindroute = (input: string) => {
+        const regex = /@blindroute\{.*?\}/g;
+        const match = input.match(regex);
+        return match ? match[0] : null;
+    }
+
+    const parseBlindroute = (blindrouteString: string) => {
+        const content = blindrouteString.match(/\{(.*?)\}/)![1];
+        const pairs = content.split(', ');
+        const obj: { [key: string]: string } = {};
+
+        pairs.forEach(pair => {
+            const [key, value] = pair.split(': ').map(s => s.trim());
+            obj[key] = value;
+        });
+
+        return {
+            start: obj.start,
+            destination: obj.destination
+        };
+    }
+
     useEffect(() => {
-        if (adotMessage.length > 0) {
+        axios.get('/api/chatadot/createNewChat').then((value) => {
+            setChatId(value.data.threadId as string);
+        });
+    }, []);
+
+
+    useEffect(() => {
+        if (userMessage && chatId) {
+            axios.post('/api/chatadot/getChatResult', {
+                threadId: chatId,
+                userMessage: userMessage
+            }).then((value) => {
+                const message = value.data.message as string;
+                console.log(message);
+
+                if (message.includes("@blindroute")) {
+                    const route = parseBlindroute(extractBlindroute(message) || "");
+                    setAdotMessage(`${route.start}에서 ${route.destination}로 안내를 시작하겠습니다`);
+                    setRoute(route);
+                }
+                else {
+                    setAdotMessage(value.data.message as string || null);
+                }
+            });
+        }
+    }, [userMessage, chatId])
+
+
+    useEffect(() => {
+        if (adotMessage) {
             SpeechOutputProvider.speak(adotMessage);
         }
     }, [adotMessage])
 
-    //"@blindroute{ start: 수정된 출발지, destination: 수정된 도착지 }"
+
     useEffect(() => {
-        if (userMessage.length > 0) {
-            getChatAdot(userMessage).then(({ msg, message }) => {
-                if (message.startsWith("@blindroute")) {
-                    const pattern = /@blindroute\{ start: (.*?), destination: (.*) \}/;
-                    const match = message.match(pattern);
-                    if (match) {
-                        const route = {
-                            start: match[1],
-                            destination: match[2]
-                        };
-                        setAdotMessage(`${route.start}에서 ${route.destination}로 경로 안내를 시작하겠습니다.`);
-                    }
-                    else {
-                        setAdotMessage("답변 중 오류가 발생했습니다. 다시 말해주세요.");
-                    }
-                } else {
-                    setAdotMessage(message);
-                }
-            });
+        if (route) {
+
         }
-    }, [userMessage])
-
-    useEffect(() => {
-        const options = {
-            method: 'POST',
-            url: 'https://apis.openapi.sk.com/transit/routes',
-            headers: {
-                accept: 'application/json',
-                'content-type': 'application/json',
-                appKey: 'e8wHh2tya84M88aReEpXCa5XTQf3xgo01aZG39k5'
-            },
-            data: {
-                startX: '126.926493082645',
-                startY: '37.6134436427887',
-                endX: '127.126936754911',
-                endY: '37.5004198786564',
-                lang: 0,
-                format: 'json',
-                count: 10,
-                searchDttm: '202301011200'
-            }
-        };
-
-        axios
-            .request(options)
-            .then(function (response) {
-                console.log(response.data);
-            })
-            .catch(function (error) {
-                console.error(error);
-            });
-    }, []);
+    }, [route]);
 
 
     return (
@@ -102,8 +105,8 @@ export default function ChatAdot() {
                 <Image src="/images/chat_adot_background.png" alt="guide01" fill priority />
             </BackImage>
 
-            <UserMessage>{userMessage}</UserMessage>
-            {adotMessage.length > 0 ? <ReturnMessage>{adotMessage}</ReturnMessage> : <></>}
+            <UserMessage>{userMessage || ""}</UserMessage>
+            <ReturnMessage>{adotMessage || ""}</ReturnMessage>
 
             <MessageInputField>
                 <TextInputField>
@@ -111,7 +114,7 @@ export default function ChatAdot() {
                         type="text"
                         placeholder="메시지를 입력하세요..."
                         onKeyDown={handleSubmitText}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ width: '100%', height: '100%', fontSize: "1.5em" }}
                     />
                 </TextInputField>
                 <SpeakInputField
@@ -143,7 +146,7 @@ const UserMessage = styled.p`
     width: calc(100% - 14%);
     margin: 2% 7%;
     z-index: 101;
-    font-size: 1.2em;
+    font-size: 1.5em;
     font-weight: bold;
     color: #666e7e;
     white-space: normal; 
@@ -158,7 +161,7 @@ const ReturnMessage = styled.p`
     padding-left: 3%;
     border-left: 0.2em solid #666e7e;
     z-index: 101;
-    font-size: 1.2em;
+    font-size: 1.5em;
     font-weight: bold;
     color: #666e7e;
     white-space: normal;
@@ -180,11 +183,13 @@ const MessageInputField = styled.div`
 const TextInputField = styled.div`
     margin-left: 10%;
     height: 100%;
-    width: 70%;
+    width: 65%;
     padding: 0;
+    z-index: 101;
 `;
 
 const SpeakInputField = styled.div`
     height: 100%;
     width: 10%;
+    z-index: 101;
 `;
