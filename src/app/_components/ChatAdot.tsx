@@ -126,7 +126,7 @@ export default function ChatAdot() {
 }
 
 const Wrapper = styled.div`
-    height: 100%;
+    height: calc(var(--vh, 1vh) * 100);
     width: 100%;
     display: flex;
     flex-direction: column;
