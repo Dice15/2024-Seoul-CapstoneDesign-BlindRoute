@@ -5,12 +5,15 @@ import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import axios from 'axios';
+import LoadingAnimation from "@/app/_components/LoadingAnimation";
+
 
 export default function ChatAdot() {
     const [chatId, setChatId] = useState<string | null>(null);
     const [userMessage, setUserMessage] = useState<string | null>(null);
     const [adotMessage, setAdotMessage] = useState<string | null>(null);
     const [route, setRoute] = useState<{ start: string; destination: string; } | null>(null);
+
 
     const handleSubmitText = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
@@ -34,13 +37,14 @@ export default function ChatAdot() {
     }, []);
 
 
-    const extractBlindroute = (input: string) => {
+    const extractBlindroute = useCallback((input: string) => {
         const regex = /@blindroute\{.*?\}/g;
         const match = input.match(regex);
         return match ? match[0] : null;
-    }
+    }, []);
 
-    const parseBlindroute = (blindrouteString: string) => {
+
+    const parseBlindroute = useCallback((blindrouteString: string) => {
         const content = blindrouteString.match(/\{(.*?)\}/)![1];
         const pairs = content.split(', ');
         const obj: { [key: string]: string } = {};
@@ -54,12 +58,15 @@ export default function ChatAdot() {
             start: obj.start,
             destination: obj.destination
         };
-    }
+    }, []);
+
 
     useEffect(() => {
-        axios.get('/api/chatadot/createNewChat').then((value) => {
-            setChatId(value.data.threadId as string);
-        });
+        SpeechOutputProvider.speak("").then(() => {
+            axios.get('/api/chatadot/createNewChat').then((value) => {
+                setChatId(value.data.threadId as string);
+            });
+        })
     }, []);
 
 
@@ -82,7 +89,7 @@ export default function ChatAdot() {
                 }
             });
         }
-    }, [userMessage, chatId])
+    }, [userMessage, chatId, parseBlindroute, extractBlindroute])
 
 
     useEffect(() => {
@@ -99,11 +106,11 @@ export default function ChatAdot() {
     }, [route]);
 
 
-    return (
+    return (!chatId ? <LoadingAnimation active={!chatId} /> :
         <Wrapper>
-            <BackImage>
+            < BackImage >
                 <Image src="/images/chat_adot_background.png" alt="guide01" fill priority />
-            </BackImage>
+            </BackImage >
 
             <UserMessage>{userMessage || ""}</UserMessage>
             <ReturnMessage>{adotMessage || ""}</ReturnMessage>
@@ -121,7 +128,7 @@ export default function ChatAdot() {
                     onClick={handleSubmitSpeak}>
                 </SpeakInputField>
             </MessageInputField>
-        </Wrapper>
+        </Wrapper >
     );
 }
 
