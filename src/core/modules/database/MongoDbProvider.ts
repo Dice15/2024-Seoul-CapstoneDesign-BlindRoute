@@ -29,7 +29,6 @@ export default class MongoDbProvider {
 
         try {
             await MongoDbProvider.client.connect();
-            console.log("MongoDB connected successfully");
         } catch (err) {
             console.error("MongoDB connection failed:", err);
             MongoDbProvider.client = undefined;
