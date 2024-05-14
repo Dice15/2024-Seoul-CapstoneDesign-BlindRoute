@@ -7,7 +7,7 @@ import { ObjectId } from 'mongodb';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    const db = await MongoDbProvider.getDb(process.env.BLINDROUTE_MONGODB_URI);
+    const db = await MongoDbProvider.getDb();
     const session = await getServerSession(request, response, authOptions);
 
     switch (request.method) {
