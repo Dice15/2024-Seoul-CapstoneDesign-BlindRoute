@@ -23,7 +23,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <ViewportHeightSetter />
         <RecoilRootProvider>
           <div style={{
-            height: "calc(calc(var(--vh, 1vh) * 100))",
+            height: "calc(var(--vh, 1vh) * 100)",
             width: "100vw"
           }}>
             {children}
