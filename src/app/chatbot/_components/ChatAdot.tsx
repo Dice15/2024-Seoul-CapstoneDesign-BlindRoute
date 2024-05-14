@@ -121,7 +121,7 @@ export default function ChatAdot() {
                         type="text"
                         placeholder="메시지를 입력하세요..."
                         onKeyDown={handleSubmitText}
-                        style={{ width: '100%', height: '100%', fontSize: "1.5em" }}
+                        style={{ width: '100%', height: '100%', fontSize: "1.3em" }}
                     />
                 </TextInputField>
                 <SpeakInputField
