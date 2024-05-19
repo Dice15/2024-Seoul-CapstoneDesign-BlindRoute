@@ -1,6 +1,4 @@
 
-
-
 /**
  * SpeechOutputProvider 클래스는 speechSynthesis API를 사용하여 텍스트를 음성으로 변환하며,
  * 시스템에 설치된 음성 목록을 관리합니다.
@@ -8,19 +6,8 @@
 export class SpeechOutputProvider {
     private static voices: SpeechSynthesisVoice[] | null = null;
 
-
-    /**
-     * 생성자 메서드입니다. SpeechOutputProvider 클래스의 인스턴스를 생성하지 않도록 private로 설정되어 있습니다.
-     */
     private constructor() { }
 
-
-
-    /**
-     * populateVoiceList 메서드는 시스템에 설치된 음성 목록을 가져와서 정렬합니다.
-     * 이 메서드는 voiceschanged 이벤트가 발생하면 호출됩니다.
-     * @returns {Promise<SpeechSynthesisVoice[]>} 정렬된 음성 목록을 반환합니다.
-     */
     private static async populateVoiceList(): Promise<SpeechSynthesisVoice[]> {
         return new Promise((resolve) => {
             const synth = window.speechSynthesis;
@@ -47,12 +34,6 @@ export class SpeechOutputProvider {
     }
 
 
-
-    /**
-     * getVoices 메서드는 이미 준비된 음성 목록을 반환하거나,
-     * 음성 목록이 아직 준비되지 않았다면 populateVoiceList 메서드를 호출하여 준비합니다.
-     * @returns {Promise<SpeechSynthesisVoice[]>} 음성 목록을 반환합니다.
-     */
     private static async getVoices(): Promise<SpeechSynthesisVoice[]> {
         if (!this.voices) {
             this.voices = await this.populateVoiceList();
@@ -61,10 +42,6 @@ export class SpeechOutputProvider {
     }
 
 
-
-    /**
-     * clearSpeak 메서드는 현재 음성을 중지하고 모든 대기 중인 음성을 제거합니다.
-     */
     public static async stopSpeak(): Promise<void> {
         this.speak(" ");
         /*const synth = window.speechSynthesis;
@@ -74,12 +51,6 @@ export class SpeechOutputProvider {
     }
 
 
-
-    /**
-     * speak 메서드는 주어진 텍스트를 읽습니다.
-     * 프로미스를 반환하여 음성이 완전히 읽힐 때까지 기다리게 할 수 있습니다.
-     * @param {string} textToRead - 읽을 텍스트입니다.
-     */
     public static async speak(textToRead: string): Promise<void> {
         const synth = window.speechSynthesis;
 
