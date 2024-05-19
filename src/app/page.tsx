@@ -13,7 +13,10 @@ export default async function AppRoot() {
   return (
     <div className={styles.wrapper}>
       {isAuth &&
-        <Link href={"./chatbot"} className={styles.linkOps}>
+        // <Link href={"./chatbot"} className={styles.linkOps}>
+        //   <button className={styles.btnOps}>시작하기</button>
+        // </Link>
+        <Link href={"./passenger/reserve-bus"} className={styles.linkOps}>
           <button className={styles.btnOps}>시작하기</button>
         </Link>
       }

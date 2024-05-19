@@ -10,6 +10,7 @@ import { getStations } from "@/core/api/blindrouteApi";
 import { Station } from "@/core/type/Station";
 import { useSwipeable } from "react-swipeable";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 
 
@@ -34,6 +35,7 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
 
 
     // States
+    const [chatId, setChatId] = useState<string | null>(null);
     const [isFirstAnnouncement, setIsFirstAnnouncement] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [stationName, setStationName] = useState<string>("");
@@ -41,7 +43,7 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
 
     // Handler
     /** 안내 음성 */
-    const handleAnnouncement = useCallback((type: "guide" | "noWordsDetected" | "noStationsFound") => {
+    const handleAnnouncement = useCallback((type: "guide" | "noWordsDetected" | "noStationsFound", content?: string) => {
         //return;
         switch (type) {
             case "guide": {
@@ -64,11 +66,11 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
                 break;
             }
             case "noStationsFound": {
-                SpeechOutputProvider.speak(`'${stationName}'가 이름에 포함된 정류장이 없습니다`);
+                SpeechOutputProvider.speak(`인식된 정류장 '${content}'가 이름에 포함된 정류장이 없습니다`);
                 break;
             }
         }
-    }, [isFirstAnnouncement, stationName]);
+    }, [isFirstAnnouncement]);
 
 
     /** 버스 정류장 이름 음성 인식 */
@@ -94,12 +96,19 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
     }, [router]);
 
 
+    useEffect(() => {
+        axios.get('/api/gpt/createNewChat').then((value) => {
+            setChatId(value.data.threadId as string);
+        });
+    }, []);
+
+
     /** 버스 데이터 가져오기 */
     const handleGetStations = useCallback(() => {
         if (stationName === "") {
             handleAnnouncement("noWordsDetected");
-        } else {
-            getStations(stationName).then(({ msg, itemList }) => {
+        } else if (chatId) {
+            getStations(chatId, stationName).then(({ msg, keyword, itemList }) => {
                 if (msg === "정상적으로 처리되었습니다." && itemList.length > 0) {
                     setStations(itemList);
                     setTimeout(() => {
@@ -108,11 +117,11 @@ export default function SearchStation({ setStep, setStations }: SearchStationPro
                     }, 1000)
                 } else {
                     setIsLoading(false);
-                    handleAnnouncement("noStationsFound");
+                    handleAnnouncement("noStationsFound", keyword);
                 }
             });
         }
-    }, [handleAnnouncement, setStations, setStep, stationName]);
+    }, [handleAnnouncement, setStations, setStep, chatId, stationName]);
 
 
     /** 음성 인식 시작 */

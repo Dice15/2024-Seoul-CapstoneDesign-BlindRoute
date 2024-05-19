@@ -51,6 +51,7 @@ function getDefualtAxiosTimeout(): number {
 /** 버스 정류장 정보 응답 데이터 타입 */
 type GetStationsResponse = {
     msg: string;
+    keyword: string;
     itemList: IStation[];
 };
 
@@ -61,26 +62,30 @@ type GetStationsResponse = {
  * StationInfo 배열과 처리 결과 메시지를 포함하는 객체를 반환합니다.
  * 요청이 실패하면 빈 배열과 "FAIL" 메시지를 반환합니다.
  */
-export async function getStations(stationName: string): Promise<{
+export async function getStations(chatId: string, userMessage: string): Promise<{
     msg: string;
+    keyword: string;
     itemList: Station[];
 }> {
     try {
-        const response = await axios.get<GetStationsResponse>(
-            getApiUrl(`/api/stationinfo/getStationByName`),
+        const response = await axios.post<GetStationsResponse>(
+            getApiUrl(`/api/gpt/getStation`),
             {
-                params: { stationName },
+                threadId: chatId,
+                userMessage: userMessage
             }
         );
 
-        const { msg, itemList } = response.data;
+        const { msg, keyword, itemList } = response.data;
         return {
             msg: msg,
+            keyword: keyword,
             itemList: itemList.map((item) => Station.fromObject(item))
         };
     } catch (error) {
         return {
             msg: "API 요청 중 오류가 발생했습니다.",
+            keyword: "",
             itemList: []
         };
     }

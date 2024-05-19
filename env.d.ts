@@ -12,5 +12,6 @@ namespace NodeJS {
         BLINDROUTE_GOOGLE_LOCAL_SECRET: string;
         OPENAI_API_KEY: string;
         BLINDROUTE_ASSISTANT: string;
+        BLINDROUTE_ASSISTANT_V1: string;
     }
 }
