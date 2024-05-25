@@ -6,7 +6,7 @@ import axios from 'axios';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    const db = await MongoDbProvider.getDb();
+    const db = await MongoDbProvider.connectDb(process.env.BLINDROUTE_MONGODB_URI).then(() => MongoDbProvider.getDb());
     const session = await getServerSession(request, response, authOptions);
 
     switch (request.method) {
