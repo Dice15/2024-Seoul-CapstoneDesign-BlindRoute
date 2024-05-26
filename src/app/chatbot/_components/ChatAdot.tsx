@@ -4,25 +4,72 @@ import styled from "styled-components";
 import Image from 'next/image';
 import { useState, useCallback, useEffect } from 'react';
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import axios from 'axios';
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
+import { loadChat } from "../_functions/loadChat";
+import { sendMessage } from "../_functions/sendMessage";
+import { useRouter } from "next/navigation";
 
 
 export default function ChatAdot() {
-    const [chatId, setChatId] = useState<string | null>(null);
+    const router = useRouter();
+    const [threadId, setThreadId] = useState<string | null>(null);
+    const [chatMode, setChatMode] = useState<"chat" | "blindroute">("chat");
     const [userMessage, setUserMessage] = useState<string | null>(null);
-    const [adotMessage, setAdotMessage] = useState<string | null>(null);
-    const [route, setRoute] = useState<{ start: string; destination: string; } | null>(null);
+    const [gptMessage, setGptMessage] = useState<string | null>(null);
+    const [route, setRoute] = useState<{ start: string; destination: string; }>({ start: "", destination: "" });
+
+
+    const handleNavigation = useCallback((start: string, destination: string) => {
+        const params = new URLSearchParams({
+            start: start,
+            destination: destination,
+        });
+        router.push(`/blindroute?${params.toString()}`);
+    }, [router]);
+
+
+    const handleSendMessage = useCallback((message: string) => {
+        if (!threadId) return;
+        switch (chatMode) {
+            case "chat": {
+                sendMessage(threadId, message, chatMode).then(async (value) => {
+                    if (value.data.chatMode === "blindroute") {
+                        setGptMessage("시각장애인 전용 길안내를 시작하겠습니다. 출발지와 목적지를 말해주세요.");
+                        setChatMode("blindroute");
+                    }
+                    else {
+                        setGptMessage(value.data.message);
+                    }
+                });
+                break;
+            }
+            case "blindroute": {
+                sendMessage(threadId, message, chatMode).then(async (value) => {
+                    const route = value.data.message.split(',');
+                    if (route.length === 2) {
+                        handleNavigation(route[0], route[1]);
+                        //setGptMessage(`출발지 ${route[0]}와 목적지 ${route[1]}가 입력되었습니다. 상세 목적지를 검색하겠습니다.`);
+                        //setChatMode("chat");
+                    }
+                    else {
+                        setGptMessage("출발지와 도착지를 다시 말해주세요.");
+                    }
+                });
+                break;
+            }
+        }
+    }, [threadId, chatMode, handleNavigation]);
 
 
     const handleSubmitText = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setUserMessage(event.currentTarget.value);
-            setAdotMessage("");
+            setGptMessage("");
+            handleSendMessage(event.currentTarget.value);
             event.currentTarget.value = "";
             event.preventDefault();
         }
-    }, []);
+    }, [handleSendMessage]);
 
 
     const handleSubmitSpeak = useCallback(() => {
@@ -31,89 +78,40 @@ export default function ChatAdot() {
             const maxLength = 30;
             const inputText = Array.from(result).slice(0, maxLength).join('');
             setUserMessage(inputText);
-            setAdotMessage("");
+            setGptMessage("");
             if (inputText.length === maxLength) SpeechInputProvider.stopRecognition();
         });
     }, []);
 
 
-    const extractBlindroute = useCallback((input: string) => {
-        const regex = /@blindroute\{.*?\}/g;
-        const match = input.match(regex);
-        return match ? match[0] : null;
-    }, []);
-
-
-    const parseBlindroute = useCallback((blindrouteString: string) => {
-        const content = blindrouteString.match(/\{(.*?)\}/)![1];
-        const pairs = content.split(', ');
-        const obj: { [key: string]: string } = {};
-
-        pairs.forEach(pair => {
-            const [key, value] = pair.split(': ').map(s => s.trim());
-            obj[key] = value;
-        });
-
-        return {
-            start: obj.start,
-            destination: obj.destination
-        };
-    }, []);
-
-
     useEffect(() => {
-        SpeechOutputProvider.speak("").then(() => {
-            axios.get('/api/chatadot/createNewChat').then((value) => {
-                setChatId(value.data.threadId as string);
+        SpeechOutputProvider.speak("")
+            .then(async () => {
+                await loadChat().then(value => {
+                    setThreadId(value.data.threadId);
+                });
+            })
+            .then(async () => {
+                setGptMessage("안녕하세요! 무엇을 도와드릴까요?");
             });
-        })
     }, []);
 
 
     useEffect(() => {
-        if (userMessage && chatId) {
-            axios.post('/api/chatadot/getChatResult', {
-                threadId: chatId,
-                userMessage: userMessage
-            }).then((value) => {
-                const message = value.data.message as string;
-                console.log(message);
-
-                if (message.includes("@blindroute")) {
-                    const route = parseBlindroute(extractBlindroute(message) || "");
-                    setAdotMessage(`${route.start}에서 ${route.destination}까지 안내를 시작하겠습니다`);
-                    setRoute(route);
-                }
-                else {
-                    setAdotMessage(value.data.message as string || null);
-                }
-            });
+        if (gptMessage) {
+            SpeechOutputProvider.speak(gptMessage);
         }
-    }, [userMessage, chatId, parseBlindroute, extractBlindroute])
+    }, [gptMessage])
 
 
-    useEffect(() => {
-        if (adotMessage) {
-            SpeechOutputProvider.speak(adotMessage);
-        }
-    }, [adotMessage])
-
-
-    useEffect(() => {
-        if (route) {
-
-        }
-    }, [route]);
-
-
-    return (!chatId ? <LoadingAnimation active={!chatId} /> :
+    return (!threadId ? <LoadingAnimation active={!threadId} /> :
         <Wrapper>
             < BackImage >
                 <Image src="/images/chat_adot_background.png" alt="guide01" fill priority />
             </BackImage >
 
             <UserMessage>{userMessage || ""}</UserMessage>
-            <ReturnMessage>{adotMessage || ""}</ReturnMessage>
+            <ReturnMessage>{gptMessage || ""}</ReturnMessage>
 
             <MessageInputField>
                 <TextInputField>

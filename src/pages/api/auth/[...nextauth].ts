@@ -73,7 +73,7 @@ export const authOptions: AuthOptions = {
 
     secret: process.env.BLINDROUTE_NEXTAUTH_SECRET,
 
-    adapter: MongoDBAdapter(MongoDbProvider.connectDb(process.env.BLINDROUTE_MONGODB_URI)),
+    //adapter: MongoDBAdapter(MongoDbProvider.connectDb(process.env.BLINDROUTE_MONGODB_URI)),
 }
 
 export default NextAuth(authOptions);
