@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
 import OpenAI from 'openai';
+import { authOptions } from '../auth/[...nextauth]';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -48,7 +50,7 @@ function parseGptResponse(gptResponse: string) {
 
 async function isValidStation(routes: string[]) {
     if (!routes[0] || !routes[1]) return false;
-    const checkStart = (await axios.get<GetStationByName>(
+    const checkStart = (await axios.get<GetStationByNameResponse>(
         "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName",
         {
             params: {
@@ -59,7 +61,7 @@ async function isValidStation(routes: string[]) {
         }
     )).data.msgBody.itemList?.length > 0;
 
-    const checkDestination = (await axios.get<GetStationByName>(
+    const checkDestination = (await axios.get<GetStationByNameResponse>(
         "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName",
         {
             params: {
@@ -75,8 +77,15 @@ async function isValidStation(routes: string[]) {
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
+    const session = await getServerSession(request, response, authOptions);
+
     switch (request.method) {
         case 'POST': {
+            if (!session) {
+                response.status(401).end('Unauthorized');
+                return;
+            }
+
             try {
                 const { threadId, userMessage, chatMode } = request.body;
                 const assistantId = process.env.BLINDROUTE_ASSISTANT_V2;
@@ -115,8 +124,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             const routes = (parseGptResponse(value) as { msg: string }).msg.split(',');
                             return {
                                 validStation: await isValidStation(routes),
-                                start: routes[0] ?? "",
-                                destination: routes[1] ?? "",
+                                start: routes[0] || "",
+                                destination: routes[1] || "",
                             };
                         });
 
@@ -125,8 +134,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                                 const routes = (parseGptResponse(value) as { msg: string }).msg.split(',');
                                 return {
                                     validStation: await isValidStation(routes),
-                                    start: routes[0] ?? "",
-                                    destination: routes[1] ?? "",
+                                    start: routes[0] || "",
+                                    destination: routes[1] || "",
                                 };
                             });
                         }
@@ -152,14 +161,15 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
             break;
         }
-        default:
+        default: {
             response.setHeader('Allow', ['POST']);
             response.status(405).end(`Method ${request.method} Not Allowed`);
+        }
     }
 }
 
 
-interface GetStationByName {
+interface GetStationByNameResponse {
     comMsgHeader: ComMsgHeader;
     msgHeader: MsgHeader;
     msgBody: {

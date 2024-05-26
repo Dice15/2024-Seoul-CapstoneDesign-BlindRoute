@@ -11,14 +11,18 @@ import { useRouter } from "next/navigation";
 
 
 export default function ChatAdot() {
+    // hook
     const router = useRouter();
+
+
+    // state
     const [threadId, setThreadId] = useState<string | null>(null);
     const [chatMode, setChatMode] = useState<"chat" | "blindroute">("chat");
     const [userMessage, setUserMessage] = useState<string | null>(null);
     const [gptMessage, setGptMessage] = useState<string | null>(null);
-    const [route, setRoute] = useState<{ start: string; destination: string; }>({ start: "", destination: "" });
 
 
+    // handler
     const handleNavigation = useCallback((start: string, destination: string) => {
         const params = new URLSearchParams({
             start: start,
@@ -48,8 +52,11 @@ export default function ChatAdot() {
                     const route = value.data.message.split(',');
                     if (route.length === 2) {
                         handleNavigation(route[0], route[1]);
-                        //setGptMessage(`출발지 ${route[0]}와 목적지 ${route[1]}가 입력되었습니다. 상세 목적지를 검색하겠습니다.`);
-                        //setChatMode("chat");
+                        // SpeechOutputProvider.speak(`출발지 ${route[0]}와 목적지 ${route[1]}가 입력되었습니다. 상세 목적지를 검색하겠습니다.`).then(() => {
+                        //     setTimeout(() => {
+                        //         handleNavigation(route[0], route[1])
+                        //     }, 500);
+                        // });
                     }
                     else {
                         setGptMessage("출발지와 도착지를 다시 말해주세요.");
@@ -84,14 +91,15 @@ export default function ChatAdot() {
     }, []);
 
 
+    // effect
     useEffect(() => {
         SpeechOutputProvider.speak("")
-            .then(async () => {
-                await loadChat().then(value => {
+            .then(() => {
+                loadChat().then(value => {
                     setThreadId(value.data.threadId);
                 });
             })
-            .then(async () => {
+            .then(() => {
                 setGptMessage("안녕하세요! 무엇을 도와드릴까요?");
             });
     }, []);
@@ -104,6 +112,7 @@ export default function ChatAdot() {
     }, [gptMessage])
 
 
+    // render
     return (!threadId ? <LoadingAnimation active={!threadId} /> :
         <Wrapper>
             < BackImage >
