@@ -99,6 +99,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
         if (locations && locations.start !== "") {
             getBusStation(locations.start).then((value) => {
                 if (value.data.stations.length > 0) {
+                    console.log(value.data.stations)
                     setStations(value.data.stations);
                     setIsLoading(false);
                 }

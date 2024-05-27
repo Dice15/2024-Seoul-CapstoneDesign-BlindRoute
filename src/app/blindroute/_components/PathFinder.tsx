@@ -27,30 +27,6 @@ function stepTitle(step: PathFinderStep): string {
 }
 
 
-// function stepAnnouncement(step: PathFinderStep, isPageInit: boolean) {
-//     const delay = isPageInit ? 700 : 0;
-
-//     for (let i = 0; i < delay; i += 50) {
-//         setTimeout(() => { SpeechOutputProvider.speak(" "); }, i);
-//     }
-
-//     setTimeout(() => {
-//         switch (step) {
-//             case "selectStart": {
-//                 //SpeechOutputProvider.speak("정류장 검색 페이지입니다. 텍스트 입력 또는 음성인식으로 검색할 수 있습니다.");
-//                 isPageInit && VibrationProvider.vibrate(1000);
-//                 break;
-//             }
-//             case "selectDestination": {
-//                 //SpeechOutputProvider.speak(`정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.`);
-//                 isPageInit && VibrationProvider.vibrate(1000);
-//                 break;
-//             }
-//         }
-//     }, delay);
-// }
-
-
 export default function PathFinder() {
     // hook
     const searchParams = useSearchParams();
@@ -61,6 +37,7 @@ export default function PathFinder() {
     const [start, setStart] = useState<Station | null>(null);
     const [destination, setDestination] = useState<Station | null>(null);
     const [locations, setLocations] = useState<{ start: string; destination: string; } | null>(null);
+
 
 
     // handler

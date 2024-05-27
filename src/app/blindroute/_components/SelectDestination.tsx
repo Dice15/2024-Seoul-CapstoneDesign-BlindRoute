@@ -97,11 +97,9 @@ export default function SelectDestination({ locations, setStep, setDestination }
     // effect
     useEffect(() => {
         if (locations && locations.destination !== "") {
-            if (focusBlankRef.current) {
-                focusBlankRef.current.focus();
-            }
             getBusStation(locations.destination).then((value) => {
                 if (value.data.stations.length > 0) {
+                    console.log(value.data.stations)
                     setStations(value.data.stations);
                     setIsLoading(false);
                 }
