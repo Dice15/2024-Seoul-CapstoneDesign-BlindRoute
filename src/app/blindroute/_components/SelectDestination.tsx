@@ -44,21 +44,22 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
     // handler
     const handleGoBack = useCallback(() => {
-        router.replace('/chatbot');
-    }, [router]);
+        setStep("selectStart");
+    }, [setStep]);
 
 
     const handleSelectStart = useCallback(() => {
         setDestination(stations[stationInfoIndex.current]);
-        setStep("selectStart");
+        setStep("routingConfirm");
     }, [setDestination, setStep, stations]);
 
 
     const handleInitSpeak = useCallback((swiper: SwiperClass) => {
         VibrationProvider.vibrate(200);
-        const guide = "도착 정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.";
-        const speakStation = `"${stations[swiper.realIndex].stNm}", ${stations[swiper.realIndex].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`;
-        SpeechOutputProvider.speak(`${guide} "${speakStation}`).then(() => { initSpeak.current = false });
+        SpeechOutputProvider.speak("출발 정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.")
+            .then(async () => { await SpeechOutputProvider.speak(`${stations[swiper.realIndex].stNm}, ${stations[swiper.realIndex].stDir} 방면.`) })
+            .then(async () => { await SpeechOutputProvider.speak("왼쪽으로 스와이프하면 정류장을 선택합니다.") })
+            .then(async () => { initSpeak.current = false });
     }, [stations]);
 
 
@@ -67,7 +68,7 @@ export default function SelectDestination({ locations, setStep, setDestination }
         isSliding.current = true;
         stationInfoIndex.current = swiper.realIndex;
         if (!initSpeak.current) {
-            SpeechOutputProvider.speak(`"${stations[stationInfoIndex.current].stNm}", ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`);
+            SpeechOutputProvider.speak(`${stations[stationInfoIndex.current].stNm}, ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`)
         }
         setTimeout(() => isSliding.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
     }, [stations]);
@@ -90,7 +91,7 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
 
     const handleTouchSwipe = useCallback(() => {
-        SpeechOutputProvider.speak(`"${stations[stationInfoIndex.current].stNm}", ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`);
+        SpeechOutputProvider.speak(`${stations[stationInfoIndex.current].stNm}, ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`)
     }, [stations]);
 
 

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import axios from 'axios';
+import { IForwarding } from '@/core/type/IForwarding';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
@@ -13,6 +14,15 @@ export default async function handler(request: NextApiRequest, response: NextApi
             //   response.status(401).end('Unauthorized');
             //   return;
             // }
+
+            const { startX, startY, destinationX, destinationY } = request.query;
+
+            if (!startX || !startY || !destinationX || !destinationY) {
+                response.status(400).json({ msg: "Missing required query parameters" });
+                return;
+            }
+
+            console.log({ startX, startY, destinationX, destinationY })
 
             try {
                 const transitRoutes = getTransitRoutes().metaData.plan.itineraries
@@ -31,12 +41,13 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     });
                 }
                 else {
-                    const summarizedTransitRoute = (await Promise.all(transitRoutes[1].legs.map(async (leg) => {
+                    const transitRoute = transitRoutes[1];
+                    const forwardings: IForwarding[] = (await Promise.all(transitRoute.legs.map(async (leg) => {
                         const busRouteNm = leg.route!.split(':')[1];
 
                         const [stationNm, nextStationNm] = [leg.passStopList!.stationList[0].stationName, leg.passStopList?.stationList[1].stationName];
 
-                        const busRouteId = (await axios.get<GetBusRouteListResponse>(
+                        const busRoute = (await axios.get<GetBusRouteListResponse>(
                             "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList", {
                             params: {
                                 serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
@@ -45,36 +56,36 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             }
                         }).then((busRoutes) => {
                             return busRoutes.data.msgBody.itemList.find((item) => item.busRouteNm === busRouteNm);
-                        }))?.busRouteId;
+                        }));
 
-                        const arsId = (await axios.get<GetStaionByRouteResponse>(
+                        const station = (await axios.get<GetStaionByRouteResponse>(
                             "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute", {
                             params: {
                                 serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                                busRouteId: busRouteId || "",
+                                busRouteId: busRoute?.busRouteId || "",
                                 resultType: "json"
                             }
                         }).then((stations) => {
                             return stations.data.msgBody.itemList.find((_, index) =>
                                 ((stationNm || "") === (stations.data.msgBody.itemList[index].stationNm || "") && (nextStationNm || "") === (stations.data.msgBody.itemList[index + 1].stationNm) || ""));
-                        }))?.arsId;
+                        }));
 
-                        return (busRouteId && arsId) ? {
+                        return (station?.arsId && busRoute?.busRouteId) ? {
                             stationNm: stationNm,
+                            stationArsId: station.arsId,
+                            stationDir: station.direction,
                             busRouteNm: busRouteNm,
-                            busRouteId: busRouteId,
-                            arsId: arsId
+                            busRouteId: busRoute.busRouteId,
                         } : null;
-                    }))).filter((value): value is {
-                        stationNm: string;
-                        busRouteNm: string;
-                        busRouteId: string;
-                        arsId: string;
-                    } => value !== null);
+                    }))).filter((value): value is IForwarding => value !== null);
 
                     response.status(200).json({
                         msg: "정상적으로 처리되었습니다.",
-                        data: { transitRoute: summarizedTransitRoute }
+                        data: {
+                            fare: transitRoute.fare.regular.totalFare,
+                            time: transitRoute.totalTime,
+                            forwarding: forwardings
+                        }
                     });
                 }
             } catch (error) {

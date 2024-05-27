@@ -12,9 +12,11 @@ import SelectStart from "./SelectStart";
 import { useSearchParams } from "next/navigation";
 import LocationConfirm from "./LocationConfirm";
 import SelectDestination from "./SelectDestination";
+import { IRouting } from "@/core/type/IRouting";
+import RoutingConfirm from "./RoutingConfirm";
 
 
-export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination";
+export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationConfirm" | "waitingBus" | "boardingConfirm" | "quitConfirm";
 
 
 function stepTitle(step: PathFinderStep): string {
@@ -22,6 +24,7 @@ function stepTitle(step: PathFinderStep): string {
         case "locationConfirm": return "출발지 및 도착지 확인";
         case "selectStart": return "출발지 선택";
         case "selectDestination": return "도착지 선택";
+        case "routingConfirm": return "경로 확인";
         default: return "알 수 없는 단계";
     }
 }
@@ -33,11 +36,11 @@ export default function PathFinder() {
 
 
     // state
-    const [step, setStep] = useState<PathFinderStep>("locationConfirm");
+    const [step, setStep] = useState<PathFinderStep>("routingConfirm");
+    const [locations, setLocations] = useState<{ start: string; destination: string; } | null>(null);
     const [start, setStart] = useState<Station | null>(null);
     const [destination, setDestination] = useState<Station | null>(null);
-    const [locations, setLocations] = useState<{ start: string; destination: string; } | null>(null);
-
+    const [routing, setRouting] = useState<IRouting | null>(null);
 
 
     // handler
@@ -63,11 +66,20 @@ export default function PathFinder() {
                     setDestination={setDestination}
                 />;
             }
+            case "routingConfirm": {
+                return <RoutingConfirm
+                    setStep={setStep}
+                    start={start}
+                    destination={destination}
+                    routing={routing}
+                    setRouting={setRouting}
+                />;
+            }
             default: {
                 return <></>;
             }
         }
-    }, [locations, step]);
+    }, [locations, step, start, destination, routing]);
 
 
     // effect

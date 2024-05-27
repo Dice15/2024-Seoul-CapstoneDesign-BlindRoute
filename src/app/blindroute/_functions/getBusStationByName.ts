@@ -2,7 +2,7 @@ import IStation, { Station } from "@/core/type/Station";
 import axios from "axios";
 
 
-type getBusStationResponse = {
+type GetBusStationResponse = {
     msg: string;
     data: {
         stations: IStation[];
@@ -17,7 +17,7 @@ export async function getBusStation(stationName: string): Promise<{
     };
 }> {
     try {
-        const response = await axios.get<getBusStationResponse>('/api/station/getBusStationByName', {
+        const response = await axios.get<GetBusStationResponse>('/api/station/getBusStationByName', {
             params: { stationName },
         });
 
