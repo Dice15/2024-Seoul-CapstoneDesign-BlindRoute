@@ -18,10 +18,11 @@ interface RoutingConfirmProps {
     destination: Station | null;
     routing: IRouting | null;
     setRouting: React.Dispatch<React.SetStateAction<IRouting | null>>;
+    setForwardIndex: React.Dispatch<React.SetStateAction<number>>
 }
 
 
-export default function RoutingConfirm({ setStep, start, destination, routing, setRouting }: RoutingConfirmProps) {
+export default function RoutingConfirm({ setStep, start, destination, routing, setRouting, setForwardIndex }: RoutingConfirmProps) {
     // ref
     const LocationInfoContainerRef = useRef<HTMLDivElement>(null);
     const focusBlank = useRef<HTMLDivElement>(null);
@@ -33,7 +34,7 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
 
     // handler
     const handleGoBack = useCallback(() => {
-        setStep("selectStart");
+        setStep("locationConfirm");
     }, [setStep]);
 
 
@@ -72,6 +73,7 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
                     .then(async () => { await SpeechOutputProvider.speak(`비용은 ${response.data.fare}원, 시간은 ${Math.round(parseFloat(response.data.time) / 60)}분 소요됩니다.`) })
                     .then(async () => { await SpeechOutputProvider.speak(`왼쪽으로 스와이프하면 경로 안내를 시작합니다.`) });
                 setRouting(response.data);
+                setForwardIndex(0);
                 setIsLoading(false);
                 console.log(response.data.forwarding)
             }
@@ -81,7 +83,7 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
             }
             // }
         })
-    }, [start, destination, setRouting, handleGoBack])
+    }, [start, destination, setRouting, handleGoBack, setForwardIndex])
 
 
     // render

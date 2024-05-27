@@ -53,7 +53,7 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
     // effect
     useEffect(() => {
         if (locations) {
-            SpeechOutputProvider.speak(`출발지 ${locations?.start || ""}, 도착지 ${locations?.destination || ""}이 맞다면 왼쪽으로 스와이프, 아니라면 오른쪽으로 스와이프를 하세요.`);
+            SpeechOutputProvider.speak(`출발지 ${locations?.start || ""}, 도착지 ${locations?.destination || ""}로 경로 탐색을 시작하려면 왼쪽으로 스와이프 하세요.`);
         }
     }, [locations]);
 

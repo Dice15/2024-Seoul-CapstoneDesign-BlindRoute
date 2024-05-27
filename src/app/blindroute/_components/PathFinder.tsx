@@ -3,17 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { Station } from "@/core/type/Station";
-import { Bus } from "@/core/type/Bus";
-import { Boarding } from "@/core/type/Boarding";
-import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
-import SelectStation from "./SelectStart";
 import SelectStart from "./SelectStart";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LocationConfirm from "./LocationConfirm";
 import SelectDestination from "./SelectDestination";
 import { IRouting } from "@/core/type/IRouting";
 import RoutingConfirm from "./RoutingConfirm";
+import ReservationConfirm from "./ReservationConfirm";
 
 
 export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationConfirm" | "waitingBus" | "boardingConfirm" | "quitConfirm";
@@ -25,12 +21,17 @@ function stepTitle(step: PathFinderStep): string {
         case "selectStart": return "출발지 선택";
         case "selectDestination": return "도착지 선택";
         case "routingConfirm": return "경로 확인";
+        case "reservationConfirm": return "버스 예약";
         default: return "알 수 없는 단계";
     }
 }
 
 
 export default function PathFinder() {
+    // hook
+    const router = useRouter();
+
+
     // hook
     const searchParams = useSearchParams();
 
@@ -41,6 +42,7 @@ export default function PathFinder() {
     const [start, setStart] = useState<Station | null>(null);
     const [destination, setDestination] = useState<Station | null>(null);
     const [routing, setRouting] = useState<IRouting | null>(null);
+    const [forwardIndex, setForwardIndex] = useState<number>(0);
 
 
     // handler
@@ -73,13 +75,25 @@ export default function PathFinder() {
                     destination={destination}
                     routing={routing}
                     setRouting={setRouting}
+                    setForwardIndex={setForwardIndex}
                 />;
+            }
+            case "reservationConfirm": {
+                if ((routing?.forwarding.length || 0) <= forwardIndex) {
+                    router.replace('/chatbot');
+                    return <></>;
+                }
+                return <ReservationConfirm
+                    setStep={setStep}
+                    routing={routing}
+                    forwardIndex={forwardIndex}
+                />
             }
             default: {
                 return <></>;
             }
         }
-    }, [locations, step, start, destination, routing]);
+    }, [router, locations, step, start, destination, routing, forwardIndex]);
 
 
     // effect

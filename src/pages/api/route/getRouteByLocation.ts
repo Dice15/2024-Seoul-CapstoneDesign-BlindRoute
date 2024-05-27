@@ -6,14 +6,14 @@ import { IForwarding } from '@/core/type/IForwarding';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    //const session = await getServerSession(request, response, authOptions);
+    const session = await getServerSession(request, response, authOptions);
 
     switch (request.method) {
         case "GET": {
-            // if (!session) {
-            //   response.status(401).end('Unauthorized');
-            //   return;
-            // }
+            if (!session) {
+                response.status(401).end('Unauthorized');
+                return;
+            }
 
             const { startX, startY, destinationX, destinationY } = request.query;
 
