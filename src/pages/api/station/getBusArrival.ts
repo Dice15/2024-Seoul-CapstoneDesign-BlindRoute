@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import axios from 'axios';
+import { IBusArrival } from '@/core/type/IBusArrival';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
@@ -15,51 +16,50 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
 
             try {
-                const requestParam = request.query;
-                const stationName = requestParam.stationName as string;
+                const { stationArsId, busRouteId } = request.query;
 
-                const stations = await axios.get<GetStationByNameResponse>(
-                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName", {
+                if (!stationArsId || !busRouteId) {
+                    response.status(400).json({ msg: "Missing required query parameters" });
+                    return;
+                }
+
+                const busArrival: IBusArrival = await axios.get<GetStationByUidItemApiResponse>(
+                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid", {
                     params: {
-                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                        stSrch: stationName,
+                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY3),
+                        arsId: stationArsId,
                         resultType: "json"
                     }
-                }).then(async (getStationByNameResponse) => {
-                    return await Promise.all(getStationByNameResponse.data.msgBody.itemList.map(async (stationInfo) => {
-                        return {
-                            ...stationInfo,
-                            seq: "",
-                            stDir: await axios.get<GetStationByUidItemResponse>(
-                                "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid", {
-                                params: {
-                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                                    arsId: stationInfo.arsId,
-                                    resultType: "json"
-                                }
-                            }).then((getStationByUidItemResponse) => {
-                                const countingMap: { [key in string]: number; } = {};
-                                const maxRequency = { count: 0, nxtStn: "" }
+                }).then((getStationByUidItemApiResponse) => {
+                    const busRouteInfo = getStationByUidItemApiResponse.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === busRouteId);
+                    const result = {
+                        busArrMsg1: "운행종료",
+                        busVehId1: "",
+                        busArrMsg2: "운행종료",
+                        busVehId2: "",
+                    }
 
-                                getStationByUidItemResponse.data.msgBody.itemList.forEach((item) => {
-                                    if (countingMap[item.nxtStn] === undefined) countingMap[item.nxtStn] = 0;
-                                    if (++countingMap[item.nxtStn] > maxRequency.count) {
-                                        maxRequency.count = countingMap[item.nxtStn];
-                                        maxRequency.nxtStn = item.nxtStn;
-                                    }
-                                });
+                    if (busRouteInfo && busRouteInfo.arrmsg1 !== "운행종료") {
+                        result.busArrMsg1 = busRouteInfo.arrmsg1;
+                        result.busVehId1 = busRouteInfo.vehId1;
+                    }
 
-                                return maxRequency.nxtStn;
-                            })
-                        }
-                    }))
-                });
+                    if (busRouteInfo && busRouteInfo.arrmsg2 !== "운행종료") {
+                        result.busArrMsg2 = busRouteInfo.arrmsg2;
+                        result.busVehId2 = busRouteInfo.vehId2;
+                    }
+
+                    return result;
+                })
+
+                console.log(busArrival)
 
                 response.status(200).json({
                     msg: "정상적으로 처리되었습니다.",
-                    data: { stations: stations }
+                    data: {
+                        busArrival: busArrival
+                    }
                 });
-
             } catch (error) {
                 console.error(error);
                 response.status(500).end(`${error}`);
@@ -74,14 +74,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
 }
 
 
-interface GetStationByNameResponse {
-    comMsgHeader: ComMsgHeader;
-    msgHeader: MsgHeader;
-    msgBody: {
-        itemList: StationInfo[];
-    };
-}
-
 interface ComMsgHeader {
     errMsg: string | null;
     requestMsgID: string | null;
@@ -91,29 +83,22 @@ interface ComMsgHeader {
     returnCode: string | null;
 }
 
+
 interface MsgHeader {
     headerMsg: string;
     headerCd: string;
     itemCount: number;
 }
 
-interface StationInfo {
-    stId: string;
-    stNm: string;
-    tmX: string;
-    tmY: string;
-    posX: string;
-    posY: string;
-    arsId: string;
-}
 
-interface GetStationByUidItemResponse {
+interface GetStationByUidItemApiResponse {
     comMsgHeader: ComMsgHeader;
     msgHeader: MsgHeader;
     msgBody: {
         itemList: StationByUidItem[];
     };
 }
+
 
 interface StationByUidItem {
     stId: string;

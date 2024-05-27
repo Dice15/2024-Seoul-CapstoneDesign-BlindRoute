@@ -38,15 +38,15 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
     }, [setStep]);
 
 
-    const handleLocationConfirm = useCallback(() => {
+    const handleGoNext = useCallback(() => {
         setStep("reservationConfirm");
     }, [setStep]);
 
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
-            handleLocationConfirm();
-        }, [handleLocationConfirm]),
+            handleGoNext();
+        }, [handleGoNext]),
         onSwipedRight: useCallback(() => {
             handleGoBack()
         }, [handleGoBack]),

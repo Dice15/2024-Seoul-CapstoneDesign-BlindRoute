@@ -6,17 +6,16 @@ import 'swiper/css';
 import styled from "styled-components";
 import { PathFinderStep } from "./PathFinder";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
-import { IRouting } from "@/core/type/IRouting";
+import { IForwarding } from "@/core/type/IForwarding";
 
 
 interface ReservationConfirmProps {
     setStep: React.Dispatch<React.SetStateAction<PathFinderStep>>;
-    routing: IRouting | null;
-    forwardIndex: number;
+    forwarding: IForwarding | null;
 }
 
 
-export default function ReservationConfirm({ setStep, routing, forwardIndex }: ReservationConfirmProps) {
+export default function ReservationConfirm({ setStep, forwarding }: ReservationConfirmProps) {
     // ref
     const ReservationInfoContainerRef = useRef<HTMLDivElement>(null);
     const focusBlank = useRef<HTMLDivElement>(null);
@@ -28,15 +27,15 @@ export default function ReservationConfirm({ setStep, routing, forwardIndex }: R
     }, [setStep]);
 
 
-    const handleLocationConfirm = useCallback(() => {
+    const handleGoNext = useCallback(() => {
         setStep("waitingBus");
     }, [setStep]);
 
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
-            handleLocationConfirm();
-        }, [handleLocationConfirm]),
+            handleGoNext();
+        }, [handleGoNext]),
         onSwipedRight: useCallback(() => {
             handleGoBack()
         }, [handleGoBack]),
@@ -45,22 +44,18 @@ export default function ReservationConfirm({ setStep, routing, forwardIndex }: R
 
 
     const handleTouch = useCallback(() => {
-        if (routing) {
-            SpeechOutputProvider.speak(`${routing.forwarding[forwardIndex].busRouteNm},`)
-                .then(async () => { await SpeechOutputProvider.speak(`${routing.forwarding[forwardIndex].stationDir} 방면.`) })
+        if (forwarding) {
+            SpeechOutputProvider.speak(`${forwarding.busRouteNm},`)
+                .then(async () => { await SpeechOutputProvider.speak(`${forwarding.stationDir} 방면.`) })
                 .then(async () => { await SpeechOutputProvider.speak(`버스를 예약하려면 왼쪽으로 스와이프를 하세요.`) });
         }
-    }, [routing, forwardIndex]);
+    }, [forwarding]);
 
 
     // effect
     useEffect(() => {
-        if (routing) {
-            SpeechOutputProvider.speak(`${routing.forwarding[forwardIndex].busRouteNm},`)
-                .then(async () => { await SpeechOutputProvider.speak(`${routing.forwarding[forwardIndex].stationDir} 방면.`) })
-                .then(async () => { await SpeechOutputProvider.speak(`버스를 예약하려면 왼쪽으로 스와이프를 하세요.`) });
-        }
-    }, [routing, forwardIndex])
+        handleTouch();
+    }, [handleTouch])
 
 
     // render
@@ -68,12 +63,12 @@ export default function ReservationConfirm({ setStep, routing, forwardIndex }: R
         <Wrapper {...handleHorizontalSwipe}>
             <ReservationInfoContainer ref={ReservationInfoContainerRef}>
                 <ReservationInfo onClick={handleTouch}>
-                    {routing && <>
+                    {forwarding && <>
                         <BusName>
-                            {routing.forwarding[forwardIndex].busRouteNm}
+                            {forwarding.busRouteNm}
                         </BusName>
                         <BusAdirection>
-                            {`${routing.forwarding[forwardIndex].stationDir} 방면`}
+                            {`${forwarding.stationDir} 방면`}
                         </BusAdirection>
                     </>}
                 </ReservationInfo>

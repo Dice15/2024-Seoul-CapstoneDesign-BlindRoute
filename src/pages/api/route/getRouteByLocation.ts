@@ -95,7 +95,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
             break;
         }
         default: {
-            response.setHeader('Allow', ['POST']);
+            response.setHeader('Allow', ['GET']);
             response.status(405).end(`Method ${request.method} Not Allowed`);
         }
     }

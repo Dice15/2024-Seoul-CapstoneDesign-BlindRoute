@@ -34,15 +34,15 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
     }, [router]);
 
 
-    const handleLocationConfirm = useCallback(() => {
+    const handleGoNext = useCallback(() => {
         setStep("selectStart");
     }, [setStep]);
 
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
-            handleLocationConfirm();
-        }, [handleLocationConfirm]),
+            handleGoNext();
+        }, [handleGoNext]),
         onSwipedRight: useCallback(() => {
             handleGoBack()
         }, [handleGoBack]),
@@ -50,19 +50,24 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
     });
 
 
-    // effect
-    useEffect(() => {
+    const handleTouch = useCallback(() => {
         if (locations) {
             SpeechOutputProvider.speak(`출발지 ${locations?.start || ""}, 도착지 ${locations?.destination || ""}로 경로 탐색을 시작하려면 왼쪽으로 스와이프 하세요.`);
         }
     }, [locations]);
 
 
+    // effect
+    useEffect(() => {
+        handleTouch();
+    }, [handleTouch]);
+
+
     // render
     return (
         <Wrapper {...handleHorizontalSwipe}>
             <LocationInfoContainer ref={LocationInfoContainerRef}>
-                <LocationInfo>
+                <LocationInfo onClick={handleTouch}>
                     {locations && <>
                         <LocationName>
                             {`출발지: ${locations?.start || ""}`}

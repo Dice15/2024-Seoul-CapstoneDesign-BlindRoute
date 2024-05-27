@@ -24,7 +24,8 @@ export async function getRoute(start?: Station, destination?: Station): Promise<
         });
 
         return response.data;
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         return {
             msg: "API 요청 중 오류가 발생했습니다.",

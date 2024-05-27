@@ -48,7 +48,7 @@ export default function SelectDestination({ locations, setStep, setDestination }
     }, [setStep]);
 
 
-    const handleSelectStart = useCallback(() => {
+    const handleGoNext = useCallback(() => {
         setDestination(stations[stationInfoIndex.current]);
         setStep("routingConfirm");
     }, [setDestination, setStep, stations]);
@@ -81,8 +81,8 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
-            setTimeout(() => { handleSelectStart(); }, 1000)
-        }, [handleSelectStart]),
+            setTimeout(() => { handleGoNext(); }, 1000)
+        }, [handleGoNext]),
         onSwipedRight: useCallback(() => {
             handleGoBack()
         }, [handleGoBack]),

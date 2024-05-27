@@ -10,6 +10,7 @@ import SelectDestination from "./SelectDestination";
 import { IRouting } from "@/core/type/IRouting";
 import RoutingConfirm from "./RoutingConfirm";
 import ReservationConfirm from "./ReservationConfirm";
+import WaitingBus from "./WaitingBus";
 
 
 export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationConfirm" | "waitingBus" | "boardingConfirm" | "quitConfirm";
@@ -22,6 +23,7 @@ function stepTitle(step: PathFinderStep): string {
         case "selectDestination": return "도착지 선택";
         case "routingConfirm": return "경로 확인";
         case "reservationConfirm": return "버스 예약";
+        case "reservationConfirm": return "버스 대기";
         default: return "알 수 없는 단계";
     }
 }
@@ -43,6 +45,7 @@ export default function PathFinder() {
     const [destination, setDestination] = useState<Station | null>(null);
     const [routing, setRouting] = useState<IRouting | null>(null);
     const [forwardIndex, setForwardIndex] = useState<number>(0);
+    const [onBoardVehId, setOnBoardVehId] = useState<string | null>(null);
 
 
     // handler
@@ -85,8 +88,14 @@ export default function PathFinder() {
                 }
                 return <ReservationConfirm
                     setStep={setStep}
-                    routing={routing}
-                    forwardIndex={forwardIndex}
+                    forwarding={routing ? routing.forwarding[forwardIndex] : null}
+                />
+            }
+            case "waitingBus": {
+                return <WaitingBus
+                    setStep={setStep}
+                    forwarding={routing ? routing.forwarding[forwardIndex] : null}
+                    setOnBoardVehId={setOnBoardVehId}
                 />
             }
             default: {

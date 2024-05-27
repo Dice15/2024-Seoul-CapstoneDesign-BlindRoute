@@ -25,7 +25,8 @@ export async function getBusStation(stationName: string): Promise<{
             msg: response.data.msg,
             data: { stations: response.data.data.stations.map((item) => Station.fromObject(item)) }
         };
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         return {
             msg: "API 요청 중 오류가 발생했습니다.",

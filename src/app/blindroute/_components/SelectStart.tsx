@@ -48,7 +48,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
     }, [setStep]);
 
 
-    const handleSelectStart = useCallback(() => {
+    const handleGoNext = useCallback(() => {
         setStart(stations[stationInfoIndex.current]);
         setStep("selectDestination");
     }, [setStart, setStep, stations]);
@@ -81,8 +81,8 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
-            handleSelectStart();
-        }, [handleSelectStart]),
+            handleGoNext();
+        }, [handleGoNext]),
         onSwipedRight: useCallback(() => {
             handleGoBack();
         }, [handleGoBack]),
