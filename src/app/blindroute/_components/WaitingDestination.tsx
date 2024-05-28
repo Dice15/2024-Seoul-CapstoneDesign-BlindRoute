@@ -83,12 +83,21 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
     });
 
 
+    const handleSpeak = useCallback((init: boolean, forwarding: IForwarding, stationVisit: IStationVisit) => {
+        const text = `
+            ${forwarding.toStationNm} 로 이동 중 입니다.
+            ${stationVisit.stationVisMsg}.
+            ${init ? "오른쪽으로 스와이프하면 정류장 하차 예약을 취소합니다." : ""}     
+        `;
+        return SpeechOutputProvider.speak(text);
+    }, []);
+
+
     const handleTouch = useCallback(() => {
         if (forwarding && stationVisit) {
-            SpeechOutputProvider.speak(`${forwarding.toStationNm} 로 이동 중 입니다..`)
-                .then(async () => { await SpeechOutputProvider.speak(stationVisit.stationVisMsg) });
+            handleSpeak(false, forwarding, stationVisit);
         }
-    }, [forwarding, stationVisit]);
+    }, [forwarding, stationVisit, handleSpeak]);
 
 
     const handleCheckStationVisit = useCallback(async () => {
@@ -107,10 +116,9 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
     useEffect(() => {
         if (isLoading && forwarding && stationVisit) {
             setIsLoading(false);
-            SpeechOutputProvider.speak(`${forwarding.toStationNm} 로 이동 중 입니다..`)
-                .then(async () => { await SpeechOutputProvider.speak(stationVisit.stationVisMsg) });
+            handleSpeak(false, forwarding, stationVisit);
         }
-    }, [forwarding, isLoading, stationVisit])
+    }, [forwarding, isLoading, stationVisit, handleSpeak]);
 
 
     useEffect(() => {

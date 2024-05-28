@@ -43,13 +43,21 @@ export default function ReservationDesConfirm({ setStep, forwarding }: Reservati
     });
 
 
+    const handleSpeak = useCallback((forwarding: IForwarding) => {
+        const text = `
+            ${forwarding.busRouteNm} 버스를 탑승하셨으면,
+            왼쪽으로 스와이프하여
+            ${forwarding.toStationNm} 정류장 하차 예약을 하세요.
+        `;
+        return SpeechOutputProvider.speak(text);
+    }, []);
+
+
     const handleTouch = useCallback(() => {
         if (forwarding) {
-            SpeechOutputProvider.speak(`${forwarding.busRouteNm} 버스를 탑승하셨으면,`)
-                .then(async () => { await SpeechOutputProvider.speak(`왼쪽으로 스와이프하여`) })
-                .then(async () => { await SpeechOutputProvider.speak(`${forwarding.toStationNm} 정류장 하차 예약을 하세요.`) });
+            handleSpeak(forwarding);
         }
-    }, [forwarding]);
+    }, [forwarding, handleSpeak]);
 
 
     // effect
