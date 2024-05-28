@@ -17,11 +17,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
             try {
                 const requestParam = request.query;
                 const stationName = requestParam.stationName as string;
+                const dataServiceKey = process.env.DATA_API_ENCODING_KEY4;
 
                 const stations = await axios.get<GetStationByNameResponse>(
                     "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName", {
                     params: {
-                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                        serviceKey: decodeURIComponent(dataServiceKey),
                         stSrch: stationName,
                         resultType: "json"
                     }
@@ -33,7 +34,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             stDir: await axios.get<GetStationByUidItemResponse>(
                                 "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid", {
                                 params: {
-                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                    serviceKey: decodeURIComponent(dataServiceKey),
                                     arsId: stationInfo.arsId,
                                     resultType: "json"
                                 }

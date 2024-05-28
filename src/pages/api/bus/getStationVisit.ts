@@ -17,6 +17,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
             try {
                 const { busRouteId, busVehId, fromStationSeq, toStationSeq } = request.query;
+                const dataServiceKey = process.env.DATA_API_ENCODING_KEY2;
 
                 if (!busRouteId || !busVehId || !fromStationSeq || !toStationSeq) {
                     response.status(400).json({ msg: "Missing required query parameters" });
@@ -26,7 +27,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 const stationVisit: IStationVisit = await axios.get<GetBusPosByVehIdResponse>(
                     "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId", {
                     params: {
-                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                        serviceKey: decodeURIComponent(dataServiceKey),
                         vehId: busVehId,
                         resultType: "json"
                     }

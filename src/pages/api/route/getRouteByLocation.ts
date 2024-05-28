@@ -17,6 +17,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
 
             const { startX, startY, destinationX, destinationY } = request.query;
+            const dataServiceKey = process.env.DATA_API_ENCODING_KEY4;
 
             if (!startX || !startY || !destinationX || !destinationY) {
                 response.status(400).json({ msg: "Missing required query parameters" });
@@ -53,7 +54,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             const busRoute = (await axios.get<GetBusRouteListResponse>(
                                 "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList", {
                                 params: {
-                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                    serviceKey: decodeURIComponent(dataServiceKey),
                                     stSrch: busRouteNm,
                                     resultType: "json"
                                 }
@@ -64,7 +65,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             const station = (await axios.get<GetStaionByRouteResponse>(
                                 "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute", {
                                 params: {
-                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                    serviceKey: decodeURIComponent(dataServiceKey),
                                     busRouteId: busRoute?.busRouteId || "",
                                     resultType: "json"
                                 }
