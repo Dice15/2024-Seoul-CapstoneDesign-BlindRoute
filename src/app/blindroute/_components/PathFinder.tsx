@@ -37,6 +37,7 @@ function stepTitle(step: PathFinderStep): string {
 export default function PathFinder() {
     // hook
     const searchParams = useSearchParams();
+    const router = useRouter();
 
 
     // state
@@ -120,12 +121,19 @@ export default function PathFinder() {
     // effect
     useEffect(() => {
         if (searchParams) {
-            setLocations({
+            const locationParam = {
                 start: searchParams.get('start') ?? "",
                 destination: searchParams.get('destination') ?? ""
-            });
+            }
+            if (locationParam.start === "" || locationParam.destination === "") {
+                SpeechOutputProvider.speak("잘못된 접근입니다. 챗봇으로 돌가압니다.");
+                router.replace('/chatbot');
+            }
+            else {
+                setLocations(locationParam);
+            }
         }
-    }, [searchParams]);
+    }, [searchParams, router]);
 
 
     // render

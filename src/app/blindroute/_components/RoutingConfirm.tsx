@@ -109,7 +109,6 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
         if (start && destination) {
             getRoute(start, destination).then((response) => {
                 if (response.data.routings.length > 0) {
-                    console.log(response.data.routings)
                     setRoutings(response.data.routings);
                     setForwardIndex(0);
                     setIsLoading(false);
