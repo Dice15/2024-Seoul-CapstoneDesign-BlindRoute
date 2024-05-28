@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import axios from 'axios';
-import { IBusArrival } from '@/core/type/IBusArrival';
+import { IStationVisit } from '@/core/type/IStationVisit';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
@@ -16,68 +16,51 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
 
             try {
-                const { stationArsId, busRouteId } = request.query;
+                const { busRouteId, busVehId, stationSeq, stopCount } = request.query;
 
-                if (!stationArsId || !busRouteId) {
+                if (!busRouteId || !busVehId || !stationSeq || !stopCount) {
                     response.status(400).json({ msg: "Missing required query parameters" });
                     return;
                 }
 
-                const busArrival: IBusArrival = await axios.get<GetStationByUidItemApiResponse>(
-                    "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid", {
+                const stationVisit: IStationVisit = await axios.get<GetBusPosByVehIdResponse>(
+                    "http://ws.bus.go.kr/api/rest/buspos/getBusPosByVehId", {
                     params: {
-                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY3),
-                        arsId: stationArsId,
+                        serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                        vehId: busVehId,
                         resultType: "json"
                     }
-                }).then((getStationByUidItemApiResponse) => {
-                    const busRouteInfo = getStationByUidItemApiResponse.data.msgBody.itemList.find((busArrivalInfo) => busArrivalInfo.busRouteId === busRouteId);
+                }).then((getBusPosByVehIdResponse) => {
+                    const currSeq = parseInt(getBusPosByVehIdResponse.data.msgBody.itemList[0]?.stOrd || "-1");
+                    const startSeq = parseInt(stationSeq as string);
+                    const destinationSeq = startSeq + parseInt(stopCount as string) - 1;
                     const result = {
-                        busArrMsg1: "버스 운행이 종료되었습니다.",
-                        busVehId1: "",
-                        busArrMsg2: "버스 운행이 종료되었습니다.",
-                        busVehId2: "",
+                        stationVisMsg: "운행종료",
                     }
 
-                    if (busRouteInfo && busRouteInfo.arrmsg1 !== "운행종료") {
-                        const arrivalTime = busRouteInfo.arrmsg1.match(/\d+분\d+초후|곧 도착/);
+                    console.log(getBusPosByVehIdResponse.data.msgBody.itemList[0])
 
-                        if (!arrivalTime) {
-                            result.busArrMsg1 = "버스 도착 정보가 없습니다.";
-                        }
-                        else if (arrivalTime[0] === "곧 도착") {
-                            result.busArrMsg1 = "버스가 곧 도착 합니다.";
-                            result.busVehId1 = busRouteInfo.vehId1;
-                        }
-                        else {
-                            result.busArrMsg1 = `${arrivalTime[0]}에 도착합니다`;
-                            result.busVehId1 = busRouteInfo.vehId1;
-                        }
+                    if (currSeq >= 0 && (startSeq <= currSeq && currSeq < destinationSeq)) {
+                        const seqGap = destinationSeq - currSeq;
+                        result.stationVisMsg = seqGap > 1 ? `${seqGap}개의 정류장이 남았습니다.` : '곧 도착합니다.';
                     }
 
-                    if (busRouteInfo && busRouteInfo.arrmsg2 !== "운행종료") {
-                        const arrivalTime = busRouteInfo.arrmsg2.match(/\d+분\d+초후/);
-
-                        if (!arrivalTime) {
-                            result.busArrMsg2 = "다음 버스는 도착 정보가 없습니다.";
-                        }
-                        else {
-                            result.busArrMsg2 = `다음 버스는 ${arrivalTime[0]}에 도착합니다`;
-                            result.busVehId2 = busRouteInfo.vehId2;
-                        }
+                    if (currSeq >= 0 && !(startSeq <= currSeq && currSeq < destinationSeq)) {
+                        result.stationVisMsg = '목적지에 도착했습니다.';
                     }
 
                     return result;
-                })
+                });
 
-                console.log(busArrival)
+                console.log(stationVisit)
 
                 response.status(200).json({
                     msg: "정상적으로 처리되었습니다.",
                     data: {
-                        busArrival: busArrival
+                        stationVisit: stationVisit
                     }
                 });
+
             } catch (error) {
                 console.error(error);
                 response.status(500).end(`${error}`);
@@ -89,6 +72,15 @@ export default async function handler(request: NextApiRequest, response: NextApi
             response.status(405).end(`Method ${request.method} Not Allowed`);
         }
     }
+}
+
+
+interface GetStaionByRouteResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: StationInfo[];
+    };
 }
 
 
@@ -106,6 +98,58 @@ interface MsgHeader {
     headerMsg: string;
     headerCd: string;
     itemCount: number;
+}
+
+
+interface StationInfo {
+    busRouteId: string;
+    busRouteNm: string;
+    busRouteAbrv: string;
+    seq: string;
+    section: string;
+    station: string;
+    arsId: string;
+    stationNm: string;
+    gpsX: string;
+    gpsY: string;
+    posX: string;
+    posY: string;
+    fullSectDist: string;
+    direction: string;
+    stationNo: string;
+    routeType: string;
+    beginTm: string;
+    lastTm: string;
+    trnstnid: string;
+    sectSpd: string;
+    transYn: string;
+}
+
+
+interface GetBusPosByVehIdResponse {
+    comMsgHeader: ComMsgHeader;
+    msgHeader: MsgHeader;
+    msgBody: {
+        itemList: BusPosition[];
+    };
+}
+
+
+interface BusPosition {
+    vehId: string;
+    stId: string;
+    stOrd: string;
+    stopFlag: string;
+    dataTm: string;
+    tmX: string;
+    tmY: string;
+    posX: string;
+    posY: string;
+    plainNo: string;
+    busType: string;
+    lastStnId: string;
+    isFullFlag: string;
+    congetion: string;
 }
 
 

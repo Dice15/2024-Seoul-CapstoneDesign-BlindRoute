@@ -20,8 +20,8 @@ export async function getBusArrival(forwarding?: IForwarding): Promise<{
     try {
         const response = await axios.get<GetBusArrivalResponse>('/api/station/getBusArrival', {
             params: {
-                stationArsId: "10011",//forwarding.stationArsId,
-                busRouteId: "100100012",//forwarding.busRouteId
+                stationArsId: "03165",//forwarding.stationArsId,
+                busRouteId: "100100019",//forwarding.busRouteId
             },
         });
 
@@ -33,9 +33,9 @@ export async function getBusArrival(forwarding?: IForwarding): Promise<{
             msg: "API 요청 중 오류가 발생했습니다.",
             data: {
                 busArrival: {
-                    busArrMsg1: "운행종료",
+                    busArrMsg1: "버스 운행이 종료되었습니다.",
                     busVehId1: "",
-                    busArrMsg2: "운행종료",
+                    busArrMsg2: "버스 운행이 종료되었습니다.",
                     busVehId2: "",
                 }
             }

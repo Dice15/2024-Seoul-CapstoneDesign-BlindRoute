@@ -39,7 +39,7 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
 
 
     const handleGoNext = useCallback(() => {
-        setStep("reservationConfirm");
+        setStep("reservationBusConfirm");
     }, [setStep]);
 
 

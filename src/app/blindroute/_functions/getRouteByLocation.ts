@@ -16,10 +16,10 @@ export async function getRoute(start?: Station, destination?: Station): Promise<
     try {
         const response = await axios.get<GetRouteResponse>('/api/route/getRouteByLocation', {
             params: {
-                startX: "127.0507436148",//start.tmX,
-                startY: "37.653177207",//start.tmY,
-                destinationX: "126.9947285429",//destination.tmX,
-                destinationY: "37.5612375854",//destination.tmY,
+                startX: "127.0057290409",//start.tmX,
+                startY: "37.5354906847",//start.tmY,
+                destinationX: "127.0257426414",//destination.tmX,
+                destinationY: "37.501795842",//destination.tmY,
             },
         });
 

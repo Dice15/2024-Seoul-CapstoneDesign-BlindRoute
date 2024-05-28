@@ -45,7 +45,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     const forwardings: IForwarding[] = (await Promise.all(transitRoute.legs.map(async (leg) => {
                         const busRouteNm = leg.route!.split(':')[1];
 
-                        const [stationNm, nextStationNm] = [leg.passStopList!.stationList[0].stationName, leg.passStopList?.stationList[1].stationName];
+                        const [stationNm, nextStationNm, lastStationNm] = [
+                            leg.passStopList!.stationList[0].stationName,
+                            leg.passStopList!.stationList[1].stationName,
+                            leg.passStopList!.stationList[leg.passStopList!.stationList.length - 1].stationName,
+                        ];
 
                         const busRoute = (await axios.get<GetBusRouteListResponse>(
                             "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList", {
@@ -67,17 +71,21 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             }
                         }).then((stations) => {
                             return stations.data.msgBody.itemList.find((_, index) =>
-                                ((stationNm || "") === (stations.data.msgBody.itemList[index].stationNm || "") && (nextStationNm || "") === (stations.data.msgBody.itemList[index + 1].stationNm) || ""));
+                                (stationNm === (stations.data.msgBody.itemList[index].stationNm || "") && nextStationNm === (stations.data.msgBody.itemList[index + 1].stationNm) || ""));
                         }));
 
                         return (station?.arsId && busRoute?.busRouteId) ? {
-                            stationNm: stationNm,
-                            stationArsId: station.arsId,
-                            stationDir: station.direction,
+                            fromStationNm: stationNm,
+                            fromStationSeq: station.seq,
+                            toStationNm: lastStationNm,
+                            toStationSeq: (parseInt(station.seq) + (leg.passStopList?.stationList.length || 1) - 1).toString(),
                             busRouteNm: busRouteNm,
                             busRouteId: busRoute.busRouteId,
+                            busRouteDir: station.direction,
                         } : null;
                     }))).filter((value): value is IForwarding => value !== null);
+
+                    console.log(forwardings)
 
                     response.status(200).json({
                         msg: "정상적으로 처리되었습니다.",

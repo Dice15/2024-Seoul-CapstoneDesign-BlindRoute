@@ -9,11 +9,12 @@ import LocationConfirm from "./LocationConfirm";
 import SelectDestination from "./SelectDestination";
 import { IRouting } from "@/core/type/IRouting";
 import RoutingConfirm from "./RoutingConfirm";
-import ReservationConfirm from "./ReservationConfirm";
+import ReservationBusConfirm from "./ReservationBusConfirm";
 import WaitingBus from "./WaitingBus";
+import ReservationDesConfirm from "./ReservationDesConfirm";
 
 
-export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationConfirm" | "waitingBus" | "boardingConfirm" | "quitConfirm";
+export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationBusConfirm" | "waitingBus" | "reservationDesConfirm" | "waitingDestination";
 
 
 function stepTitle(step: PathFinderStep): string {
@@ -22,8 +23,10 @@ function stepTitle(step: PathFinderStep): string {
         case "selectStart": return "출발지 선택";
         case "selectDestination": return "도착지 선택";
         case "routingConfirm": return "경로 확인";
-        case "reservationConfirm": return "버스 예약";
-        case "reservationConfirm": return "버스 대기";
+        case "reservationBusConfirm": return "버스 예약";
+        case "waitingBus": return "버스 대기";
+        case "reservationDesConfirm": return "하차 예약";
+        case "waitingDestination": return "하차 대기";
         default: return "알 수 없는 단계";
     }
 }
@@ -81,12 +84,12 @@ export default function PathFinder() {
                     setForwardIndex={setForwardIndex}
                 />;
             }
-            case "reservationConfirm": {
+            case "reservationBusConfirm": {
                 if ((routing?.forwarding.length || 0) <= forwardIndex) {
                     router.replace('/chatbot');
                     return <></>;
                 }
-                return <ReservationConfirm
+                return <ReservationBusConfirm
                     setStep={setStep}
                     forwarding={routing ? routing.forwarding[forwardIndex] : null}
                 />
@@ -96,6 +99,12 @@ export default function PathFinder() {
                     setStep={setStep}
                     forwarding={routing ? routing.forwarding[forwardIndex] : null}
                     setOnBoardVehId={setOnBoardVehId}
+                />
+            }
+            case "reservationDesConfirm": {
+                return <ReservationDesConfirm
+                    setStep={setStep}
+                    forwarding={routing ? routing.forwarding[forwardIndex] : null}
                 />
             }
             default: {

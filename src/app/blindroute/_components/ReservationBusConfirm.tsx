@@ -9,13 +9,13 @@ import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { IForwarding } from "@/core/type/IForwarding";
 
 
-interface ReservationConfirmProps {
+interface ReservationBusConfirmProps {
     setStep: React.Dispatch<React.SetStateAction<PathFinderStep>>;
     forwarding: IForwarding | null;
 }
 
 
-export default function ReservationConfirm({ setStep, forwarding }: ReservationConfirmProps) {
+export default function ReservationBusConfirm({ setStep, forwarding }: ReservationBusConfirmProps) {
     // ref
     const ReservationInfoContainerRef = useRef<HTMLDivElement>(null);
     const focusBlank = useRef<HTMLDivElement>(null);
@@ -45,9 +45,9 @@ export default function ReservationConfirm({ setStep, forwarding }: ReservationC
 
     const handleTouch = useCallback(() => {
         if (forwarding) {
-            SpeechOutputProvider.speak(`${forwarding.busRouteNm},`)
-                .then(async () => { await SpeechOutputProvider.speak(`${forwarding.stationDir} 방면.`) })
-                .then(async () => { await SpeechOutputProvider.speak(`버스를 예약하려면 왼쪽으로 스와이프를 하세요.`) });
+            SpeechOutputProvider.speak(`${forwarding.fromStationNm} 정류장에서`)
+                .then(async () => { await SpeechOutputProvider.speak(`${forwarding.busRouteNm}, ${forwarding.busRouteDir} 방면.`) })
+                .then(async () => { await SpeechOutputProvider.speak(`버스 예약을 하려면 왼쪽으로 스와이프를 하세요.`) });
         }
     }, [forwarding]);
 
@@ -64,12 +64,12 @@ export default function ReservationConfirm({ setStep, forwarding }: ReservationC
             <ReservationInfoContainer ref={ReservationInfoContainerRef}>
                 <ReservationInfo onClick={handleTouch}>
                     {forwarding && <>
-                        <BusName>
-                            {forwarding.busRouteNm}
-                        </BusName>
-                        <BusAdirection>
-                            {`${forwarding.stationDir} 방면`}
-                        </BusAdirection>
+                        <StationInfo>
+                            {`승차: ${forwarding.fromStationNm}`}
+                        </StationInfo>
+                        <BusInfo>
+                            {`${forwarding.busRouteNm}, ${forwarding.busRouteDir} 방면`}
+                        </BusInfo>
                     </>}
                 </ReservationInfo>
             </ReservationInfoContainer>
@@ -111,7 +111,7 @@ const ReservationInfo = styled.div`
     align-items: center;
 `;
 
-const BusName = styled.h1` 
+const StationInfo = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
     font-size: 6.5vw;
@@ -120,7 +120,7 @@ const BusName = styled.h1`
     user-select: none;
 `;
 
-const BusAdirection = styled.h3`
+const BusInfo = styled.h3`
     margin-bottom: 5%;
     text-align: center;
     font-size: 4vw;
