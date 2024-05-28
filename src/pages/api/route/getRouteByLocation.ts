@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import axios from 'axios';
 import { IForwarding } from '@/core/type/IForwarding';
+import { IRouting } from '@/core/type/IRouting';
 
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
@@ -22,8 +23,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 return;
             }
 
-            console.log({ startX, startY, destinationX, destinationY })
-
             try {
                 const transitRoutes = getTransitRoutes().metaData.plan.itineraries
                     .filter((itinerary) => {
@@ -41,58 +40,65 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     });
                 }
                 else {
-                    const transitRoute = transitRoutes[1];
-                    const forwardings: IForwarding[] = (await Promise.all(transitRoute.legs.map(async (leg) => {
-                        const busRouteNm = leg.route!.split(':')[1];
+                    const routings: IRouting[] = await Promise.all(transitRoutes.map(async (transitRoute) => {
+                        const forwardings: IForwarding[] = (await Promise.all(transitRoute.legs.map(async (leg) => {
+                            const busRouteNm = leg.route!.split(':')[1];
 
-                        const [stationNm, nextStationNm, lastStationNm] = [
-                            leg.passStopList!.stationList[0].stationName,
-                            leg.passStopList!.stationList[1].stationName,
-                            leg.passStopList!.stationList[leg.passStopList!.stationList.length - 1].stationName,
-                        ];
+                            const [stationNm, nextStationNm, lastStationNm] = [
+                                leg.passStopList!.stationList[0].stationName,
+                                leg.passStopList!.stationList[1].stationName,
+                                leg.passStopList!.stationList[leg.passStopList!.stationList.length - 1].stationName,
+                            ];
 
-                        const busRoute = (await axios.get<GetBusRouteListResponse>(
-                            "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList", {
-                            params: {
-                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                                stSrch: busRouteNm,
-                                resultType: "json"
-                            }
-                        }).then((busRoutes) => {
-                            return busRoutes.data.msgBody.itemList.find((item) => item.busRouteNm === busRouteNm);
-                        }));
+                            const busRoute = (await axios.get<GetBusRouteListResponse>(
+                                "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList", {
+                                params: {
+                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                    stSrch: busRouteNm,
+                                    resultType: "json"
+                                }
+                            }).then((busRoutes) => {
+                                return busRoutes.data.msgBody.itemList.find((item) => item.busRouteNm === busRouteNm);
+                            }));
 
-                        const station = (await axios.get<GetStaionByRouteResponse>(
-                            "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute", {
-                            params: {
-                                serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
-                                busRouteId: busRoute?.busRouteId || "",
-                                resultType: "json"
-                            }
-                        }).then((stations) => {
-                            return stations.data.msgBody.itemList.find((_, index) =>
-                                (stationNm === (stations.data.msgBody.itemList[index].stationNm || "") && nextStationNm === (stations.data.msgBody.itemList[index + 1].stationNm) || ""));
-                        }));
+                            const station = (await axios.get<GetStaionByRouteResponse>(
+                                "http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute", {
+                                params: {
+                                    serviceKey: decodeURIComponent(process.env.DATA_API_ENCODING_KEY4),
+                                    busRouteId: busRoute?.busRouteId || "",
+                                    resultType: "json"
+                                }
+                            }).then((stations) => {
+                                return stations.data.msgBody.itemList.find((_, index) =>
+                                    (stationNm === (stations.data.msgBody.itemList[index].stationNm || "") && nextStationNm === (stations.data.msgBody.itemList[index + 1].stationNm) || ""));
+                            }));
 
-                        return (station?.arsId && busRoute?.busRouteId) ? {
-                            fromStationNm: stationNm,
-                            fromStationSeq: station.seq,
-                            toStationNm: lastStationNm,
-                            toStationSeq: (parseInt(station.seq) + (leg.passStopList?.stationList.length || 1) - 1).toString(),
-                            busRouteNm: busRouteNm,
-                            busRouteId: busRoute.busRouteId,
-                            busRouteDir: station.direction,
-                        } : null;
-                    }))).filter((value): value is IForwarding => value !== null);
+                            return (station?.arsId && busRoute?.busRouteId) ? {
+                                fromStationNm: stationNm,
+                                fromStationSeq: station.seq,
+                                fromStationArsId: station.arsId,
+                                toStationNm: lastStationNm,
+                                toStationSeq: (parseInt(station.seq) + (leg.passStopList?.stationList.length || 1) - 1).toString(),
+                                busRouteNm: busRouteNm,
+                                busRouteId: busRoute.busRouteId,
+                                busRouteDir: station.direction,
+                            } : null;
+                        }))).filter((value): value is IForwarding => value !== null);
 
-                    console.log(forwardings)
+                        return {
+                            fare: transitRoute.fare.regular.totalFare.toString(),
+                            time: transitRoute.totalTime.toString(),
+                            forwarding: forwardings
+                        };
+                    }));
+
+
+                    console.log(routings)
 
                     response.status(200).json({
                         msg: "정상적으로 처리되었습니다.",
                         data: {
-                            fare: transitRoute.fare.regular.totalFare,
-                            time: transitRoute.totalTime,
-                            forwarding: forwardings
+                            routings: routings
                         }
                     });
                 }
@@ -317,7 +323,7 @@ function getTransitRoutes(): GetTransitRoutesResponse {
                 "startX": "127.0507436148",
                 "ferryCount": 0,
                 "trainCount": 0,
-                "reqDttm": "20240527192351"
+                "reqDttm": "20240528221644"
             },
             "plan": {
                 "itineraries": [
@@ -401,7 +407,7 @@ function getTransitRoutes(): GetTransitRoutesResponse {
                                         "routeColor": "00A5DE",
                                         "route": "수도권4호선(급행)",
                                         "routeId": "111041002",
-                                        "service": 1,
+                                        "service": 0,
                                         "type": 119
                                     }
                                 ],
@@ -1257,7 +1263,7 @@ function getTransitRoutes(): GetTransitRoutesResponse {
                                         "routeColor": "00A5DE",
                                         "route": "수도권4호선(급행)",
                                         "routeId": "111041002",
-                                        "service": 1,
+                                        "service": 0,
                                         "type": 119
                                     }
                                 ],
@@ -1580,7 +1586,7 @@ function getTransitRoutes(): GetTransitRoutesResponse {
                                         "routeColor": "00A5DE",
                                         "route": "수도권4호선(급행)",
                                         "routeId": "111041002",
-                                        "service": 1,
+                                        "service": 0,
                                         "type": 119
                                     }
                                 ],

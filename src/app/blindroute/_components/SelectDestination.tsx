@@ -54,13 +54,21 @@ export default function SelectDestination({ locations, setStep, setDestination }
     }, [setDestination, setStep, stations]);
 
 
+    const handleSpeak = useCallback((init: boolean, station: Station) => {
+        const text = `
+            ${init ? "도착 정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : ""}
+            ${station.stNm}, ${station.stDir} 방면.
+            왼쪽으로 스와이프하면 정류장을 선택합니다.
+        `;
+        return SpeechOutputProvider.speak(text);
+    }, []);
+
+
+
     const handleInitSpeak = useCallback((swiper: SwiperClass) => {
         VibrationProvider.vibrate(200);
-        SpeechOutputProvider.speak("출발 정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다.")
-            .then(async () => { await SpeechOutputProvider.speak(`${stations[swiper.realIndex].stNm}, ${stations[swiper.realIndex].stDir} 방면.`) })
-            .then(async () => { await SpeechOutputProvider.speak("왼쪽으로 스와이프하면 정류장을 선택합니다.") })
-            .then(async () => { initSpeak.current = false });
-    }, [stations]);
+        handleSpeak(true, stations[swiper.realIndex]).then(() => { initSpeak.current = false });
+    }, [stations, handleSpeak]);
 
 
     const handleVerticalSwipe = useCallback((swiper: SwiperClass) => {
@@ -68,10 +76,10 @@ export default function SelectDestination({ locations, setStep, setDestination }
         isSliding.current = true;
         stationInfoIndex.current = swiper.realIndex;
         if (!initSpeak.current) {
-            SpeechOutputProvider.speak(`${stations[stationInfoIndex.current].stNm}, ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`)
+            handleSpeak(false, stations[swiper.realIndex]).then(() => { initSpeak.current = false });
         }
         setTimeout(() => isSliding.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
-    }, [stations]);
+    }, [stations, handleSpeak]);
 
 
     const handleVerticalSliding = useCallback((swiper: SwiperClass) => {
@@ -91,8 +99,8 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
 
     const handleTouchSwipe = useCallback(() => {
-        SpeechOutputProvider.speak(`${stations[stationInfoIndex.current].stNm}, ${stations[stationInfoIndex.current].stDir} 방면. 왼쪽으로 스와이프하면 정류장을 선택합니다.`)
-    }, [stations]);
+        handleSpeak(false, stations[stationInfoIndex.current]).then(() => { initSpeak.current = false });
+    }, [stations, handleSpeak]);
 
 
     // effect
@@ -100,7 +108,6 @@ export default function SelectDestination({ locations, setStep, setDestination }
         if (locations && locations.destination !== "") {
             getBusStation(locations.destination).then((value) => {
                 if (value.data.stations.length > 0) {
-                    console.log(value.data.stations)
                     setStations(value.data.stations);
                     setIsLoading(false);
                 }

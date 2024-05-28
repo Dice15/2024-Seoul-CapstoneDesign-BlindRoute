@@ -45,6 +45,7 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
 
     const handleTouch = useCallback(() => {
         if (forwarding) {
+            console.log(forwarding)
             SpeechOutputProvider.speak(`${forwarding.fromStationNm} 정류장에서`)
                 .then(async () => { await SpeechOutputProvider.speak(`${forwarding.busRouteNm}, ${forwarding.busRouteDir} 방면.`) })
                 .then(async () => { await SpeechOutputProvider.speak(`버스 예약을 하려면 왼쪽으로 스와이프를 하세요.`) });

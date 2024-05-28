@@ -35,7 +35,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     const result = {
                         busArrMsg1: "버스 운행이 종료되었습니다.",
                         busVehId1: "",
-                        busArrMsg2: "버스 운행이 종료되었습니다.",
+                        busArrMsg2: "",
                         busVehId2: "",
                     }
 
@@ -55,7 +55,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                         }
                     }
 
-                    if (busRouteInfo && busRouteInfo.arrmsg2 !== "운행종료") {
+                    if (result.busVehId1 !== '' && busRouteInfo && busRouteInfo.arrmsg2 !== "운행종료") {
                         const arrivalTime = busRouteInfo.arrmsg2.match(/\d+분\d+초후/);
 
                         if (!arrivalTime) {

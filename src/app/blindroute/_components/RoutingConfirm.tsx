@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import styled from "styled-components";
 import { PathFinderStep } from "./PathFinder";
@@ -10,6 +11,7 @@ import { Station } from "@/core/type/Station";
 import { IRouting } from "@/core/type/IRouting";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { getRoute } from "../_functions/getRouteByLocation";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 
 
 interface RoutingConfirmProps {
@@ -26,10 +28,14 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
     // ref
     const LocationInfoContainerRef = useRef<HTMLDivElement>(null);
     const focusBlank = useRef<HTMLDivElement>(null);
+    const routingInfoIndex = useRef<number>(0);
+    const isSliding = useRef<boolean>(false);
+    const initSpeak = useRef<boolean>(true);
 
 
     // state
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [routings, setRoutings] = useState<IRouting[]>([]);
 
 
     // handler
@@ -39,9 +45,45 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
 
 
     const handleGoNext = useCallback(() => {
+        setRouting(routings[routingInfoIndex.current])
         setStep("reservationBusConfirm");
-    }, [setStep]);
+    }, [setStep, setRouting, routings]);
 
+
+    const handleSpeak = useCallback((init: boolean, index: number, routing: IRouting) => {
+        const text = `
+            ${init ? "경로를 선택하세요. 위아래 스와이프로 경로를 선택할 수 있습니다." : ""}
+            ${index + 1}번 째 경로,
+            ${routing.forwarding.length}개의 버스를 탑승하며,
+            비용은 ${routing.fare}원,
+            시간은 ${Math.round(parseFloat(routing.time) / 60)}분이 소요됩니다.
+            ${routing.forwarding.map((forwarding, index) => `${index + 1}번째 탑승 정류장: ${forwarding.fromStationNm}`).join(',')}
+            왼쪽으로 스와이프하면 이 경로를 선택합니다.
+        `;
+        return SpeechOutputProvider.speak(text);
+    }, []);
+
+
+    const handleInitSpeak = useCallback((swiper: SwiperClass) => {
+        VibrationProvider.vibrate(200);
+        handleSpeak(true, swiper.realIndex, routings[swiper.realIndex]).then(() => { initSpeak.current = false });
+    }, [routings, handleSpeak]);
+
+
+    const handleVerticalSwipe = useCallback((swiper: SwiperClass) => {
+        VibrationProvider.vibrate(200);
+        isSliding.current = true;
+        routingInfoIndex.current = swiper.realIndex;
+        if (!initSpeak.current) {
+            handleSpeak(false, swiper.realIndex, routings[swiper.realIndex]).then(() => { initSpeak.current = false });
+        }
+        setTimeout(() => isSliding.current = false, 250); // 300ms는 애니메이션 시간에 맞게 조정
+    }, [routings, handleSpeak]);
+
+
+    const handleVerticalSliding = useCallback((swiper: SwiperClass) => {
+        initSpeak.current = false;
+    }, []);
 
     const handleHorizontalSwipe = useSwipeable({
         onSwipedLeft: useCallback(() => {
@@ -54,35 +96,30 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
     });
 
 
-    const handleTouch = useCallback(() => {
-        if (routing) {
-            SpeechOutputProvider.speak(`${routing.forwarding.length}개의 버스를 탑승합니다.`)
-                .then(async () => { await SpeechOutputProvider.speak(`비용은 ${routing.fare}원, 시간은 ${Math.round(parseFloat(routing.time) / 60)}분 소요됩니다.`) })
-                .then(async () => { await SpeechOutputProvider.speak(`왼쪽으로 스와이프하면 경로 안내를 시작합니다.`) });
+    const handleTouchSwipe = useCallback(() => {
+        if (routings) {
+            handleSpeak(false, routingInfoIndex.current, routings[routingInfoIndex.current]).then(() => { initSpeak.current = false });
         }
-    }, [routing]);
+    }, [routings, handleSpeak]);
 
 
     // effect
     useEffect(() => {
         setRouting(null);
-        // if (start && destination) {
-        getRoute().then((response) => {
-            if (response.data.forwarding.length > 0) {
-                SpeechOutputProvider.speak(`${response.data.forwarding.length}개의 버스를 탑승합니다.`)
-                    .then(async () => { await SpeechOutputProvider.speak(`비용은 ${response.data.fare}원, 시간은 ${Math.round(parseFloat(response.data.time) / 60)}분 소요됩니다.`) })
-                    .then(async () => { await SpeechOutputProvider.speak(`왼쪽으로 스와이프하면 경로 안내를 시작합니다.`) });
-                setRouting(response.data);
-                setForwardIndex(0);
-                setIsLoading(false);
-                console.log(response.data.forwarding)
-            }
-            else {
-                SpeechOutputProvider.speak(`검색된 경로가 없습니다`);
-                handleGoBack();
-            }
-            // }
-        })
+        if (start && destination) {
+            getRoute(start, destination).then((response) => {
+                if (response.data.routings.length > 0) {
+                    console.log(response.data.routings)
+                    setRoutings(response.data.routings);
+                    setForwardIndex(0);
+                    setIsLoading(false);
+                }
+                else {
+                    SpeechOutputProvider.speak(`검색된 경로가 없습니다`);
+                    handleGoBack();
+                }
+            })
+        }
     }, [start, destination, setRouting, handleGoBack, setForwardIndex])
 
 
@@ -91,16 +128,40 @@ export default function RoutingConfirm({ setStep, start, destination, routing, s
         <Wrapper {...handleHorizontalSwipe}>
             <LoadingAnimation active={isLoading} />
             <RoutingInfoContainer ref={LocationInfoContainerRef}>
-                <RoutingInfo onClick={handleTouch}>
-                    {routing && <>
-                        <ForwardingInfo>
-                            {`${routing.forwarding.length}개의 버스 탑승`}
-                        </ForwardingInfo>
-                        <CostInfo>
-                            {`${routing.fare}원, ${Math.round(parseFloat(routing.time) / 60)}분`}
-                        </CostInfo>
-                    </>}
-                </RoutingInfo>
+                {routings.length > 0 &&
+                    <Swiper
+                        slidesPerView={1}
+                        spaceBetween={50}
+                        onInit={handleInitSpeak}
+                        onSlideChange={handleVerticalSwipe}
+                        onSliderMove={handleVerticalSliding}
+                        speed={300}
+                        loop={routings.length > 1 ? true : false}
+                        direction="vertical"
+                        style={{ height: "100%", width: "100%" }}
+                    >
+                        {routings.map((routing, index) => (
+                            <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
+                                <RoutingInfo
+                                    onClick={handleTouchSwipe}
+                                    tabIndex={1}
+                                >
+                                    <ForwardingInfo>
+                                        {`${routing.forwarding.length}개의 버스 탑승`}
+                                    </ForwardingInfo>
+                                    <CostInfo>
+                                        {`${routing.fare}원, ${Math.round(parseFloat(routing.time) / 60)}분`}
+                                    </CostInfo>
+                                    {routing.forwarding.map((forwarding, index) => (
+                                        <StationInfo key={index}>
+                                            {`${forwarding.fromStationNm} - ${forwarding.busRouteNm} (${forwarding.busRouteDir} 방면)`}
+                                        </StationInfo>
+                                    ))}
+                                </RoutingInfo>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                }
             </RoutingInfoContainer>
             <FocusBlank ref={focusBlank} tabIndex={0} />
         </Wrapper >
@@ -150,7 +211,16 @@ const ForwardingInfo = styled.h1`
 `;
 
 const CostInfo = styled.h3`
-    margin-bottom: 5%;
+    margin-bottom: 8vw;
+    text-align: center;
+    font-size: 4vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
+const StationInfo = styled.h3`
+    margin-bottom: 2vw;
     text-align: center;
     font-size: 4vw;
     font-weight: bold;

@@ -11,7 +11,7 @@ type GetBusArrivalResponse = {
 };
 
 
-export async function getBusArrival(forwarding?: IForwarding): Promise<{
+export async function getBusArrival(forwarding: IForwarding): Promise<{
     msg: string;
     data: {
         busArrival: IBusArrival;
@@ -20,8 +20,8 @@ export async function getBusArrival(forwarding?: IForwarding): Promise<{
     try {
         const response = await axios.get<GetBusArrivalResponse>('/api/station/getBusArrival', {
             params: {
-                stationArsId: "03165",//forwarding.stationArsId,
-                busRouteId: "100100019",//forwarding.busRouteId
+                stationArsId: forwarding.fromStationArsId,
+                busRouteId: forwarding.busRouteId
             },
         });
 

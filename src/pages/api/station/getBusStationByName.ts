@@ -55,6 +55,8 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     }))
                 });
 
+                console.log(stations);
+
                 response.status(200).json({
                     msg: "정상적으로 처리되었습니다.",
                     data: { stations: stations }

@@ -16,9 +16,9 @@ export default async function handler(request: NextApiRequest, response: NextApi
             }
 
             try {
-                const { busRouteId, busVehId, stationSeq, stopCount } = request.query;
+                const { busRouteId, busVehId, fromStationSeq, toStationSeq } = request.query;
 
-                if (!busRouteId || !busVehId || !stationSeq || !stopCount) {
+                if (!busRouteId || !busVehId || !fromStationSeq || !toStationSeq) {
                     response.status(400).json({ msg: "Missing required query parameters" });
                     return;
                 }
@@ -32,10 +32,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     }
                 }).then((getBusPosByVehIdResponse) => {
                     const currSeq = parseInt(getBusPosByVehIdResponse.data.msgBody.itemList[0]?.stOrd || "-1");
-                    const startSeq = parseInt(stationSeq as string);
-                    const destinationSeq = startSeq + parseInt(stopCount as string) - 1;
+                    const startSeq = parseInt(fromStationSeq as string);
+                    const destinationSeq = parseInt(toStationSeq as string);
                     const result = {
                         stationVisMsg: "운행종료",
+                        stationOrd: "",
                     }
 
                     console.log(getBusPosByVehIdResponse.data.msgBody.itemList[0])
@@ -43,10 +44,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
                     if (currSeq >= 0 && (startSeq <= currSeq && currSeq < destinationSeq)) {
                         const seqGap = destinationSeq - currSeq;
                         result.stationVisMsg = seqGap > 1 ? `${seqGap}개의 정류장이 남았습니다.` : '곧 도착합니다.';
+                        result.stationOrd = currSeq.toString();
                     }
 
                     if (currSeq >= 0 && !(startSeq <= currSeq && currSeq < destinationSeq)) {
                         result.stationVisMsg = '목적지에 도착했습니다.';
+                        result.stationOrd = currSeq.toString();
                     }
 
                     return result;

@@ -12,7 +12,7 @@ type GetStationVisitResponse = {
 };
 
 
-export async function getStationVisit(forwarding?: IForwarding, busVehId?: string): Promise<{
+export async function getStationVisit(forwarding: IForwarding, busVehId: string): Promise<{
     msg: string;
     data: {
         stationVisit: IStationVisit;
@@ -21,10 +21,10 @@ export async function getStationVisit(forwarding?: IForwarding, busVehId?: strin
     try {
         const response = await axios.get<GetStationVisitResponse>('/api/bus/getStationVisit', {
             params: {
-                busRouteId: 100100019,//forwarding.busRouteId,
-                busVehId: 123060251, //busVehId,
-                stationSeq: 33, //start.seq,
-                stopCount: 4,//destination.seq
+                busRouteId: forwarding.busRouteId,
+                busVehId: busVehId,
+                fromStationSeq: forwarding.fromStationSeq,
+                toStationSeq: forwarding.toStationSeq
             },
         });
 
@@ -37,6 +37,7 @@ export async function getStationVisit(forwarding?: IForwarding, busVehId?: strin
             data: {
                 stationVisit: {
                     stationVisMsg: "운행종료",
+                    stationOrd: "",
                 }
             }
         };

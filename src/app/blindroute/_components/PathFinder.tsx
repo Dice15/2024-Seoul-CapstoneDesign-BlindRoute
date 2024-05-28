@@ -12,6 +12,8 @@ import RoutingConfirm from "./RoutingConfirm";
 import ReservationBusConfirm from "./ReservationBusConfirm";
 import WaitingBus from "./WaitingBus";
 import ReservationDesConfirm from "./ReservationDesConfirm";
+import WaitingDestination from "./WaitingDestination";
+import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 
 
 export type PathFinderStep = "locationConfirm" | "selectStart" | "selectDestination" | "routingConfirm" | "reservationBusConfirm" | "waitingBus" | "reservationDesConfirm" | "waitingDestination";
@@ -34,15 +36,11 @@ function stepTitle(step: PathFinderStep): string {
 
 export default function PathFinder() {
     // hook
-    const router = useRouter();
-
-
-    // hook
     const searchParams = useSearchParams();
 
 
     // state
-    const [step, setStep] = useState<PathFinderStep>("routingConfirm");
+    const [step, setStep] = useState<PathFinderStep>("locationConfirm");
     const [locations, setLocations] = useState<{ start: string; destination: string; } | null>(null);
     const [start, setStart] = useState<Station | null>(null);
     const [destination, setDestination] = useState<Station | null>(null);
@@ -85,10 +83,6 @@ export default function PathFinder() {
                 />;
             }
             case "reservationBusConfirm": {
-                if ((routing?.forwarding.length || 0) <= forwardIndex) {
-                    router.replace('/chatbot');
-                    return <></>;
-                }
                 return <ReservationBusConfirm
                     setStep={setStep}
                     forwarding={routing ? routing.forwarding[forwardIndex] : null}
@@ -107,11 +101,20 @@ export default function PathFinder() {
                     forwarding={routing ? routing.forwarding[forwardIndex] : null}
                 />
             }
+            case "waitingDestination": {
+                return <WaitingDestination
+                    setStep={setStep}
+                    forwarding={routing ? routing.forwarding[forwardIndex] : null}
+                    setForwardIndex={setForwardIndex}
+                    onBoardVehId={onBoardVehId}
+                    lastForwarding={(routing?.forwarding.length || 1) - 1 === forwardIndex}
+                />
+            }
             default: {
                 return <></>;
             }
         }
-    }, [router, locations, step, start, destination, routing, forwardIndex]);
+    }, [locations, step, start, destination, routing, forwardIndex, onBoardVehId]);
 
 
     // effect

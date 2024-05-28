@@ -49,11 +49,14 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
             clearInterval(intervalIdRef.current);
         }
 
-        SpeechOutputProvider.speak("버스가 도착했습니다.").then(() => {
-            setStep("reservationDesConfirm");
-        });
+        if (busArrival) {
+            SpeechOutputProvider.speak("버스가 도착했습니다.").then(() => {
+                setOnBoardVehId(busArrival.busVehId1);
+                setStep("reservationDesConfirm");
+            });
+        }
 
-    }, [setStep]);
+    }, [setStep, setOnBoardVehId, busArrival]);
 
 
     const handleHorizontalSwipe = useSwipeable({
@@ -67,38 +70,44 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
     });
 
 
+    const handleSpeak = useCallback((init: boolean, forwarding: IForwarding, busArrival: IBusArrival) => {
+        const text = `
+            ${forwarding.busRouteNm} 버스를 대기중입니다.  
+            ${busArrival.busArrMsg1}.
+            ${busArrival.busArrMsg2}.
+            ${init ? "오른쪽으로 스와이프하면 버스 대기 예약을 취소합니다." : ""}     
+        `;
+        return SpeechOutputProvider.speak(text);
+    }, []);
+
+
     const handleTouch = useCallback(() => {
         if (forwarding && busArrival) {
-            SpeechOutputProvider.speak(`${forwarding.busRouteNm} 버스를 대기중입니다.`)
-                .then(async () => { await SpeechOutputProvider.speak(busArrival.busArrMsg1) })
-                .then(async () => { await SpeechOutputProvider.speak(busArrival.busArrMsg2) });
+            handleSpeak(false, forwarding, busArrival);
         }
-    }, [forwarding, busArrival]);
+    }, [forwarding, busArrival, handleSpeak]);
 
 
     const handleCheckBusArrival = useCallback(async () => {
         if (!forwarding) return;
-        getBusArrival(forwarding).then((newbusArrival) => {
-            if (busArrival && newbusArrival.data.busArrival.busVehId1 !== busArrival.busVehId1) {
-                setOnBoardVehId(busArrival.busVehId1);
+        getBusArrival(forwarding).then((newBusArrival) => {
+            if (busArrival && busArrival.busVehId1 !== '' && newBusArrival.data.busArrival.busVehId1 !== busArrival.busVehId1) {
                 handleGoNext();
             }
             else {
-                setBusArrival(newbusArrival.data.busArrival);
+                setBusArrival(newBusArrival.data.busArrival);
             }
         });
-    }, [forwarding, setOnBoardVehId, busArrival, handleGoNext]);
+    }, [forwarding, busArrival, handleGoNext]);
 
 
     // effect
     useEffect(() => {
         if (isLoading && forwarding && busArrival) {
             setIsLoading(false);
-            SpeechOutputProvider.speak(`${forwarding.busRouteNm} 버스를 대기중입니다.`)
-                .then(async () => { await SpeechOutputProvider.speak(busArrival.busArrMsg1) })
-                .then(async () => { await SpeechOutputProvider.speak(busArrival.busArrMsg2) });
+            handleSpeak(true, forwarding, busArrival);
         }
-    }, [forwarding, isLoading, busArrival])
+    }, [forwarding, isLoading, busArrival, handleSpeak])
 
 
     useEffect(() => {
@@ -127,7 +136,7 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
             <LoadingAnimation active={isLoading} />
             <WaitingBusInfoContainer ref={WaitingBusInfoContainerRef}>
                 <WaitingBusInfo onClick={handleTouch}>
-                    {forwarding &&
+                    {(busArrival && forwarding) &&
                         <BusName>
                             {forwarding.busRouteNm}
                         </BusName>
