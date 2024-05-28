@@ -10,6 +10,7 @@ import { IForwarding } from "@/core/type/IForwarding";
 import { IBusArrival } from "@/core/type/IBusArrival";
 import { getBusArrival } from "../_functions/getBusArrival";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 
 
 interface WaitingBusProps {
@@ -50,10 +51,12 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
         }
 
         if (busArrival) {
-            SpeechOutputProvider.speak("버스가 도착했습니다.").then(() => {
+            VibrationProvider.vibrate(8000);
+            setTimeout(() => {
                 setOnBoardVehId(busArrival.busVehId1);
                 setStep("reservationDesConfirm");
-            });
+            }, 8000);
+            SpeechOutputProvider.speak("버스가 도착했습니다.");
         }
 
     }, [setStep, setOnBoardVehId, busArrival]);
@@ -102,6 +105,11 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
 
 
     // effect
+    useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
     useEffect(() => {
         if (isLoading && forwarding && busArrival) {
             setIsLoading(false);
@@ -189,7 +197,7 @@ const WaitingBusInfo = styled.div`
 const BusName = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
-    font-size: 6.5vw;
+    font-size: 7.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
@@ -198,7 +206,7 @@ const BusName = styled.h1`
 const BusArrMsg = styled.h3`
     margin-bottom: 5%;
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

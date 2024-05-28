@@ -44,13 +44,17 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
 
     // handler
     const handleGoBack = useCallback(() => {
-        setStep("locationConfirm");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStep("locationConfirm");
+        });
     }, [setStep]);
 
 
     const handleGoNext = useCallback(() => {
-        setStart(stations[stationInfoIndex.current]);
-        setStep("selectDestination");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStart(stations[stationInfoIndex.current]);
+            setStep("selectDestination");
+        });
     }, [setStart, setStep, stations]);
 
 
@@ -104,6 +108,11 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
 
     // effect
     useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
+    useEffect(() => {
         if (locations && locations.start !== "") {
             getBusStation(locations.start).then((value) => {
                 if (value.data.stations.length > 0) {
@@ -136,7 +145,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
                         slidesPerView={1}
                         spaceBetween={50}
                         onInit={handleInitSpeak}
-                        onSlideChange={handleVerticalSwipe}
+                        onSlideChangeTransitionEnd={handleVerticalSwipe}
                         onSliderMove={handleVerticalSliding}
                         speed={300}
                         loop={stations.length > 1 ? true : false}
@@ -201,7 +210,7 @@ const StationInfo = styled.div`
 const StationName = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
-    font-size: 6.5vw;
+    font-size: 7.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
@@ -210,7 +219,7 @@ const StationName = styled.h1`
 
 const StationDirection = styled.h3`
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

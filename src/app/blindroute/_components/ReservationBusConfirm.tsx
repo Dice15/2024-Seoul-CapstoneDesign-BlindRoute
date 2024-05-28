@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { PathFinderStep } from "./PathFinder";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { IForwarding } from "@/core/type/IForwarding";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 
 
 interface ReservationBusConfirmProps {
@@ -23,12 +24,16 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
 
     // handler
     const handleGoBack = useCallback(() => {
-        setStep("locationConfirm");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStep("locationConfirm");
+        });
     }, [setStep]);
 
 
     const handleGoNext = useCallback(() => {
-        setStep("waitingBus");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStep("waitingBus");
+        });
     }, [setStep]);
 
 
@@ -61,6 +66,11 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
 
 
     // effect
+    useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
     useEffect(() => {
         handleTouch();
     }, [handleTouch])
@@ -122,7 +132,7 @@ const ReservationInfo = styled.div`
 const StationInfo = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
-    font-size: 6.5vw;
+    font-size: 7.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
@@ -131,7 +141,7 @@ const StationInfo = styled.h1`
 const BusInfo = styled.h3`
     margin-bottom: 5%;
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

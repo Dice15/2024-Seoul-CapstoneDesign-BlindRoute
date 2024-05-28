@@ -11,6 +11,7 @@ import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { IStationVisit } from "@/core/type/IStationVisit";
 import { getStationVisit } from "../_functions/getStationVisit";
 import { useRouter } from "next/navigation";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 
 
 interface WaitingDesProps {
@@ -56,6 +57,7 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
             clearInterval(intervalIdRef.current);
         }
 
+        VibrationProvider.vibrate(8000);
         if (lastForwarding) {
             SpeechOutputProvider.speak('정류장에 도착했습니다.')
                 .then(async () => { await await SpeechOutputProvider.speak(`최종 목적지 ${forwarding?.toStationNm}에 도착했습니다.`) })
@@ -63,10 +65,11 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
                 .then(() => { router.replace('/chatbot') });
         }
         else {
-            SpeechOutputProvider.speak("정류장에 도착했습니다.").then(() => {
+            setTimeout(() => {
                 setForwardIndex(prev => prev + 1);
                 setStep("reservationBusConfirm");
-            });
+            }, 8000);
+            SpeechOutputProvider.speak("정류장에 도착했습니다.");
         }
 
     }, [setStep, forwarding, setForwardIndex, lastForwarding, router]);
@@ -113,6 +116,11 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
 
 
     // effect
+    useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
     useEffect(() => {
         if (isLoading && forwarding && stationVisit) {
             setIsLoading(false);
@@ -200,7 +208,7 @@ const WaitingDesInfo = styled.div`
 const StationName = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
-    font-size: 6.5vw;
+    font-size: 7.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
@@ -209,7 +217,7 @@ const StationName = styled.h1`
 const StaitonVisMsg = styled.h3`
     margin-bottom: 5%;
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

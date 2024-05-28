@@ -7,6 +7,7 @@ import 'swiper/css';
 import styled from "styled-components";
 import { PathFinderStep } from "./PathFinder";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
+import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 
 
 interface LocationConfirmProps {
@@ -30,12 +31,16 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
 
     // handler
     const handleGoBack = useCallback(() => {
-        router.replace('/chatbot');
+        SpeechOutputProvider.speak(" ").then(() => {
+            router.replace('/chatbot');
+        });
     }, [router]);
 
 
     const handleGoNext = useCallback(() => {
-        setStep("selectStart");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStep("selectStart");
+        });
     }, [setStep]);
 
 
@@ -58,6 +63,11 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
 
 
     // effect
+    useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
     useEffect(() => {
         handleTouch();
     }, [handleTouch]);
@@ -117,9 +127,9 @@ const LocationInfo = styled.div`
 `;
 
 const LocationName = styled.h3`
-    margin-bottom: 5%;
+    margin-bottom: 8vw;
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

@@ -44,13 +44,17 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
     // handler
     const handleGoBack = useCallback(() => {
-        setStep("selectStart");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setStep("selectStart");
+        });
     }, [setStep]);
 
 
     const handleGoNext = useCallback(() => {
-        setDestination(stations[stationInfoIndex.current]);
-        setStep("routingConfirm");
+        SpeechOutputProvider.speak(" ").then(() => {
+            setDestination(stations[stationInfoIndex.current]);
+            setStep("routingConfirm");
+        });
     }, [setDestination, setStep, stations]);
 
 
@@ -105,6 +109,11 @@ export default function SelectDestination({ locations, setStep, setDestination }
 
     // effect
     useEffect(() => {
+        VibrationProvider.vibrate(500);
+    }, []);
+
+
+    useEffect(() => {
         if (locations && locations.destination !== "") {
             getBusStation(locations.destination).then((value) => {
                 if (value.data.stations.length > 0) {
@@ -137,7 +146,7 @@ export default function SelectDestination({ locations, setStep, setDestination }
                         slidesPerView={1}
                         spaceBetween={50}
                         onInit={handleInitSpeak}
-                        onSlideChange={handleVerticalSwipe}
+                        onSlideChangeTransitionEnd={handleVerticalSwipe}
                         onSliderMove={handleVerticalSliding}
                         speed={300}
                         loop={stations.length > 1 ? true : false}
@@ -202,7 +211,7 @@ const StationInfo = styled.div`
 const StationName = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
-    font-size: 6.5vw;
+    font-size: 7.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
@@ -211,7 +220,7 @@ const StationName = styled.h1`
 
 const StationDirection = styled.h3`
     text-align: center;
-    font-size: 4vw;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
