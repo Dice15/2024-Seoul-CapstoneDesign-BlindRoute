@@ -2,18 +2,23 @@
 
 import styled from "styled-components";
 import Image from 'next/image';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { SpeechInputProvider, SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { loadChat } from "../_functions/loadChat";
 import { sendMessage } from "../_functions/sendMessage";
 import { useRouter } from "next/navigation";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
+import { useSwipeable } from "react-swipeable";
 
 
 export default function ChatAdot() {
     // hook
     const router = useRouter();
+
+
+    // ref
+    const isRecognitionActive = useRef<Boolean>(false);
 
 
     // state
@@ -24,6 +29,21 @@ export default function ChatAdot() {
 
 
     // handler
+    const handleGoBack = useCallback(() => {
+        SpeechOutputProvider.speak(" ").then(() => {
+            router.replace('/');
+        });
+    }, [router]);
+
+
+    const handleHorizontalSwipe = useSwipeable({
+        onSwipedRight: useCallback(() => {
+            handleGoBack()
+        }, [handleGoBack]),
+        trackMouse: true
+    });
+
+
     const handleNavigation = useCallback((start: string, destination: string) => {
         const params = new URLSearchParams({
             start: start,
@@ -80,16 +100,23 @@ export default function ChatAdot() {
     }, [handleSendMessage]);
 
 
-    const handleSubmitSpeak = useCallback(() => {
+    const handleSubmitSpeak = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (isRecognitionActive.current) return;
+        isRecognitionActive.current = true;
         VibrationProvider.vibrate(500);
         SpeechOutputProvider.stopSpeak();
-        SpeechInputProvider.startRecognition((result: string) => {
-            const maxLength = 30;
-            const inputText = Array.from(result).slice(0, maxLength).join('');
-            setUserMessage(inputText);
-            setGptMessage("");
-            handleSendMessage(inputText);
-            if (inputText.length === maxLength) SpeechInputProvider.stopRecognition();
+        SpeechInputProvider.startRecognition({
+            onResult: (result: string) => {
+                const maxLength = 100;
+                const inputText = Array.from(result).slice(0, maxLength).join('');
+                setUserMessage(inputText);
+                setGptMessage("");
+                handleSendMessage(inputText);
+                isRecognitionActive.current = false;
+            },
+            onAutoStop: () => {
+                isRecognitionActive.current = false;
+            },
         });
     }, [handleSendMessage]);
 
@@ -113,9 +140,8 @@ export default function ChatAdot() {
     }, [gptMessage])
 
 
-    // render
     return (!threadId ? <LoadingAnimation active={!threadId} /> :
-        <Wrapper>
+        <Wrapper {...handleHorizontalSwipe}>
             < BackImage >
                 <Image src="/images/chat_adot_background.png" alt="guide01" fill priority />
             </BackImage >
@@ -133,7 +159,7 @@ export default function ChatAdot() {
                     />
                 </TextInputField>
                 <SpeakInputField
-                    onClick={handleSubmitSpeak}>
+                    onClick={handleSubmitSpeak} >
                 </SpeakInputField>
             </MessageInputField>
         </Wrapper >
