@@ -1,5 +1,3 @@
-import MongoDbProvider from "@/core/modules/database/MongoDbProvider";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import NextAuth, { AuthOptions, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
@@ -72,8 +70,6 @@ export const authOptions: AuthOptions = {
     },
 
     secret: process.env.BLINDROUTE_NEXTAUTH_SECRET,
-
-    //adapter: MongoDBAdapter(MongoDbProvider.connectDb(process.env.BLINDROUTE_MONGODB_URI)),
 }
 
 export default NextAuth(authOptions);

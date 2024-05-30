@@ -24,7 +24,7 @@ function stepTitle(step: PathFinderStep): string {
         case "locationConfirm": return "출발지 및 도착지 확인";
         case "selectStart": return "출발지 선택";
         case "selectDestination": return "도착지 선택";
-        case "routingConfirm": return "경로 확인";
+        case "routingConfirm": return "경로 선택";
         case "reservationBusConfirm": return "버스 예약";
         case "waitingBus": return "버스 대기";
         case "reservationDesConfirm": return "하차 예약";
@@ -152,14 +152,14 @@ export default function PathFinder() {
 const Wrapper = styled.div`
     height: 100%;
     width: 100%;
+    background-color: var(--main-color);
 `;
 
 const Title = styled.div`
-    height: 40px;
-    border-bottom: 1px dashed var(--main-border-color);
-    margin-bottom: 4px;
+    height: 10vw;
+    border-bottom: 0.25vw dashed var(--main-border-color);
     padding: 10px;
-    font-size: 8vw;
+    font-size: 7vw;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
