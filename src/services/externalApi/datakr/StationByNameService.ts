@@ -10,9 +10,11 @@ export class StationByNameService {
     public static async getStationByName(stationName: string): Promise<IGetStationByNameResponse | null> {
         return this.getStationByNameByDataKr(stationName)
             .then((response) => {
+                console.log(response.data)
                 return response.data;
             })
             .catch((error) => {
+                console.log(error)
                 console.error(error);
                 return null;
             });
@@ -20,6 +22,7 @@ export class StationByNameService {
 
 
     private static getStationByNameByDataKr(stationName: string): Promise<AxiosResponse<IGetStationByNameResponse, any>> {
+        console.log(stationName)
         return axios.get<IGetStationByNameResponse>(
             "http://ws.bus.go.kr/api/rest/stationinfo/getStationByName", {
             params: {
