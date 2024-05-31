@@ -22,7 +22,7 @@ export class GptChatController {
         if (!match) return "";
 
         let content = match[1].trim();
-        content = content.replace(/[^.,'\"!?가-힣\n\s]/g, '');   // 특수 문자 제거
+        content = content.replace(/[^.,'\"!?가-힣a-zA-Z0-9\s\n]/g, '');   // 특수 문자 제거
         content = content.replace(/[ ]+/g, ' ');   // 연속된 공백을 하나의 공백으로 대체
         content = content.replace(/\n+/g, '\n');   // 연속된 개행을 하나의 개행으로 대체
         content = content.replace(/\n/g, '.');   // 개행을 온점으로 대체
