@@ -75,7 +75,7 @@ export default function ChatAdot() {
                         setChatMode("blindroute");
                     }
                     else {
-                        setGptMessage(value.data.message);
+                        setGptMessage(value.data.message.length > 0 ? value.data.message : "이해를 잘 못했습니다. 다시 말해주세요.");
                     }
                 });
                 break;
@@ -193,7 +193,7 @@ export default function ChatAdot() {
                         type="text"
                         placeholder="메시지를 입력하세요..."
                         onKeyDown={handleSubmitText}
-                        style={{ width: '100%', height: '100%', fontSize: "1.3em" }}
+                        style={{ width: '100%', height: '100%', fontSize: "4vw" }}
                     />
                 </TextInputField>
                 <SpeakInputField
@@ -227,7 +227,7 @@ const BackImage = styled.div`
 
 const PageGuideImage = styled.div`
     position: fixed;
-    opacity: 0.93;
+    opacity: 0.95;
     top:7.5%;
     height: 92.5%;
     width: 100%;
@@ -238,7 +238,7 @@ const PageGuideImage = styled.div`
 const PageGuideButton = styled.div`
     position: fixed;
     z-index: 101;
-    top: 3%;
+    top: 20%;
     background-color: #F2F3F6;
     height: 5%;
     width: calc(50% - 4vw);
@@ -257,11 +257,12 @@ const UserMessage = styled.p`
     width: calc(100% - 14%);
     margin: 2% 7%;
     z-index: 101;
-    font-size: 1.3em;
+    font-size: 5vw;
     font-weight: bold;
     color: #666e7e;
     white-space: normal; 
     overflow-wrap: break-word;
+    user-select: none;
 `;
 
 const ReturnMessage = styled.p`
@@ -272,11 +273,12 @@ const ReturnMessage = styled.p`
     padding-left: 3%;
     border-left: 0.2em solid #666e7e;
     z-index: 101;
-    font-size: 1.3em;
+    font-size: 5vw;
     font-weight: bold;
     color: #666e7e;
     white-space: normal;
     overflow-wrap: break-word;
+    user-select: none;
 `;
 
 
