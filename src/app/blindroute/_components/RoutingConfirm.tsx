@@ -13,6 +13,7 @@ import { getRoute } from "../_functions/getRouteByLocation";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { numberToKorean } from "../_functions/numberToKorean";
 import IStation from "@/models/IStation";
+import Image from "next/image";
 
 
 interface RoutingConfirmProps {
@@ -36,6 +37,7 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
     // state
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [routings, setRoutings] = useState<IRouting[]>([]);
+    const [displayPageGuide, setDisplayPageGuide] = useState<boolean>(false);
 
 
     // handler
@@ -52,6 +54,16 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
             setStep("reservationBusConfirm");
         });
     }, [setStep, setRouting, routings]);
+
+
+    const handlePageGuideOpen = useCallback(() => {
+        setDisplayPageGuide(true);
+    }, []);
+
+
+    const handlePageGuideClose = useCallback(() => {
+        setDisplayPageGuide(false);
+    }, []);
 
 
     const handleSpeak = useCallback((init: boolean, index: number, routing: IRouting) => {
@@ -134,8 +146,16 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
     // render
     return (
         <Wrapper {...handleHorizontalSwipe}>
+            {displayPageGuide &&
+                <PageGuideImage onClick={handlePageGuideClose}>
+                    <Image src="/images/blindroute_page_guide_routing_confirm.png" alt="page_guide" fill priority />
+                </PageGuideImage>
+            }
             <LoadingAnimation active={isLoading} />
             <RoutingInfoContainer ref={LocationInfoContainerRef}>
+                <PageGuideButton onClick={handlePageGuideOpen}>
+                    {'ⓘ 사용 가이드 (보호자 전용)'}
+                </PageGuideButton>
                 {routings.length > 0 &&
                     <Swiper
                         slidesPerView={1}
@@ -146,7 +166,7 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
                         speed={300}
                         loop={routings.length > 1 ? true : false}
                         direction="vertical"
-                        style={{ height: "100%", width: "100%" }}
+                        style={{ height: "calc(100% - 7vw)", width: "100%" }}
                     >
                         {routings.map((routing, index) => (
                             <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
@@ -191,12 +211,33 @@ const FocusBlank = styled.div`
     width: 85%;
 `;
 
+const PageGuideImage = styled.div`
+    position: fixed;
+    opacity: 0.95;
+    top:7.5%;
+    height: 92.5%;
+    width: 100%;
+    z-index: 500;
+    background-color: #D9D9D9;
+`;
+
 const RoutingInfoContainer = styled.div`
     height: 92.5%;
     width: 85%;
     border: 0.7vw solid var(--main-border-color);
     border-radius: 4vw;
     color: var(--main-font-color);
+`;
+
+const PageGuideButton = styled.div`
+    height: calc(7.5vw - 4vw);
+    width: calc(100% - 4vw);
+    padding: 2vw 3vw 2vw 1vw;
+    text-align: right;
+    font-size: 3.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
 `;
 
 const RoutingInfo = styled.div`

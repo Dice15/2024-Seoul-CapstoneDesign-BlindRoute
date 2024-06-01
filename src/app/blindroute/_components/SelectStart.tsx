@@ -12,6 +12,7 @@ import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { getBusStation } from "../_functions/getBusStationByName";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import IStation from "@/models/IStation";
+import Image from "next/image";
 
 
 interface SelectStartProps {
@@ -40,6 +41,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
     // state
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [stations, setStations] = useState<IStation[]>([]);
+    const [displayPageGuide, setDisplayPageGuide] = useState<boolean>(false);
 
 
     // handler
@@ -56,6 +58,16 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
             setStep("selectDestination");
         });
     }, [setStart, setStep, stations]);
+
+
+    const handlePageGuideOpen = useCallback(() => {
+        setDisplayPageGuide(true);
+    }, []);
+
+
+    const handlePageGuideClose = useCallback(() => {
+        setDisplayPageGuide(false);
+    }, []);
 
 
     const handleSpeak = useCallback((init: boolean, station: IStation) => {
@@ -138,8 +150,16 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
     // render
     return (
         <Wrapper {...handleHorizontalSwipe}>
+            {displayPageGuide &&
+                <PageGuideImage onClick={handlePageGuideClose}>
+                    <Image src="/images/blindroute_page_guide_select_start.png" alt="page_guide" fill priority />
+                </PageGuideImage>
+            }
             <LoadingAnimation active={isLoading} />
             <StationInfoContainer ref={stationInfoContainerRef}>
+                <PageGuideButton onClick={handlePageGuideOpen}>
+                    {'ⓘ 사용 가이드 (보호자 전용)'}
+                </PageGuideButton>
                 {stations.length > 0 &&
                     <Swiper
                         slidesPerView={1}
@@ -150,7 +170,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
                         speed={300}
                         loop={stations.length > 1 ? true : false}
                         direction="vertical"
-                        style={{ height: "100%", width: "100%" }}
+                        style={{ height: "calc(100% - 7vw)", width: "100%" }}
                     >
                         {stations.map((station, index) => (
                             <SwiperSlide key={index} style={{ height: "100%", width: "100%" }}>
@@ -181,12 +201,20 @@ const Wrapper = styled.div`
     align-items: center;
 `;
 
-
 const FocusBlank = styled.div`
     height:0px;
     width: 85%;
 `;
 
+const PageGuideImage = styled.div`
+    position: fixed;
+    opacity: 0.95;
+    top:7.5%;
+    height: 92.5%;
+    width: 100%;
+    z-index: 500;
+    background-color: #D9D9D9;
+`;
 
 const StationInfoContainer = styled.div`
     height: 92.5%;
@@ -196,6 +224,16 @@ const StationInfoContainer = styled.div`
     color: var(--main-font-color);
 `;
 
+const PageGuideButton = styled.div`
+    height: calc(7.5vw - 4vw);
+    width: calc(100% - 4vw);
+    padding: 2vw 3vw 2vw 1vw;
+    text-align: right;
+    font-size: 3.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
 
 const StationInfo = styled.div`
     height: 100%;

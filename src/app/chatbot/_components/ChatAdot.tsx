@@ -18,6 +18,7 @@ export default function ChatAdot() {
 
     // ref
     const isRecognitionActive = useRef<Boolean>(false);
+    const focusBlank = useRef<HTMLDivElement>(null);
 
 
     // state
@@ -25,6 +26,7 @@ export default function ChatAdot() {
     const [userMessage, setUserMessage] = useState<string | null>(null);
     const [gptMessage, setGptMessage] = useState<string | null>(null);
     const [waitingGpt, setWaitingGpt] = useState<boolean>(false);
+    const [displayPageGuide, setDisplayPageGuide] = useState<boolean>(false);
 
 
     // handler
@@ -33,6 +35,16 @@ export default function ChatAdot() {
             router.replace('/');
         });
     }, [router]);
+
+
+    const handlePageGuideOpen = useCallback(() => {
+        setDisplayPageGuide(true);
+    }, []);
+
+
+    const handlePageGuideClose = useCallback(() => {
+        setDisplayPageGuide(false);
+    }, []);
 
 
     const handleHorizontalSwipe = useSwipeable({
@@ -153,10 +165,19 @@ export default function ChatAdot() {
 
     return (
         <Wrapper {...handleHorizontalSwipe}>
+            {displayPageGuide &&
+                <PageGuideImage onClick={handlePageGuideClose}>
+                    <Image src="/images/blindroute_page_guide_chat_bot.png" alt="page_guide" fill priority />
+                </PageGuideImage>
+            }
             <LoadingAnimation active={waitingGpt} invisibleBackground={true} />
             <BackImage >
                 <Image src="/images/chat_adot_background.png" alt="guide01" fill priority />
             </BackImage >
+
+            <PageGuideButton onClick={handlePageGuideOpen}>
+                {'ⓘ 사용 가이드 (보호자 전용)'}
+            </PageGuideButton>
 
             <UserMessage onClick={handleTouchUserMessage}>
                 {userMessage || ""}
@@ -179,6 +200,7 @@ export default function ChatAdot() {
                     onClick={handleSubmitSpeak} >
                 </SpeakInputField>
             </MessageInputField>
+            <FocusBlank ref={focusBlank} tabIndex={0} />
         </Wrapper >
     );
 }
@@ -191,11 +213,42 @@ const Wrapper = styled.div`
     align-items: center;
 `;
 
+const FocusBlank = styled.div`
+    height:0px;
+    width: 85%;
+`;
+
 const BackImage = styled.div`
     position: fixed;
     width: 100%;
     height: 100%;
     z-index: 100;
+`;
+
+const PageGuideImage = styled.div`
+    position: fixed;
+    opacity: 0.93;
+    top:7.5%;
+    height: 92.5%;
+    width: 100%;
+    z-index: 500;
+    background-color: #D9D9D9;
+`;
+
+const PageGuideButton = styled.div`
+    position: fixed;
+    z-index: 101;
+    top: 3%;
+    background-color: #F2F3F6;
+    height: 5%;
+    width: calc(50% - 4vw);
+    margin-left: 50%;
+    padding: 2vw 3vw 2vw 1vw;
+    text-align: right;
+    font-size: 3.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
 `;
 
 const UserMessage = styled.p`

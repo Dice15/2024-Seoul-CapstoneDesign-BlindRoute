@@ -11,6 +11,7 @@ import { IBusArrival } from "@/models/IBusArrival";
 import { getBusArrival } from "../_functions/getBusArrival";
 import LoadingAnimation from "@/app/_components/LoadingAnimation";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
+import Image from "next/image";
 
 
 interface WaitingBusProps {
@@ -30,6 +31,7 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
     // state
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [busArrival, setBusArrival] = useState<IBusArrival | null>(null);
+    const [displayPageGuide, setDisplayPageGuide] = useState<boolean>(false);
 
 
     // handler
@@ -60,6 +62,16 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
         }
 
     }, [setStep, setOnBoardVehId, busArrival]);
+
+
+    const handlePageGuideOpen = useCallback(() => {
+        setDisplayPageGuide(true);
+    }, []);
+
+
+    const handlePageGuideClose = useCallback(() => {
+        setDisplayPageGuide(false);
+    }, []);
 
 
     const handleHorizontalSwipe = useSwipeable({
@@ -141,8 +153,16 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
     // render
     return (
         <Wrapper {...handleHorizontalSwipe}>
+            {displayPageGuide &&
+                <PageGuideImage onClick={handlePageGuideClose}>
+                    <Image src="/images/blindroute_page_guide_waiting_bus.png" alt="page_guide" fill priority />
+                </PageGuideImage>
+            }
             <LoadingAnimation active={isLoading} />
             <WaitingBusInfoContainer ref={WaitingBusInfoContainerRef}>
+                <PageGuideButton onClick={handlePageGuideOpen}>
+                    {'ⓘ 사용 가이드 (보호자 전용)'}
+                </PageGuideButton>
                 <WaitingBusInfo onClick={handleTouch}>
                     {(busArrival && forwarding) &&
                         <BusName>
@@ -176,6 +196,16 @@ const FocusBlank = styled.div`
     width: 85%;
 `;
 
+const PageGuideImage = styled.div`
+    position: fixed;
+    opacity: 0.95;
+    top:7.5%;
+    height: 92.5%;
+    width: 100%;
+    z-index: 500;
+    background-color: #D9D9D9;
+`;
+
 const WaitingBusInfoContainer = styled.div`
     height: 92.5%;
     width: 85%;
@@ -184,8 +214,19 @@ const WaitingBusInfoContainer = styled.div`
     color: var(--main-font-color);
 `;
 
+const PageGuideButton = styled.div`
+    height: calc(7.5vw - 4vw);
+    width: calc(100% - 4vw);
+    padding: 2vw 3vw 2vw 1vw;
+    text-align: right;
+    font-size: 3.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
 const WaitingBusInfo = styled.div`
-    height: 100%;
+    height: calc(100% - 7vw);
     width: 100%;
     display: flex;
     flex-direction: column;

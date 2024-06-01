@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import 'swiper/css';
 import styled from "styled-components";
@@ -8,6 +8,7 @@ import { PathFinderStep } from "./PathFinder";
 import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { IForwarding } from "@/models/IForwarding";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
+import Image from "next/image";
 
 
 interface ReservationBusConfirmProps {
@@ -20,6 +21,10 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
     // ref
     const ReservationInfoContainerRef = useRef<HTMLDivElement>(null);
     const focusBlank = useRef<HTMLDivElement>(null);
+
+
+    // state
+    const [displayPageGuide, setDisplayPageGuide] = useState<boolean>(false);
 
 
     // handler
@@ -35,6 +40,16 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
             setStep("waitingBus");
         });
     }, [setStep]);
+
+
+    const handlePageGuideOpen = useCallback(() => {
+        setDisplayPageGuide(true);
+    }, []);
+
+
+    const handlePageGuideClose = useCallback(() => {
+        setDisplayPageGuide(false);
+    }, []);
 
 
     const handleHorizontalSwipe = useSwipeable({
@@ -79,7 +94,15 @@ export default function ReservationBusConfirm({ setStep, forwarding }: Reservati
     // render
     return (
         <Wrapper {...handleHorizontalSwipe}>
+            {displayPageGuide &&
+                <PageGuideImage onClick={handlePageGuideClose}>
+                    <Image src="/images/blindroute_page_guide_reservation_bus_confirm.png" alt="page_guide" fill priority />
+                </PageGuideImage>
+            }
             <ReservationInfoContainer ref={ReservationInfoContainerRef}>
+                <PageGuideButton onClick={handlePageGuideOpen}>
+                    {'ⓘ 사용 가이드 (보호자 전용)'}
+                </PageGuideButton>
                 <ReservationInfo onClick={handleTouch}>
                     {forwarding && <>
                         <StationInfo>
@@ -111,6 +134,16 @@ const FocusBlank = styled.div`
     width: 85%;
 `;
 
+const PageGuideImage = styled.div`
+    position: fixed;
+    opacity: 0.95;
+    top:7.5%;
+    height: 92.5%;
+    width: 100%;
+    z-index: 500;
+    background-color: #D9D9D9;
+`;
+
 const ReservationInfoContainer = styled.div`
     height: 92.5%;
     width: 85%;
@@ -119,8 +152,19 @@ const ReservationInfoContainer = styled.div`
     color: var(--main-font-color);
 `;
 
+const PageGuideButton = styled.div`
+    height: calc(7.5vw - 4vw);
+    width: calc(100% - 4vw);
+    padding: 2vw 3vw 2vw 1vw;
+    text-align: right;
+    font-size: 3.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
 const ReservationInfo = styled.div`
-    height: 100%;
+    height: calc(100% - 7vw);
     width: 100%;
     display: flex;
     flex-direction: column;
