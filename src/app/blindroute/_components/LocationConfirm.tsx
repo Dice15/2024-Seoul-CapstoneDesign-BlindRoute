@@ -102,12 +102,10 @@ export default function LocationConfirm({ locations, setStep }: LocationConfirmP
                 </PageGuideButton>
                 <LocationInfo onClick={handleTouch}>
                     {locations && <>
-                        <LocationName>
-                            {`출발지: ${locations?.start || ""}`}
-                        </LocationName>
-                        <LocationName>
-                            {`도착지: ${locations?.destination || ""}`}
-                        </LocationName>
+                        <LocationTitle>{'출발지'}</LocationTitle>
+                        <LocationName>{`${locations?.start || ""}`}</LocationName>
+                        <LocationTitle>{'도착지'}</LocationTitle>
+                        <LocationName>{`${locations?.destination || ""}`}</LocationName>
                     </>}
                 </LocationInfo>
             </LocationInfoContainer>
@@ -169,10 +167,19 @@ const LocationInfo = styled.div`
     align-items: center;
 `;
 
-const LocationName = styled.h3`
-    margin-bottom: 8vw;
+const LocationTitle = styled.h1`
+    margin-bottom: 3vw;
     text-align: center;
-    font-size: 6vw;
+    font-size: 7.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
+const LocationName = styled.h3`
+    margin-bottom: 14vw;
+    text-align: center;
+    font-size: 5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

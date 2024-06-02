@@ -9,6 +9,7 @@ import { SpeechOutputProvider } from "@/core/modules/speech/SpeechProviders";
 import { IForwarding } from "@/models/IForwarding";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import Image from "next/image";
+import { stationSpeakHelper } from "../_functions/stationSpeakHelper";
 
 
 interface ReservationDesConfirmProps {
@@ -65,7 +66,7 @@ export default function ReservationDesConfirm({ setStep, forwarding }: Reservati
         const text = `
             ${forwarding.busRouteNm} 버스를 탑승하셨으면,
             왼쪽으로 스와이프하여
-            ${forwarding.toStationNm} 정류장 하차 예약을 하세요.
+            ${stationSpeakHelper(forwarding.toStationNm)} 정류장 하차 예약을 하세요.
         `;
         return SpeechOutputProvider.speak(text);
     }, []);
@@ -103,11 +104,14 @@ export default function ReservationDesConfirm({ setStep, forwarding }: Reservati
                 </PageGuideButton>
                 <ReservationInfo onClick={handleTouch}>
                     {forwarding && <>
+                        <ReservationType>
+                            {'(버스 하차 예약)'}
+                        </ReservationType>
                         <StationInfo>
-                            {`하차: ${forwarding.toStationNm}`}
+                            {forwarding.toStationNm}
                         </StationInfo>
                         <BusInfo>
-                            {`${forwarding.busRouteNm}, ${forwarding.busRouteDir} 방면`}
+                            {`${forwarding.busRouteNm} 버스, ${forwarding.busRouteDir} 방면`}
                         </BusInfo>
                     </>}
                 </ReservationInfo>
@@ -170,6 +174,15 @@ const ReservationInfo = styled.div`
     align-items: center;
 `;
 
+const ReservationType = styled.h2` 
+    text-align: center;
+    margin-bottom: 3vw;
+    font-size: 6vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
 const StationInfo = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
@@ -180,7 +193,7 @@ const StationInfo = styled.h1`
 `;
 
 const BusInfo = styled.h3`
-    margin-bottom: 5%;
+    margin-bottom: 14vw;
     text-align: center;
     font-size: 5vw;
     font-weight: bold;

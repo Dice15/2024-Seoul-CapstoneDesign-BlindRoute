@@ -152,7 +152,7 @@ export default function ChatAdot() {
 
     // effect
     useEffect(() => {
-        setGptMessage("안녕하세요! 무엇을 도와드릴까요?");
+        setGptMessage("안녕하세요, 저는 당신의 AI 비서 에이닷입니다.");
     }, []);
 
 

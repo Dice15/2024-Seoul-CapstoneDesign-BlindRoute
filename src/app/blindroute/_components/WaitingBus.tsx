@@ -164,11 +164,14 @@ export default function WaitingBus({ setStep, forwarding, setOnBoardVehId }: Wai
                     {'ⓘ 사용 가이드 (보호자 전용)'}
                 </PageGuideButton>
                 <WaitingBusInfo onClick={handleTouch}>
-                    {(busArrival && forwarding) &&
+                    {(busArrival && forwarding) && <>
+                        <ReservationType>
+                            {'(버스 승차 대기)'}
+                        </ReservationType>
                         <BusName>
-                            {forwarding.busRouteNm}
+                            {`${forwarding.busRouteNm} 버스`}
                         </BusName>
-                    }
+                    </>}
                     {busArrival &&
                         <BusArrMsg>
                             {busArrival.busArrMsg1}
@@ -234,6 +237,15 @@ const WaitingBusInfo = styled.div`
     align-items: center;
 `;
 
+const ReservationType = styled.h2` 
+    text-align: center;
+    margin-bottom: 3vw;
+    font-size: 6vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+`;
+
 const BusName = styled.h1` 
     text-align: center;
     margin-bottom: 8vw;
@@ -244,7 +256,7 @@ const BusName = styled.h1`
 `;
 
 const BusArrMsg = styled.h3`
-    margin-bottom: 5%;
+    margin-bottom: 14vw;
     text-align: center;
     font-size: 5vw;
     font-weight: bold;

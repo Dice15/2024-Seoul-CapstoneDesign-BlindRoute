@@ -14,6 +14,7 @@ import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import { numberToKorean } from "../_functions/numberToKorean";
 import IStation from "@/models/IStation";
 import Image from "next/image";
+import { stationSpeakHelper } from "../_functions/stationSpeakHelper";
 
 
 interface RoutingConfirmProps {
@@ -65,7 +66,6 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
         setDisplayPageGuide(false);
     }, []);
 
-
     const handleSpeak = useCallback((init: boolean, index: number, routing: IRouting) => {
         const text = `
             ${init ? "경로를 선택하세요. 위아래 스와이프로 경로를 선택할 수 있습니다." : ""}
@@ -73,7 +73,7 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
             ${routing.forwarding.length}개의 버스를 탑승하며,
             비용은 ${routing.fare}원,
             시간은 ${Math.round(parseFloat(routing.time) / 60)}분이 소요됩니다.
-            ${routing.forwarding.map((forwarding, index) => `${numberToKorean(index + 1)} 탑승 정류장: ${forwarding.fromStationNm}`).join(',')}
+            ${routing.forwarding.map((forwarding, index) => `${numberToKorean(index + 1)} 탑승: ${stationSpeakHelper(forwarding.fromStationNm)}, ${forwarding.busRouteNm} 버스`).join(',')}
             왼쪽으로 스와이프하면 이 경로를 선택합니다.
         `;
         return SpeechOutputProvider.speak(text);
@@ -182,7 +182,7 @@ export default function RoutingConfirm({ setStep, start, destination, setRouting
                                     </CostInfo>
                                     {routing.forwarding.map((forwarding, index) => (
                                         <StationInfo key={index}>
-                                            {`${index + 1}) ${forwarding.fromStationNm}`}
+                                            {`${index + 1}) ${forwarding.fromStationNm}, ${forwarding.busRouteNm} 버스`}
                                         </StationInfo>
                                     ))}
                                 </RoutingInfo>
@@ -270,7 +270,7 @@ const CostInfo = styled.h3`
 const StationInfo = styled.h3`
     margin-bottom: 2vw;
     text-align: center;
-    font-size: 5vw;
+    font-size: 4.5vw;
     font-weight: bold;
     cursor: pointer;
     user-select: none;

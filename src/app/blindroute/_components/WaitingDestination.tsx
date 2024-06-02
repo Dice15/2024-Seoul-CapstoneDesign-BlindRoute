@@ -13,6 +13,7 @@ import { getStationVisit } from "../_functions/getStationVisit";
 import { useRouter } from "next/navigation";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import Image from "next/image";
+import { stationSpeakHelper } from "../_functions/stationSpeakHelper";
 
 
 interface WaitingDesProps {
@@ -62,7 +63,7 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
         VibrationProvider.vibrate(8000);
         if (lastForwarding) {
             SpeechOutputProvider.speak('정류장에 도착했습니다.')
-                .then(async () => { await await SpeechOutputProvider.speak(`최종 목적지 ${forwarding?.toStationNm}에 도착했습니다.`) })
+                .then(async () => { await await SpeechOutputProvider.speak(`최종 목적지 ${stationSpeakHelper(forwarding?.toStationNm || "")}에 도착했습니다.`) })
                 .then(async () => { await SpeechOutputProvider.speak("경로 탐색을 종료하고 챗봇으로 돌아갑니다.") })
                 .then(() => { router.replace('/chatbot') });
         }
@@ -100,7 +101,7 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
 
     const handleSpeak = useCallback((init: boolean, forwarding: IForwarding, stationVisit: IStationVisit) => {
         const text = `
-            ${forwarding.toStationNm} 로 이동 중 입니다.
+            ${stationSpeakHelper(forwarding.toStationNm)} 로 이동 중 입니다.
             ${stationVisit.stationVisMsg}.
             ${init ? "오른쪽으로 스와이프하면 정류장 하차 예약을 취소합니다." : ""}     
         `;
@@ -175,11 +176,14 @@ export default function WaitingDestination({ setStep, forwarding, setForwardInde
                     {'ⓘ 사용 가이드 (보호자 전용)'}
                 </PageGuideButton>
                 <WaitingDesInfo onClick={handleTouch}>
-                    {forwarding &&
+                    {forwarding && <>
+                        <ReservationType>
+                            {'(버스 하차 대기)'}
+                        </ReservationType>
                         <StationName>
-                            {forwarding.toStationNm}
+                            {`${forwarding.toStationNm}`}
                         </StationName>
-                    }
+                    </>}
                     {stationVisit &&
                         <StaitonVisMsg>
                             {stationVisit.stationVisMsg}
@@ -243,6 +247,15 @@ const WaitingDesInfo = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
+`;
+
+const ReservationType = styled.h2` 
+    text-align: center;
+    margin-bottom: 3vw;
+    font-size: 6vw;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
 `;
 
 const StationName = styled.h1` 

@@ -13,6 +13,7 @@ import { getBusStation } from "../_functions/getBusStationByName";
 import { VibrationProvider } from "@/core/modules/vibration/VibrationProvider";
 import IStation from "@/models/IStation";
 import Image from "next/image";
+import { stationSpeakHelper } from "../_functions/stationSpeakHelper";
 
 
 interface SelectStartProps {
@@ -73,7 +74,7 @@ export default function SelectStart({ locations, setStep, setStart }: SelectStar
     const handleSpeak = useCallback((init: boolean, station: IStation) => {
         const text = `
             ${init ? "출발 정류장을 선택하세요. 위아래 스와이프로 정류장을 선택할 수 있습니다." : ""}
-            ${station.stNm}, ${station.stDir} 방면.
+            ${stationSpeakHelper(station.stNm)}, ${stationSpeakHelper(station.stDir)} 방면.
             왼쪽으로 스와이프하면 정류장을 선택합니다.
         `;
         return SpeechOutputProvider.speak(text);
