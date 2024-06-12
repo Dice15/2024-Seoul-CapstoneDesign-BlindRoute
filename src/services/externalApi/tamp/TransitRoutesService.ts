@@ -10,8 +10,8 @@ export class TransitRoutesService {
     public static async getTransitRoutes(startX: string, startY: string, destinationX: string, destinationY: string): Promise<IGetTransitRoutesResponse> {
         return this.getTransitRoutesByTMapAPI(startX, startY, destinationX, destinationY)
             .then((response) => {
-                //return response.data;
-                return this.getTransitRoutesByStaticData();
+                return response.data;
+                //return this.getTransitRoutesByStaticData();
             })
             .catch((error) => {
                 console.error(error);
