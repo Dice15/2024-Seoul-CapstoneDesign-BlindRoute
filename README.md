@@ -1,78 +1,49 @@
-# BlindRoute (시각장애인을 위한 버스 승하차 예약 서비스)
-<p>서울시 어디서든 시각장애인이 버스 승하차를 도와주는 모바일 웹앱 서비스</p>
+# 시각장애인 버스 안내 서비스
+서울시 어디서든 사용할 수 있는 챗봇형 버스 안내 웹 앱
+
 </br>
 
 # 프로젝트 개요
-<h3>최종 벨류업 (2023.12 ~ 2024.01)</h3>
-<p>-> 2023 서울 지역사회공헌 캡스톤디자인 Fair 우수상, 혁신상</p>
+### Info
+|||
+|-----|-----|
+|**개발 기간**|2023.12 ~ 2024.06|
+|**수상 실적**|2023 서울 지역사회공헌 캡스톤디자인 Fair 우수상(의장상), 혁신상|
+|**핵심 기술**|![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) <img src="https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white"/> <img src="https://img.shields.io/badge/GPT%20Assistants-black?style=flat-square&logoColor=white&color=white"/>|
+|**참여 인원**|4명 (Project Leader)|
+|**배포 주소**|<a>https://blindroute.vercel.app/</a>|
+|**GitHub**|<a>https://github.com/Dice15/BlindRoute</a>|
 
-|전공|이름|역할|주요 업무|기술 스택|
-|-------|-----|-----|-----|-----|
-|컴퓨터공학전공|문정훈|팀장|Front-End & Back-End|![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white) ![React.js](https://img.shields.io/badge/React.js-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)|
-|컴퓨터공학전공|손기민|팀원|웹 테스팅, 문서관리, 발표||
-|컴퓨터공학전공|정채우|팀원|복지관/교수와 인터뷰||
-
-<h3>초기 프로젝트 (2023.03 ~ 2023.11)</h3>
-<p>-> 2023 동국대학교 겨울 ICIP & 캡스톤디자인 우수상</p>
-  
-|전공|이름|역할|주요 업무|기술 스택|
-|-------|-----|-----|-----|-----|
-|컴퓨터공학전공|문정훈|팀장|Front-End|![React.js](https://img.shields.io/badge/React.js-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)|
-|컴퓨터공학전공|남동호|팀원|Back-End|![Spring](https://img.shields.io/badge/Spring-6DB33F?style=flat-square&logo=spring&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=springboot&logoColor=white) ![Oracle DB](https://img.shields.io/badge/Oracle%20DB-F80000?style=flat-square&logo=oracle&logoColor=white)|
-|컴퓨터공학전공|김준섭|팀원|버스번호판 인식|![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Django](https://img.shields.io/badge/Django-092E20?style=flat-square&logo=django&logoColor=white) ![YOLO v5](https://img.shields.io/badge/YOLO%20v5-000000?style=flat-square)|
-|컴퓨터공학전공|정채우|팀원|버스 번호 추출|![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![VOLO OCR](https://img.shields.io/badge/VOLO%20OCR-000000?style=flat-square)|
+### Works
+- GPT Assistants를 활용하여 시각장애인 버스 안내 기능을 제공하는 챗봇 구현
+- PWA 기술을 적용하여 Android 스마트폰에서 앱으로 설치할 수 있도록 함
+- 챗봇과의 대화, 경로 찾기, 실시간 버스 도착 시간 REST API 구축
+- 웹 앱 UI 디자인 및 구현
 
 </br>
 
-# UI/UX 설계
-<h3>다음 자료를 참고하여 설계</h3>
-<ul>
-  <li>한국시각장애인복지관과 인터뷰 진행</li>
-  <li>방송통신표준심의회 시각장애인 애플리케이션 콘텐츠 지침 참고</li>
-  <li>중앙대학교 시각장애인을 위한 앱 디자인 논문 참고</li>
-  <li>Google Talkback 기본 동작 가이드 (안드로이드OS 시각장애인 설정)</li>
-</ul>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/6eecc19e-de1c-4e61-8efd-743375b4e631" width="700">
-</br>
-</br>
-</br>
+# 소스코드 주소
+### 클라이언트
+- [홈 페이지](src/app/)
+- [챗봇 페이지](src/app/chatbot/)
+- [버스 안내 페이지](src/app/blindroute/)
 
-# 배포 사이트 (모바일 환경 지원)
-<h3>데스크톱은 F12(개발자 도구)를 통해 모바일 설정 권장</h3>
-<h3>웹 사이트 : https://blindroute.vercel.app (게스트 로그인 가능)</h3>
-<h3>시연 영상 : https://youtu.be/ELm7Vdc6aMQ </h3>
-</br>
-</br>
-
-
-# 데모 시연
-<h3>시나리오</h3>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/d4d31eae-a14e-4562-87a8-06db2676921c" width="700"> 
-<h3>※ 음성입력/안내가 있으므로 원본영상을 시청하는 것을 추천합니다 ※</h3>
-<h3>유튜브 : https://youtu.be/ELm7Vdc6aMQ</h3>
-</br>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/1bcfbb03-6e47-417b-a1db-13085fe2333d" width="700">
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/df30918f-cb31-4f31-b4bc-54d13333d5b2" width="700">
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/023313ab-a036-4299-8221-99c27052566a" width="700">
-</br>
-</br>
-
-
-# API 명세서
-<h3>서울시 BIS API를 기반으로 제작</h3>
-<img src="https://github.com/Dice15/BlindRoute/assets/102275981/e5198f37-3ef3-470a-b5ab-b4400e84edff" width="700"> 
-</br>
-</br>
-
-# 수상
-![image](https://github.com/Dice15/BlindRoute/assets/102275981/45291781-0185-45df-8585-7e0a2bb1f8f2)
+### 서버
+- [REST API](src/pages/api)
+- [Controller](src/controllers)
+- [Service](src/services/externalApi)
+- [Model](src/models)
+- [Middleware](src/middleware.ts)
 
 </br>
-</br>
 
-# 소스코드 바로가기
-- 사용자 웹 페이지 구현 : [userpage](src/app/passenger)
-- API 및 Auth 구현 : [apiroutes](src/pages/api)
-- 미들 웨어 구현 : [middleware](src/middleware.ts)
-</br>
-</br>
+# 프로젝트 상세 소개
+![슬라이드20](https://github.com/Dice15/BlindRoute/assets/102275981/0e550197-1533-402e-ba09-96df6215b2a5)
+![슬라이드21](https://github.com/Dice15/BlindRoute/assets/102275981/3b2be3b7-bde6-44f3-803f-b6a938819dd0)
+![슬라이드22](https://github.com/Dice15/BlindRoute/assets/102275981/00b3036f-c9fc-47ee-a507-9804504d9d9f)
+![슬라이드23](https://github.com/Dice15/BlindRoute/assets/102275981/8d25fbe5-52df-47a3-a767-07389ec36f53)
+![슬라이드24](https://github.com/Dice15/BlindRoute/assets/102275981/91665761-f67b-4c22-aabd-59a18db85a49)
+![슬라이드25](https://github.com/Dice15/BlindRoute/assets/102275981/c630482e-9739-498b-ac32-88554d98e8f6)
+![슬라이드26](https://github.com/Dice15/BlindRoute/assets/102275981/9ed7e793-edc3-49cc-b34f-1ecbc57d0548)
+![슬라이드27](https://github.com/Dice15/BlindRoute/assets/102275981/be19e9f6-05e9-41b5-adae-fd050d28e949)
+![슬라이드28](https://github.com/Dice15/BlindRoute/assets/102275981/8b6a1ece-2a1a-47b5-ba1b-180edd2b7021)

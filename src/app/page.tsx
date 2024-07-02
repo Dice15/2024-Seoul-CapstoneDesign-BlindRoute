@@ -4,9 +4,13 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import Link from "next/link";
 import AuthButton from "./_components/AuthButton";
 import Image from "next/image";
+import ServerSideWeblog from "./_classes/ServerSideWeblog";
+import { headers } from "next/headers";
 
 
 export default async function AppRoot() {
+  ServerSideWeblog.saveConnectionUrl(headers(), '/');
+
   // Const
   const isAuth = (await getServerSession(authOptions)) !== null;
 
